@@ -1,0 +1,25 @@
+# PHP
+/vendor/
+composer.phar
+/composer.lock
+
+# Logs
+*.log
+
+# Runtime
+/sessions/
+/cache/
+
+# Environment
+.env
+.env.*
+
+# Uploads
+/uploads/
+/temp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
