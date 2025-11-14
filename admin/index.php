@@ -17,6 +17,7 @@ require_once './models/AdminDashboard.php';
 require_once './models/AdminDanhMuc.php';
 require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
+require_once './models/AdminTaiKhoan.php';
 
 // Route
 $act = $_GET['act'] ?? '/';
