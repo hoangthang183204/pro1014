@@ -22,11 +22,14 @@ require_once './models/AdminTaiKhoan.php';
 
 
 
+
 // Route
 $act = $_GET['act'] ?? '/';
 
+if($act !== 'login' && $act !== 'check-login-admin' && $act !== 'logout-admin'){
+    CheckloginAdmin();
+}
 
-// Để bảo bảo tính chất chỉ gọi 1 hàm Controller để xử lý request thì mình sử dụng match
 
 match ($act) {
     // Trang chủ
@@ -107,9 +110,14 @@ match ($act) {
     // Quản lý đăng ký
     // Đăng ký Admin
 
-    // Quản lý đăng ký
-// Đăng ký Admin
-'register' => (new AdminTaiKhoanController())->register(),
-'register-process' => (new AdminTaiKhoanController())->registerprocess(),
+    // Đăng nhập / Đăng xuất Admin
+    'login' => (new AdminTaiKhoanController())->login(),
+    'logout-admin' => (new AdminTaiKhoanController())->logout(),
 
+    // Đăng ký Admin
+    'register' => (new AdminTaiKhoanController())->register(),
+    'register-process' => (new AdminTaiKhoanController())->registerprocess(),
+
+    // Route mặc định
+    default => (new DashboardController())->home(),
 };
