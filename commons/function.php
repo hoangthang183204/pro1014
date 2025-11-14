@@ -1,7 +1,8 @@
 <?php
 
 // Kết nối CSDL qua PDO
-function connectDB() {
+function connectDB()
+{
     // Kết nối CSDL
     $host = DB_HOST;
     $port = DB_PORT;
@@ -15,14 +16,15 @@ function connectDB() {
 
         // cài đặt chế độ trả dữ liệu
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    
+
         return $conn;
     } catch (PDOException $e) {
         echo ("Connection failed: " . $e->getMessage());
     }
 }
 
-function uploadFile($file, $folderSave){
+function uploadFile($file, $folderSave)
+{
     $file_upload = $file;
     $pathStorage = $folderSave . rand(10000, 99999) . $file_upload['name'];
 
@@ -35,9 +37,54 @@ function uploadFile($file, $folderSave){
     return null;
 }
 
-function deleteFile($file){
+function deleteFile($file)
+{
     $pathDelete = PATH_ROOT . $file;
     if (file_exists($pathDelete)) {
         unlink($pathDelete); // Hàm unlink dùng để xóa file
+    }
+}
+
+// Bắt đầu session nếu chưa có
+function ensureSessionStarted(): void
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+}
+
+// Kiểm tra đã đăng nhập admin chưa
+function isAdminLoggedIn(): bool
+{
+    ensureSessionStarted();
+    return !empty($_SESSION['admin_id']);
+}
+
+// Hàm rào lại: gọi ở đầu admin/index.php
+function CheckloginAdmin(): void
+{
+    ensureSessionStarted();
+
+    // Route hiện tại (lấy từ query string)
+    $act = $_GET['act'] ?? '/';
+
+    // Các route công khai không cần đăng nhập
+    $publicRoutes = [
+        'login',
+        'check-login-admin', // nếu bạn có xử lý riêng
+        'logout-admin',
+        'register',
+        'register-process'
+    ];
+
+    // Nếu route thuộc public thì cho qua
+    if (in_array($act, $publicRoutes, true)) {
+        return;
+    }
+
+    // Nếu chưa login -> chuyển về trang đăng nhập
+    if (!isAdminLoggedIn()) {
+        header('Location: ' . BASE_URL_ADMIN . '?act=login');
+        exit();
     }
 }

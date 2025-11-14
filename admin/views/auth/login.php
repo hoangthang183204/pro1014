@@ -3,10 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Đăng ký Admin</title>
-
+    <title>Đăng nhập Admin</title>
     <link rel="stylesheet" href="./assets/plugins/fontawesome-free/css/all.min.css">
-
     <style>
         body {
             margin: 0;
@@ -19,7 +17,7 @@
             align-items: center;
         }
 
-        .register-container {
+        .login-container {
             width: 380px;
             background: #ffffff;
             padding: 35px 40px;
@@ -35,7 +33,7 @@
 
         .title {
             text-align: center;
-            font-size: 30px;
+            font-size: 32px;
             font-weight: 700;
             margin-bottom: 25px;
             color: #224abe;
@@ -59,7 +57,7 @@
             box-shadow: 0 0 5px rgba(78,115,223,0.4);
         }
 
-        .btn-register {
+        .btn-login {
             width: 100%;
             padding: 12px;
             background: #4e73df;
@@ -71,25 +69,30 @@
             transition: 0.2s;
         }
 
-        .btn-register:hover {
+        .btn-login:hover {
             background: #2e59d9;
+        }
+
+        .register-link {
+            text-align: center;
+            display: block;
+            margin-top: 18px;
+            font-size: 14px;
+            color: #4e73df;
+            text-decoration: none;
+        }
+
+        .register-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
-<div class="register-container">
-    <div class="title">Đăng Ký Admin</div>
+<div class="login-container">
+    <div class="title">Admin</div>
 
-    <?php if (isset($_SESSION['error'])) { ?>
-        <p class="text-danger text-center"> <?= $_SESSION['error']; ?> </p>
-    <?php unset($_SESSION['error']); } ?>
-
-    <?php if (isset($_SESSION['success'])) { ?>
-        <p class="text-success text-center"> <?= $_SESSION['success']; ?> </p>
-    <?php unset($_SESSION['success']); } ?>
-
-    <form action="?act=register-process" method="post">
+    <form action="?act=login" method="post">
 
         <div class="input-group">
             <input type="email" name="email" placeholder="Email" required>
@@ -99,13 +102,10 @@
             <input type="password" name="password" placeholder="Mật khẩu" required>
         </div>
 
-        <div class="input-group">
-            <input type="password" name="confirm" placeholder="Nhập lại mật khẩu" required>
-        </div>
-
-        <button class="btn-register">Đăng ký</button>
-
+        <button type="submit" class="btn-login">Đăng nhập</button>
     </form>
+
+    <a href="?act=register" class="register-link">Đăng ký tài khoản Admin</a>
 </div>
 
 </body>

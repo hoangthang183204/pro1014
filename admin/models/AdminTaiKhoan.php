@@ -1,8 +1,10 @@
-<?php 
- class AdminTaiKhoan{
+<?php
+class AdminTaiKhoan
+{
     public $conn;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conn = connectDB();
     }
     public function registerprocess()
@@ -53,8 +55,28 @@
         }
 
         // Chuyển hướng
-        header("Location: " . BASE_URL_ADMIN . "?act=register");
+        header("Location: " . BASE_URL_ADMIN . "?act=login");
         exit();
     }
- }
-?>
+
+    // Lấy user theo email
+    public function getByEmail($email)
+    {
+        $sql = "SELECT * FROM tai_khoan WHERE email = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Thử đăng nhập: trả về user array nếu thành công, false nếu thất bại
+    public function attemptLogin($email, $password)
+    {
+        $user = $this->getByEmail($email);
+        if (!$user) return false;
+
+        if (isset($user['password']) && password_verify($password, $user['password'])) {
+            return $user;
+        }
+        return false;
+    }
+}
