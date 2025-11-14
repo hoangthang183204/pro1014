@@ -10,6 +10,7 @@ require_once './controllers/DashboardController.php';
 require_once './controllers/AdminDanhMucTourController.php';
 require_once './controllers/AdminTourController.php';
 require_once './controllers/AdminLichTrinhKhoiHanhController.php';
+require_once './controllers/AdminTaiKhoanController.php';
 
 
 // Require toàn bộ file Models
@@ -17,6 +18,7 @@ require_once './models/AdminDashboard.php';
 require_once './models/AdminDanhMuc.php';
 require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
+require_once './models/AdminTaiKhoan.php';
 
 
 
@@ -101,4 +103,13 @@ match ($act) {
     'phan-cong-hdv-store' => (new AdminLichKhoiHanhController())->phanCongHDVStore(),
     'dich-vu-kem-theo' => (new AdminLichKhoiHanhController())->dichVuKemTheo(),
     'checklist-chuan-bi' => (new AdminLichKhoiHanhController())->checklistChuanBi(),
+
+    // Quản lý đăng ký
+    // Đăng ký Admin
+
+    // Quản lý đăng ký
+// Đăng ký Admin
+'register' => (new AdminTaiKhoanController())->register(),
+'register-process' => (new AdminTaiKhoanController())->registerprocess(),
+
 };

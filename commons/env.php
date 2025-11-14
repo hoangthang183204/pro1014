@@ -5,7 +5,8 @@
 
 define('BASE_URL'       , 'http://localhost/pro1014/');
 
-define('BASE_URL_ADMIN'       , 'http://localhost/pro1014/admin/');
+
+define('BASE_URL_ADMIN'       , 'http://localhost/pro1014/pro1014/admin/');
 
 define('DB_HOST'    , 'localhost');
 define('DB_PORT'    , 3306);
