@@ -26,10 +26,9 @@ require_once './models/AdminTaiKhoan.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
-if($act !== 'login' && $act !== 'check-login-admin' && $act !== 'logout-admin'){
-    CheckloginAdmin();
+if (!in_array($act, ['login', 'login-process', 'register', 'register-process'])) {
+    ensureAdminLoggedIn();
 }
-
 
 match ($act) {
     // Trang chủ
@@ -109,14 +108,12 @@ match ($act) {
 
     // Quản lý đăng ký
     // Đăng ký Admin
-
-    // Đăng nhập / Đăng xuất Admin
-    'login' => (new AdminTaiKhoanController())->login(),
-    'logout-admin' => (new AdminTaiKhoanController())->logout(),
-
-    // Đăng ký Admin
     'register' => (new AdminTaiKhoanController())->register(),
     'register-process' => (new AdminTaiKhoanController())->registerprocess(),
+
+    // Đăng nhập Admin
+    'login' => (new AdminTaiKhoanController())->login(),
+    'login-process' => (new AdminTaiKhoanController())->loginprocess(),
 
     // Route mặc định
     default => (new DashboardController())->home(),

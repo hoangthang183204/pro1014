@@ -88,3 +88,13 @@ function CheckloginAdmin(): void
         exit();
     }
 }
+
+function ensureAdminLoggedIn(): void
+{
+    ensureSessionStarted();
+
+    if (empty($_SESSION['admin_id'])) {
+        header("Location: " . BASE_URL_ADMIN . "?act=login");
+        exit();
+    }
+}
