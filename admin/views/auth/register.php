@@ -1,112 +1,109 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Đăng ký Admin</title>
-
-    <link rel="stylesheet" href="./assets/plugins/fontawesome-free/css/all.min.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #269269ff, #224abe);
-            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-
-        .register-container {
-            width: 380px;
-            background: #ffffff;
-            padding: 35px 40px;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            animation: fadeIn 0.6s ease;
+        .form-container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .title {
+        .form-container h2 {
             text-align: center;
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: #224abe;
+            margin-bottom: 20px;
+            color: #333;
         }
-
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
-
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
         .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #d1d3e2;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: 0.2s;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
         }
-
-        .input-group input:focus {
-            border-color: #4e73df;
-            box-shadow: 0 0 5px rgba(78,115,223,0.4);
-        }
-
         .btn-register {
             width: 100%;
-            padding: 12px;
-            background: #4e73df;
-            border: none;
+            padding: 10px;
+            background-color: #28a745;
             color: #fff;
+            border: none;
+            border-radius: 5px;
             font-size: 16px;
-            border-radius: 10px;
             cursor: pointer;
-            transition: 0.2s;
         }
-
         .btn-register:hover {
-            background: #2e59d9;
+            background-color: #218838;
+        }
+        .form-footer {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .form-footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .form-footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <div class="form-container">
+        <h2>Đăng ký</h2>
+        <form action="?act=register-process" method="post">
+            <div class="input-group">
+                <label for="ten_dang_nhap">Tên đăng nhập</label>
+                <input type="text" name="ten_dang_nhap" id="ten_dang_nhap" placeholder="Tên đăng nhập" required>
+            </div>
 
-<div class="register-container">
-    <div class="title">Đăng Ký Admin</div>
+            <div class="input-group">
+                <label for="ho_ten">Họ tên</label>
+                <input type="text" name="ho_ten" id="ho_ten" placeholder="Họ tên" required>
+            </div>
 
-    <?php if (isset($_SESSION['error'])) { ?>
-        <p class="text-danger text-center"> <?= $_SESSION['error']; ?> </p>
-    <?php unset($_SESSION['error']); } ?>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="Email" required>
+            </div>
 
-    <?php if (isset($_SESSION['success'])) { ?>
-        <p class="text-success text-center"> <?= $_SESSION['success']; ?> </p>
-    <?php unset($_SESSION['success']); } ?>
+            <div class="input-group">
+                <label for="so_dien_thoai">Số điện thoại</label>
+                <input type="text" name="so_dien_thoai" id="so_dien_thoai" placeholder="Số điện thoại">
+            </div>
 
-    <form action="?act=register-process" method="post">
+            <div class="input-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+            </div>
 
-        <div class="input-group">
-            <input type="email" name="email" placeholder="Email" required>
-        </div>
+            <div class="input-group">
+                <label for="confirm">Nhập lại mật khẩu</label>
+                <input type="password" name="confirm" id="confirm" placeholder="Nhập lại mật khẩu" required>
+            </div>
 
-        <div class="input-group">
-            <input type="password" name="password" placeholder="Mật khẩu" required>
-        </div>
-
-        <div class="input-group">
-            <input type="password" name="confirm" placeholder="Nhập lại mật khẩu" required>
-        </div>
-
-        <button class="btn-register">Đăng ký</button>
-
-    </form>
-</div>
-
+            <button type="submit" class="btn-register">Đăng ký</button>
+        </form>
+    </div>
 </body>
 </html>

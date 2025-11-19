@@ -1,112 +1,92 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Đăng nhập Admin</title>
-    <link rel="stylesheet" href="./assets/plugins/fontawesome-free/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #269269ff, #224abe);
-            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-
-        .login-container {
-            width: 380px;
-            background: #ffffff;
-            padding: 35px 40px;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            animation: fadeIn 0.6s ease;
+        .form-container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .title {
+        .form-container h2 {
             text-align: center;
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: #224abe;
+            margin-bottom: 20px;
+            color: #333;
         }
-
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
-
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
         .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #d1d3e2;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: 0.2s;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
         }
-
-        .input-group input:focus {
-            border-color: #4e73df;
-            box-shadow: 0 0 5px rgba(78,115,223,0.4);
-        }
-
         .btn-login {
             width: 100%;
-            padding: 12px;
-            background: #4e73df;
-            border: none;
+            padding: 10px;
+            background-color: #007bff;
             color: #fff;
+            border: none;
+            border-radius: 5px;
             font-size: 16px;
-            border-radius: 10px;
             cursor: pointer;
-            transition: 0.2s;
         }
-
         .btn-login:hover {
-            background: #2e59d9;
+            background-color: #0056b3;
         }
-
-        .register-link {
+        .form-footer {
             text-align: center;
-            display: block;
-            margin-top: 18px;
-            font-size: 14px;
-            color: #4e73df;
+            margin-top: 15px;
+        }
+        .form-footer a {
+            color: #007bff;
             text-decoration: none;
         }
-
-        .register-link:hover {
+        .form-footer a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <div class="form-container">
+        <h2>Đăng nhập</h2>
+        <form action="?act=login-process" method="post">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="Email" required>
+            </div>
 
-<div class="login-container">
-    <div class="title">Admin</div>
+            <div class="input-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+            </div>
 
-    <form action="?act=login" method="post">
-
-        <div class="input-group">
-            <input type="email" name="email" placeholder="Email" required>
+            <button type="submit" class="btn-login">Đăng nhập</button>
+        </form>
+        <div class="form-footer">
+            <p>Chưa có tài khoản? <a href="?act=register">Đăng ký</a></p>
         </div>
-
-        <div class="input-group">
-            <input type="password" name="password" placeholder="Mật khẩu" required>
-        </div>
-
-        <button type="submit" class="btn-login">Đăng nhập</button>
-    </form>
-
-    <a href="?act=register" class="register-link">Đăng ký tài khoản Admin</a>
-</div>
-
+    </div>
 </body>
 </html>
