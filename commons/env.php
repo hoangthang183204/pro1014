@@ -3,7 +3,7 @@
 // Biến môi trường, dùng chung toàn hệ thống
 // Khai báo dưới dạng HẰNG SỐ để không phải dùng $GLOBALS
 
-define('BASE_URL'       , 'http://localhost/duanmau/mvc-oop-basic/');
+define('BASE_URL'       , 'http://localhost/pro1014/');
 
 define('BASE_URL_ADMIN'       , 'http://localhost/pro1014/admin/');
 define('BASE_URL_GUIDE'       , 'http://localhost/pro1014/tour_guide/');
