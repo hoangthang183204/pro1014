@@ -2,7 +2,7 @@
 class AdminLichKhoiHanhController
 {
     public $lichKhoiHanhModel;
-    
+
     public function __construct()
     {
         $this->lichKhoiHanhModel = new AdminLichKhoiHanh();
@@ -13,11 +13,11 @@ class AdminLichKhoiHanhController
     {
         $search = $_GET['search'] ?? '';
         $trang_thai = $_GET['trang_thai'] ?? '';
-        $thang = $_GET['thang'] ?? date('m');
-        $nam = $_GET['nam'] ?? date('Y');
-        
+        $thang = $_GET['thang'] ?? '';
+        $nam = $_GET['nam'] ?? '';
+
         $lich_khoi_hanh = $this->lichKhoiHanhModel->getAllLichKhoiHanh($search, $trang_thai, $thang, $nam);
-        
+
         require_once './views/lichtrinhkhoihanh/listKhoiHanh.php';
     }
 
@@ -25,7 +25,7 @@ class AdminLichKhoiHanhController
     public function create()
     {
         $tours = $this->lichKhoiHanhModel->getAllToursActive();
-        
+
         require_once './views/lichtrinhkhoihanh/addLichTrinh.php';
     }
 
@@ -39,16 +39,23 @@ class AdminLichKhoiHanhController
                 'ngay_ket_thuc' => $_POST['ngay_ket_thuc'],
                 'gio_tap_trung' => $_POST['gio_tap_trung'],
                 'diem_tap_trung' => $_POST['diem_tap_trung'],
-                'so_cho_du_kien' => $_POST['so_cho_du_kien'],
-                'ghi_chu_van_hanh' => $_POST['ghi_chu_van_hanh']
+                'so_cho_toi_da' => $_POST['so_cho_toi_da'],
+                'ghi_chu_van_hanh' => $_POST['ghi_chu_van_hanh'] ?? ''
             ];
-            
+
+            // Validate ngày
+            if ($data['ngay_bat_dau'] > $data['ngay_ket_thuc']) {
+                $_SESSION['error'] = 'Ngày kết thúc phải sau ngày bắt đầu';
+                header('Location: ?act=lich-khoi-hanh-create');
+                return;
+            }
+
             $result = $this->lichKhoiHanhModel->createLichKhoiHanh($data);
-            
+
             if ($result) {
-                header('Location: ?act=lich-khoi-hanh&success=Thêm lịch khởi hành thành công');
+                header('Location: index.php?act=lich-khoi-hanh&success=' . urlencode('Thêm lịch trình thành công!'));
             } else {
-                header('Location: ?act=lich-khoi-hanh-create&error=Có lỗi xảy ra khi thêm lịch khởi hành');
+                header('Location: index.php?act=lich-khoi-hanh-create&error=' . urlencode('Có lỗi xảy ra khi thêm!'));
             }
         }
     }
@@ -58,14 +65,15 @@ class AdminLichKhoiHanhController
     {
         $id = $_GET['id'] ?? 0;
         $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($id);
-        
+
         if (!$lich_khoi_hanh) {
-            header('Location: ?act=lich-khoi-hanh&error=Lịch khởi hành không tồn tại');
+            $_SESSION['error'] = 'Lịch khởi hành không tồn tại';
+            header('Location: ?act=lich-khoi-hanh');
             return;
         }
-        
+
         $tours = $this->lichKhoiHanhModel->getAllToursActive();
-        
+
         require_once './views/lichtrinhkhoihanh/editLichTrinh.php';
     }
 
@@ -80,17 +88,24 @@ class AdminLichKhoiHanhController
                 'ngay_ket_thuc' => $_POST['ngay_ket_thuc'],
                 'gio_tap_trung' => $_POST['gio_tap_trung'],
                 'diem_tap_trung' => $_POST['diem_tap_trung'],
-                'so_cho_du_kien' => $_POST['so_cho_du_kien'],
-                'ghi_chu_van_hanh' => $_POST['ghi_chu_van_hanh'],
+                'so_cho_toi_da' => $_POST['so_cho_toi_da'],
+                'ghi_chu_van_hanh' => $_POST['ghi_chu_van_hanh'] ?? '',
                 'trang_thai' => $_POST['trang_thai']
             ];
-            
+
+            // Validate ngày
+            if ($data['ngay_bat_dau'] > $data['ngay_ket_thuc']) {
+                $_SESSION['error'] = 'Ngày kết thúc phải sau ngày bắt đầu';
+                header('Location: ?act=lich-khoi-hanh-edit&id=' . $id);
+                return;
+            }
+
             $result = $this->lichKhoiHanhModel->updateLichKhoiHanh($id, $data);
-            
+
             if ($result) {
-                header('Location: ?act=lich-khoi-hanh&success=Cập nhật lịch khởi hành thành công');
+                header('Location: index.php?act=lich-khoi-hanh&success=' . urlencode('Sửa lịch trình thành công!'));
             } else {
-                header('Location: ?act=lich-khoi-hanh-edit&id=' . $id . '&error=Có lỗi xảy ra khi cập nhật');
+                header('Location: index.php?act=lich-khoi-hanh-edit&error=' . urlencode('Có lỗi xảy ra khi sửa lịch trình!'));
             }
         }
     }
@@ -99,88 +114,105 @@ class AdminLichKhoiHanhController
     public function delete()
     {
         $id = $_GET['id'] ?? 0;
+
         $result = $this->lichKhoiHanhModel->deleteLichKhoiHanh($id);
-        
+
         if ($result) {
-            header('Location: ?act=lich-khoi-hanh&success=Xóa lịch khởi hành thành công');
+            $_SESSION['success'] = 'Xóa lịch khởi hành thành công';
         } else {
-            header('Location: ?act=lich-khoi-hanh&error=Có lỗi xảy ra khi xóa lịch khởi hành');
+            $_SESSION['error'] = 'Không thể xóa lịch khởi hành. Có thể đã có booking hoặc có lỗi xảy ra';
         }
+
+        header('Location: ?act=lich-khoi-hanh');
     }
 
     // Phân công HDV
-    public function phanCongHDV()
+    public function phanCong()
     {
         $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
-        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
-        
-        if (!$lich_khoi_hanh) {
-            header('Location: ?act=lich-khoi-hanh&error=Lịch khởi hành không tồn tại');
+
+        if (!$lich_khoi_hanh_id) {
+            $_SESSION['error'] = 'Không tìm thấy lịch khởi hành';
+            header('Location: ?act=lich-khoi-hanh');
             return;
         }
-        
-        $hdv_list = $this->lichKhoiHanhModel->getAllHDV();
-        $hdv_trung_lich = $this->lichKhoiHanhModel->getHDVTrungLich($lich_khoi_hanh_id, $lich_khoi_hanh['ngay_bat_dau'], $lich_khoi_hanh['ngay_ket_thuc']);
+
+        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
+
+        if (!$lich_khoi_hanh) {
+            $_SESSION['error'] = 'Lịch khởi hành không tồn tại';
+            header('Location: ?act=lich-khoi-hanh');
+            return;
+        }
+
+        $huong_dan_vien_list = $this->lichKhoiHanhModel->getAllHuongDanVien();
         $phan_cong_hien_tai = $this->lichKhoiHanhModel->getPhanCongHDV($lich_khoi_hanh_id);
-        
+
         require_once './views/lichtrinhkhoihanh/phanHuongDanVien.php';
     }
 
-    // Xử lý phân công HDV - THÊM METHOD NÀY
-    public function phanCongHDVStore()
+    // Xử lý phân công HDV
+    public function phanCongStore()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
-            $hdv_id = $_POST['hdv_id'] ?? 0;
+            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'];
+            $huong_dan_vien_id = $_POST['huong_dan_vien_id'];
             $ghi_chu = $_POST['ghi_chu'] ?? '';
-            
-            if (!$lich_khoi_hanh_id || !$hdv_id) {
-                header('Location: ?act=phan-cong-hdv&lich_khoi_hanh_id=' . $lich_khoi_hanh_id . '&error=Vui lòng chọn HDV');
+
+            if (!$lich_khoi_hanh_id || !$huong_dan_vien_id) {
+                $_SESSION['error'] = 'Vui lòng chọn HDV';
+                header('Location: ?act=phan-cong&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
                 return;
             }
-            
-            $result = $this->lichKhoiHanhModel->phanCongHDV($lich_khoi_hanh_id, $hdv_id, $ghi_chu);
-            
+
+            $result = $this->lichKhoiHanhModel->phanCongHDV($lich_khoi_hanh_id, $huong_dan_vien_id, $ghi_chu);
+
             if ($result) {
-                header('Location: ?act=phan-cong-hdv&lich_khoi_hanh_id=' . $lich_khoi_hanh_id . '&success=Phân công HDV thành công');
+                $_SESSION['success'] = 'Phân công HDV thành công';
             } else {
-                header('Location: ?act=phan-cong-hdv&lich_khoi_hanh_id=' . $lich_khoi_hanh_id . '&error=Có lỗi xảy ra khi phân công HDV');
+                $_SESSION['error'] = 'Có lỗi xảy ra khi phân công HDV';
             }
+
+            header('Location: ?act=phan-cong&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
         }
     }
 
-    // Quản lý dịch vụ kèm theo
-    public function dichVuKemTheo()
+    // Hủy phân công HDV
+    public function huyPhanCong()
     {
         $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
-        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
-        
-        if (!$lich_khoi_hanh) {
-            header('Location: ?act=lich-khoi-hanh&error=Lịch khởi hành không tồn tại');
+
+        if (!$lich_khoi_hanh_id) {
+            $_SESSION['error'] = 'Không tìm thấy lịch khởi hành';
+            header('Location: ?act=lich-khoi-hanh');
             return;
         }
-        
-        $doi_tac_list = $this->lichKhoiHanhModel->getAllDoiTac();
-        $dich_vu_list = $this->lichKhoiHanhModel->getDichVuKemTheo($lich_khoi_hanh_id);
-        
-        require_once './views/lichtrinhkhoihanh/dichVuTheoKem.php';
+
+        $result = $this->lichKhoiHanhModel->huyPhanCongHDV($lich_khoi_hanh_id);
+
+        if ($result) {
+            $_SESSION['success'] = 'Hủy phân công HDV thành công';
+        } else {
+            $_SESSION['error'] = 'Có lỗi xảy ra khi hủy phân công HDV';
+        }
+
+        header('Location: ?act=phan-cong&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
     }
 
-    // Checklist chuẩn bị
-    public function checklistChuanBi()
+    // Quản lý checklist trước tour
+    public function checklistTruocTour()
     {
         $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
         $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
-        
+
         if (!$lich_khoi_hanh) {
-            header('Location: ?act=lich-khoi-hanh&error=Lịch khởi hành không tồn tại');
+            $_SESSION['error'] = 'Lịch khởi hành không tồn tại';
+            header('Location: ?act=lich-khoi-hanh');
             return;
         }
-        
-        $checklist = $this->lichKhoiHanhModel->getChecklistChuanBi($lich_khoi_hanh_id);
-        
-        require_once './views/lichtrinhkhoihanh/checklistChuanBi.php';
+
+        $checklist = $this->lichKhoiHanhModel->getChecklistTruocTour($lich_khoi_hanh_id);
+
+        require_once './views/lichtrinhkhoihanh/listKhoiHanh.php';
     }
 }
-?>
-

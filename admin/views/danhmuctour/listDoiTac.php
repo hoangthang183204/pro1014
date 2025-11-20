@@ -72,10 +72,10 @@
                                                   <td>
                                                       <span class="badge bg-<?php
                                                                             echo match ($doi_tac['loai_dich_vu']) {
-                                                                                'vận_chuyển' => 'primary',
-                                                                                'khách_sạn' => 'success',
-                                                                                'nhà_hàng' => 'warning',
-                                                                                'vé_tham_quan' => 'info',
+                                                                                'vận chuyển' => 'primary',
+                                                                                'khách sạn' => 'success',
+                                                                                'nhà hàng' => 'warning',
+                                                                                'vé tham quan' => 'info',
                                                                                 default => 'secondary'
                                                                             };
                                                                             ?>">

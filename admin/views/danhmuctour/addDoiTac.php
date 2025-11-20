@@ -55,10 +55,10 @@
                                           <label class="form-label">Loại dịch vụ <span class="text-danger">*</span></label>
                                           <select name="loai_dich_vu" class="form-select" required>
                                               <option value="">Chọn loại dịch vụ</option>
-                                              <option value="vận_chuyển">Vận chuyển</option>
-                                              <option value="khách_sạn">Khách sạn</option>
-                                              <option value="nhà_hàng">Nhà hàng</option>
-                                              <option value="vé_tham_quan">Vé tham quan</option>
+                                              <option value="vận chuyển">Vận chuyển</option>
+                                              <option value="khách sạn">Khách sạn</option>
+                                              <option value="nhà hàng">Nhà hàng</option>
+                                              <option value="vé tham quan">Vé tham quan</option>
                                               <option value="khác">Khác</option>
                                           </select>
                                       </div>

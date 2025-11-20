@@ -56,10 +56,10 @@
                                           <label class="form-label">Loại dịch vụ <span class="text-danger">*</span></label>
                                           <select name="loai_dich_vu" class="form-select" required>
                                               <option value="">Chọn loại dịch vụ</option>
-                                              <option value="vận_chuyển" <?php echo ($doi_tac['loai_dich_vu'] == 'vận_chuyển') ? 'selected' : ''; ?>>Vận chuyển</option>
-                                              <option value="khách_sạn" <?php echo ($doi_tac['loai_dich_vu'] == 'khách_sạn') ? 'selected' : ''; ?>>Khách sạn</option>
-                                              <option value="nhà_hàng" <?php echo ($doi_tac['loai_dich_vu'] == 'nhà_hàng') ? 'selected' : ''; ?>>Nhà hàng</option>
-                                              <option value="vé_tham_quan" <?php echo ($doi_tac['loai_dich_vu'] == 'vé_tham_quan') ? 'selected' : ''; ?>>Vé tham quan</option>
+                                              <option value="vận chuyển" <?php echo ($doi_tac['loai_dich_vu'] == 'vận chuyển') ? 'selected' : ''; ?>>Vận chuyển</option>
+                                              <option value="khách sạn" <?php echo ($doi_tac['loai_dich_vu'] == 'khách sạn') ? 'selected' : ''; ?>>Khách sạn</option>
+                                              <option value="nhà hàng" <?php echo ($doi_tac['loai_dich_vu'] == 'nhà hàng') ? 'selected' : ''; ?>>Nhà hàng</option>
+                                              <option value="vé tham quan" <?php echo ($doi_tac['loai_dich_vu'] == 'vé tham quan') ? 'selected' : ''; ?>>Vé tham quan</option>
                                               <option value="khác" <?php echo ($doi_tac['loai_dich_vu'] == 'khác') ? 'selected' : ''; ?>>Khác</option>
                                           </select>
                                       </div>

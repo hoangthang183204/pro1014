@@ -17,4 +17,3 @@ class DashboardController
         require_once './views/home.php';
     }
 }
-?>

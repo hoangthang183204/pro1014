@@ -12,17 +12,17 @@ class AdminDashboard
     {
         try {
             $query = "SELECT 
-                        (SELECT COUNT(*) FROM tours WHERE trang_thai = 'đang_hoạt_động') as tong_tour,
-                        (SELECT COUNT(*) FROM lich_khoi_hanh WHERE trang_thai = 'đã_lên_lịch' AND ngay_bat_dau >= CURDATE()) as tour_sap_khoi_hanh,
+                        (SELECT COUNT(*) FROM tour WHERE trang_thai = 'đang hoạt động') as tong_tour,
+                        (SELECT COUNT(*) FROM lich_khoi_hanh WHERE trang_thai = 'đã lên lịch' AND ngay_bat_dau >= CURDATE()) as tour_sap_khoi_hanh,
                         (SELECT COUNT(*) FROM bao_cao_su_co WHERE DATE(thoi_gian_bao_cao) = CURDATE()) as su_co_hom_nay,
-                        (SELECT COUNT(*) FROM huong_dan_vien WHERE trang_thai = 'đang_làm_việc') as hdv_dang_lam";
+                        (SELECT COUNT(*) FROM huong_dan_vien WHERE trang_thai = 'đang làm việc') as hdv_dang_lam";
             
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
             
         } catch (PDOException $e) {
-            // Log lỗi nếu cần
+            error_log("Dashboard Error: " . $e->getMessage());
             return [
                 'tong_tour' => 0,
                 'tour_sap_khoi_hanh' => 0,
@@ -35,12 +35,13 @@ class AdminDashboard
     public function getTourSapKhoiHanh($limit = 5)
     {
         try {
-            $query = "SELECT lkh.id, t.ma_tour, t.ten_tour, lkh.ngay_bat_dau, hdv.ten_hdv
+            $query = "SELECT lkh.id, t.ma_tour, t.ten_tour, lkh.ngay_bat_dau, 
+                             hdv.ho_ten as ten_hdv, lkh.so_cho_con_lai
                       FROM lich_khoi_hanh lkh
-                      JOIN tours t ON lkh.tour_id = t.id
-                      LEFT JOIN phan_cong pc ON lkh.id = pc.lich_khoi_hanh_id AND pc.loai_phan_cong = 'hdv'
-                      LEFT JOIN huong_dan_vien hdv ON pc.hdv_id = hdv.id
-                      WHERE lkh.trang_thai = 'đã_lên_lịch' 
+                      JOIN tour t ON lkh.tour_id = t.id
+                      LEFT JOIN phan_cong pc ON lkh.id = pc.lich_khoi_hanh_id AND pc.loai_phan_cong = 'hướng dẫn viên'
+                      LEFT JOIN huong_dan_vien hdv ON pc.huong_dan_vien_id = hdv.id
+                      WHERE lkh.trang_thai = 'đã lên lịch' 
                       AND lkh.ngay_bat_dau >= CURDATE()
                       ORDER BY lkh.ngay_bat_dau ASC 
                       LIMIT :limit";
@@ -51,6 +52,7 @@ class AdminDashboard
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch (PDOException $e) {
+            error_log("Tour Sap Khoi Hanh Error: " . $e->getMessage());
             return [];
         }
     }
@@ -59,12 +61,12 @@ class AdminDashboard
     {
         try {
             $query = "SELECT bsc.tieu_de, bsc.muc_do_nghiem_trong, bsc.thoi_gian_bao_cao, 
-                             t.ten_tour, hdv.ten_hdv
+                             t.ten_tour, hdv.ho_ten as ten_hdv
                       FROM bao_cao_su_co bsc
                       JOIN lich_khoi_hanh lkh ON bsc.lich_khoi_hanh_id = lkh.id
-                      JOIN tours t ON lkh.tour_id = t.id
-                      JOIN huong_dan_vien hdv ON bsc.hdv_id = hdv.id
-                      WHERE bsc.muc_do_nghiem_trong IN ('cao', 'nghiêm_trọng')
+                      JOIN tour t ON lkh.tour_id = t.id
+                      JOIN huong_dan_vien hdv ON bsc.huong_dan_vien_id = hdv.id
+                      WHERE bsc.muc_do_nghiem_trong IN ('cao', 'nghiêm trọng')
                       ORDER BY bsc.thoi_gian_bao_cao DESC
                       LIMIT :limit";
             
@@ -74,7 +76,57 @@ class AdminDashboard
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
         } catch (PDOException $e) {
+            error_log("Su Co Can Xu Ly Error: " . $e->getMessage());
             return [];
+        }
+    }
+
+    // Thêm phương thức mới để lấy doanh thu
+    public function getDoanhThuThang($thang = null, $nam = null)
+    {
+        try {
+            $thang = $thang ?? date('m');
+            $nam = $nam ?? date('Y');
+            
+            $query = "SELECT COALESCE(SUM(tong_tien), 0) as doanh_thu
+                      FROM phieu_dat_tour 
+                      WHERE MONTH(created_at) = :thang 
+                      AND YEAR(created_at) = :nam
+                      AND trang_thai IN ('đã xác nhận', 'đã hoàn thành')";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindValue(':thang', $thang, PDO::PARAM_INT);
+            $stmt->bindValue(':nam', $nam, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['doanh_thu'] ?? 0;
+            
+        } catch (PDOException $e) {
+            error_log("Doanh Thu Error: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Lấy số booking mới trong tháng
+    public function getBookingMoiThang()
+    {
+        try {
+            $query = "SELECT COUNT(*) as booking_moi
+                      FROM phieu_dat_tour 
+                      WHERE MONTH(created_at) = MONTH(CURDATE()) 
+                      AND YEAR(created_at) = YEAR(CURDATE())
+                      AND trang_thai = 'chờ xác nhận'";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['booking_moi'] ?? 0;
+            
+        } catch (PDOException $e) {
+            error_log("Booking Moi Error: " . $e->getMessage());
+            return 0;
         }
     }
 }

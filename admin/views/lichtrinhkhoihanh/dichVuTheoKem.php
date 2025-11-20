@@ -132,10 +132,10 @@
                                                           <td>
                                                               <span class="badge bg-<?php
                                                                                     echo match ($dich_vu['loai_phan_cong']) {
-                                                                                        'vận_chuyển' => 'primary',
-                                                                                        'khách_sạn' => 'success',
-                                                                                        'nhà_hàng' => 'warning',
-                                                                                        'vé_tham_quan' => 'info',
+                                                                                        'vận chuyển' => 'primary',
+                                                                                        'khách sạn' => 'success',
+                                                                                        'nhà hàng' => 'warning',
+                                                                                        'vé tham quan' => 'info',
                                                                                         default => 'secondary'
                                                                                     };
                                                                                     ?>">
@@ -153,9 +153,9 @@
                                                           <td>
                                                               <span class="badge bg-<?php
                                                                                     echo match ($dich_vu['trang_thai_xac_nhan']) {
-                                                                                        'đã_xác_nhận' => 'success',
-                                                                                        'chờ_xác_nhận' => 'warning',
-                                                                                        'đã_hủy' => 'danger',
+                                                                                        'đã xác nhận' => 'success',
+                                                                                        'chờ xác nhận' => 'warning',
+                                                                                        'đã hủy' => 'danger',
                                                                                         default => 'secondary'
                                                                                     };
                                                                                     ?>">

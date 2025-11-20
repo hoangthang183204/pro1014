@@ -28,9 +28,6 @@
                     <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
                 <?php endif; ?>
 
-                <!-- Debug info -->
-
-
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Upload hình ảnh/video</h5>
@@ -53,7 +50,7 @@
                                     <div class="mb-3">
                                         <label class="form-label">Loại media</label>
                                         <select name="loai_media" class="form-select" required>
-                                            <option value="hình_ảnh">Hình ảnh</option>
+                                            <option value="hình ảnh">Hình ảnh</option>
                                             <option value="video">Video</option>
                                         </select>
                                     </div>
@@ -87,26 +84,20 @@
                                 <?php foreach ($media_list as $media): ?>
                                     <div class="col-md-3 mb-4">
                                         <div class="card media-card">
-                                            <?php if ($media['loai_media'] == 'hình_ảnh'): ?>
+                                            <?php if ($media['loai_media'] == 'hình ảnh'): ?>
                                                 <?php
-                                                // URL ĐÚNG: thêm 'imgproduct/' vào đường dẫn
+                                                // SỬA ĐƯỜNG DẪN VẬT LÝ
+                                                $physical_path = $_SERVER['DOCUMENT_ROOT'] . '/pro1014/uploads/imgproduct/' . $media['url'];
                                                 $image_url = '/pro1014/uploads/imgproduct/' . $media['url'];
-                                                $physical_path = 'D:\\laragon\\www\\pro1014\\uploads\\imgproduct\\' . $media['url'];
                                                 $image_exists = file_exists($physical_path);
-
-                                                // Debug chi tiết
-                                                error_log("=== DEBUG IMAGE INFO ===");
-                                                error_log("URL in DB: " . $media['url']);
-                                                error_log("Full URL: " . $image_url);
-                                                error_log("Physical Path: " . $physical_path);
-                                                error_log("File Exists: " . ($image_exists ? 'YES' : 'NO'));
                                                 ?>
 
                                                 <?php if ($image_exists): ?>
                                                     <img src="<?php echo $image_url; ?>"
                                                         class="card-img-top media-thumbnail"
                                                         alt="<?php echo htmlspecialchars($media['chu_thich']); ?>"
-                                                        style="height: 200px; object-fit: cover;">
+                                                        style="height: 200px; object-fit: cover;"
+                                                        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg=='">
                                                 <?php else: ?>
                                                     <div class="card-img-top bg-danger text-white d-flex align-items-center justify-content-center media-thumbnail" style="height: 200px;">
                                                         <div class="text-center">
@@ -115,10 +106,6 @@
                                                             <small><strong>LỖI: File không tồn tại</strong></small>
                                                             <br>
                                                             <small>Tên file: <?php echo $media['url']; ?></small>
-                                                            <br>
-                                                            <small>Đường dẫn: <?php echo $physical_path; ?></small>
-                                                            <br>
-                                                            <small>URL: <?php echo $image_url; ?></small>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
@@ -146,7 +133,7 @@
                                                 </form>
 
                                                 <div class="btn-group w-100">
-                                                    <?php if ($media['loai_media'] == 'hình_ảnh' && $image_exists): ?>
+                                                    <?php if ($media['loai_media'] == 'hình ảnh' && $image_exists): ?>
                                                         <a href="<?php echo $image_url; ?>"
                                                             class="btn btn-outline-info btn-sm"
                                                             target="_blank"
@@ -156,7 +143,7 @@
                                                     <?php endif; ?>
                                                     <a href="?act=delete-media&media_id=<?php echo $media['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
                                                         class="btn btn-outline-danger btn-sm"
-                                                        onclick="return confirm('Bạn có chắc muốn xóa media này?')"
+                                                        onclick="return confirm('Bạn có chắc muốn xóa media này? File sẽ bị xóa vĩnh viễn.')"
                                                         title="Xóa">
                                                         <i class="fas fa-trash"></i>
                                                     </a>
@@ -171,7 +158,7 @@
                                                     <small class="text-muted">
                                                         <?php echo date('d/m/Y H:i', strtotime($media['created_at'])); ?>
                                                     </small>
-                                                    <?php if ($media['loai_media'] == 'hình_ảnh' && !$image_exists): ?>
+                                                    <?php if ($media['loai_media'] == 'hình ảnh' && !$image_exists): ?>
                                                         <br>
                                                         <small class="text-danger">
                                                             <i class="fas fa-exclamation-circle"></i>

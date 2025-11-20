@@ -51,7 +51,6 @@
                                       </div>
                                   </div>
                               </div>
-
                               <div class="mb-3">
                                   <label class="form-label">Quy định hủy/đổi tour</label>
                                   <textarea name="quy_dinh_huy_doi" class="form-control" rows="4"

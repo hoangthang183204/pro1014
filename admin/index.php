@@ -10,12 +10,14 @@ require_once './controllers/DashboardController.php';
 require_once './controllers/AdminDanhMucTourController.php';
 require_once './controllers/AdminTourController.php';
 require_once './controllers/AdminLichTrinhKhoiHanhController.php';
+require_once './controllers/AdminDatTourController.php';
 
 // Require toàn bộ file Models
 require_once './models/AdminDashboard.php';
 require_once './models/AdminDanhMuc.php';
 require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
+require_once './models/AdminDatTour.php';
 
 // Route
 $act = $_GET['act'] ?? '/';
@@ -34,9 +36,22 @@ match ($act) {
     'tour-edit' => (new AdminTourController())->edit(),
     'tour-update' => (new AdminTourController())->update(),
     'tour-delete' => (new AdminTourController())->delete(),
+    // Quản lý Lịch trình Tour
     'tour-lich-trinh' => (new AdminTourController())->lichTrinh(),
+    'lich-trinh-create' => (new AdminTourController())->createLichTrinh(),
+    'lich-trinh-store' => (new AdminTourController())->storeLichTrinh(),
+    'lich-trinh-edit' => (new AdminTourController())->editLichTrinh(),
+    'lich-trinh-update' => (new AdminTourController())->updateLichTrinh(),
+    'lich-trinh-delete' => (new AdminTourController())->deleteLichTrinh(),
+    // Quản lý Phiên bản Tour
     'tour-phien-ban' => (new AdminTourController())->phienBan(),
-
+    'phien-ban-create' => (new AdminTourController())->createPhienBan(),
+    'phien-ban-store' => (new AdminTourController())->storePhienBan(),
+    'phien-ban-edit' => (new AdminTourController())->editPhienBan(),
+    'phien-ban-update' => (new AdminTourController())->updatePhienBan(),
+    'phien-ban-delete' => (new AdminTourController())->deletePhienBan(),
+    'phien-ban-ap-dung' => (new AdminTourController())->apDungPhienBan(),
+    'phien-ban-xem' => (new AdminTourController())->xemPhienBan(),
     // Media Tour routes - THÊM MỚI
     'tour-media' => (new AdminTourController())->media(),
     'upload-media' => (new AdminTourController())->uploadMedia(),
@@ -52,12 +67,12 @@ match ($act) {
     'danh-muc-diem-den-update' => (new AdminDanhMucTourController())->updateDiemDen(),
     'danh-muc-diem-den-delete' => (new AdminDanhMucTourController())->deleteDiemDen(),
 
-    'danh-muc-loai-tour' => (new AdminDanhMucTourController())->loaiTour(),
-    'danh-muc-loai-tour-create' => (new AdminDanhMucTourController())->createLoaiTour(),
-    'danh-muc-loai-tour-store' => (new AdminDanhMucTourController())->storeLoaiTour(),
-    'danh-muc-loai-tour-edit' => (new AdminDanhMucTourController())->editLoaiTour(),
-    'danh-muc-loai-tour-update' => (new AdminDanhMucTourController())->updateLoaiTour(),
-    'danh-muc-loai-tour-delete' => (new AdminDanhMucTourController())->deleteLoaiTour(),
+    'danh-muc-tour' => (new AdminDanhMucTourController())->danhMucTour(),
+    'danh-muc-tour-create' => (new AdminDanhMucTourController())->createDanhMucTour(),
+    'danh-muc-tour-store' => (new AdminDanhMucTourController())->storeDanhMucTour(),
+    'danh-muc-tour-edit' => (new AdminDanhMucTourController())->editDanhMucTour(),
+    'danh-muc-tour-update' => (new AdminDanhMucTourController())->updateDanhMucTour(),
+    'danh-muc-tour-delete' => (new AdminDanhMucTourController())->deleteDanhMucTour(),
 
     'danh-muc-tag-tour' => (new AdminDanhMucTourController())->tagTour(),
     'danh-muc-tag-tour-create' => (new AdminDanhMucTourController())->createTagTour(),
@@ -80,12 +95,12 @@ match ($act) {
     'danh-muc-doi-tac-update' => (new AdminDanhMucTourController())->updateDoiTac(),
     'danh-muc-doi-tac-delete' => (new AdminDanhMucTourController())->deleteDoiTac(),
 
-    'danh-muc-hdv' => (new AdminDanhMucTourController())->huongDanVien(),
-    'danh-muc-hdv-create' => (new AdminDanhMucTourController())->createHDV(),
-    'danh-muc-hdv-store' => (new AdminDanhMucTourController())->storeHDV(),
-    'danh-muc-hdv-edit' => (new AdminDanhMucTourController())->editHDV(),
-    'danh-muc-hdv-update' => (new AdminDanhMucTourController())->updateHDV(),
-    'danh-muc-hdv-delete' => (new AdminDanhMucTourController())->deleteHDV(),
+    // HƯỚNG DẪN VIÊN
+    'huong-dan-vien' => (new AdminDanhMucTourController())->huongDanVien(),
+    'chi-tiet-huong-dan-vien' => (new AdminDanhMucTourController())->chiTietHuongDanVien(),
+    'sua-huong-dan-vien' => (new AdminDanhMucTourController())->suaHuongDanVien(),
+    'update-huong-dan-vien' => (new AdminDanhMucTourController())->updateHuongDanVien(),
+    'xoa-huong-dan-vien' => (new AdminDanhMucTourController())->xoaHuongDanVien(),
 
     // Quản lý Lịch Khởi Hành
     'lich-khoi-hanh' => (new AdminLichKhoiHanhController())->index(),
@@ -94,8 +109,9 @@ match ($act) {
     'lich-khoi-hanh-edit' => (new AdminLichKhoiHanhController())->edit(),
     'lich-khoi-hanh-update' => (new AdminLichKhoiHanhController())->update(),
     'lich-khoi-hanh-delete' => (new AdminLichKhoiHanhController())->delete(),
-    'phan-cong-hdv' => (new AdminLichKhoiHanhController())->phanCongHDV(),
-    'phan-cong-hdv-store' => (new AdminLichKhoiHanhController())->phanCongHDVStore(),
-    'dich-vu-kem-theo' => (new AdminLichKhoiHanhController())->dichVuKemTheo(),
-    'checklist-chuan-bi' => (new AdminLichKhoiHanhController())->checklistChuanBi(),
+    'phan-cong' => (new AdminLichKhoiHanhController())->phanCong(),
+    'phan-cong-store' => (new AdminLichKhoiHanhController())->phanCongStore(),
+    'huy-phan-cong' => (new AdminLichKhoiHanhController())->huyPhanCong(),
+    'checklist-truoc-tour' => (new AdminLichKhoiHanhController())->checklistTruocTour(),
+
 };
