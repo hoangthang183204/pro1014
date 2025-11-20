@@ -46,55 +46,55 @@ function deleteFile($file)
 }
 
 // Bắt đầu session nếu chưa có
-function ensureSessionStarted(): void
-{
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
-}
+// function ensureSessionStarted(): void
+// {
+//     if (session_status() !== PHP_SESSION_ACTIVE) {
+//         session_start();
+//     }
+// }
 
-// Kiểm tra đã đăng nhập admin chưa
-function isAdminLoggedIn(): bool
-{
-    ensureSessionStarted();
-    return !empty($_SESSION['admin_id']);
-}
+// // Kiểm tra đã đăng nhập admin chưa
+// function isAdminLoggedIn(): bool
+// {
+//     ensureSessionStarted();
+//     return !empty($_SESSION['admin_id']);
+// }
 
-// Hàm rào lại: gọi ở đầu admin/index.php
-function CheckloginAdmin(): void
-{
-    ensureSessionStarted();
+// // Hàm rào lại: gọi ở đầu admin/index.php
+// function CheckloginAdmin(): void
+// {
+//     ensureSessionStarted();
 
-    // Route hiện tại (lấy từ query string)
-    $act = $_GET['act'] ?? '/';
+//     // Route hiện tại (lấy từ query string)
+//     $act = $_GET['act'] ?? '/';
 
-    // Các route công khai không cần đăng nhập
-    $publicRoutes = [
-        'login',
-        'check-login-admin', // nếu bạn có xử lý riêng
-        'logout-admin',
-        'register',
-        'register-process'
-    ];
+//     // Các route công khai không cần đăng nhập
+//     $publicRoutes = [
+//         'login',
+//         'check-login-admin', // nếu bạn có xử lý riêng
+//         'logout-admin',
+//         'register',
+//         'register-process'
+//     ];
 
-    // Nếu route thuộc public thì cho qua
-    if (in_array($act, $publicRoutes, true)) {
-        return;
-    }
+//     // Nếu route thuộc public thì cho qua
+//     if (in_array($act, $publicRoutes, true)) {
+//         return;
+//     }
 
-    // Nếu chưa login -> chuyển về trang đăng nhập
-    if (!isAdminLoggedIn()) {
-        header('Location: ' . BASE_URL_ADMIN . '?act=login');
-        exit();
-    }
-}
+//     // Nếu chưa login -> chuyển về trang đăng nhập
+//     if (!isAdminLoggedIn()) {
+//         header('Location: ' . BASE_URL_ADMIN . '?act=login');
+//         exit();
+//     }
+// }
 
-function ensureAdminLoggedIn(): void
-{
-    ensureSessionStarted();
+// function ensureAdminLoggedIn(): void
+// {
+//     ensureSessionStarted();
 
-    if (empty($_SESSION['admin_id'])) {
-        header("Location: " . BASE_URL_ADMIN . "?act=login");
-        exit();
-    }
-}
+//     if (empty($_SESSION['admin_id'])) {
+//         header("Location: " . BASE_URL_ADMIN . "?act=login");
+//         exit();
+//     }
+// }

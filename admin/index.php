@@ -26,9 +26,9 @@ require_once './models/AdminTaiKhoan.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
-if (!in_array($act, ['login', 'login-process', 'register', 'register-process'])) {
-    ensureAdminLoggedIn();
-}
+// if (!in_array($act, ['login', 'login-process', 'register', 'register-process'])) {
+//     ensureAdminLoggedIn();
+// }
 
 match ($act) {
     // Trang chủ
