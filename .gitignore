@@ -17,6 +17,7 @@ composer.phar
 # Uploads
 /uploads/
 /temp/
+admin/uploads/
 
 # IDE
 .idea/
