@@ -1,5 +1,4 @@
- <!-- Footer -->
-    <footer>
+<footer>
         <p>WEBSITE LATA &copy; 2023 - Hệ thống quản lý tour du lịch</p>
     </footer>
 
@@ -60,4 +59,3 @@
             }, 3000);
         });
     </script>
-</body>
