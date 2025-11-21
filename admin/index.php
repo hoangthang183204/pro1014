@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Require toàn bộ các file khai báo môi trường, thực thi,...(không require view)
 
 // Require file Common
@@ -11,6 +12,8 @@ require_once './controllers/AdminDanhMucTourController.php';
 require_once './controllers/AdminTourController.php';
 require_once './controllers/AdminLichTrinhKhoiHanhController.php';
 require_once './controllers/AdminDatTourController.php';
+require_once './controllers/AdminTaiKhoanController.php';
+
 
 // Require toàn bộ file Models
 require_once './models/AdminDashboard.php';
@@ -18,14 +21,29 @@ require_once './models/AdminDanhMuc.php';
 require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
 require_once './models/AdminDatTour.php';
+require_once './models/AdminTaiKhoan.php';
+
 
 // Route
 $act = $_GET['act'] ?? '/';
+
+// Kiểm tra đăng nhập
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 
 
 // Để bảo bảo tính chất chỉ gọi 1 hàm Controller để xử lý request thì mình sử dụng match
 
 match ($act) {
+    // AUTH
+    'login' => (new AdminTaiKhoanController())->login(),
+    'login-process' => (new AdminTaiKhoanController())->loginprocess(),
+    'register' => (new AdminTaiKhoanController())->register(),
+    'register-process' => (new AdminTaiKhoanController())->registerprocess(),
+    'logout-admin' => (new AdminTaiKhoanController())->logout(),
+
     // Trang chủ
     '/' => (new DashboardController())->home(),
 
@@ -113,5 +131,4 @@ match ($act) {
     'phan-cong-store' => (new AdminLichKhoiHanhController())->phanCongStore(),
     'huy-phan-cong' => (new AdminLichKhoiHanhController())->huyPhanCong(),
     'checklist-truoc-tour' => (new AdminLichKhoiHanhController())->checklistTruocTour(),
-
 };
