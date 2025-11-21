@@ -41,3 +41,14 @@ function deleteFile($file){
         unlink($pathDelete); // Hàm unlink dùng để xóa file
     }
 }
+
+function checkAuth(array $allowed_actions, string $current_action) {
+    // Nếu action hiện tại KHÔNG nằm trong danh sách cho phép
+    // VÀ session 'admin_id' chưa được thiết lập (chưa đăng nhập)
+    if (!in_array($current_action, $allowed_actions) && !isset($_SESSION['admin_id'])) {
+        // Chuyển hướng người dùng về trang đăng nhập
+        header('Location: ' . BASE_URL_ADMIN . '?act=login');
+        exit();
+    }
+}
+

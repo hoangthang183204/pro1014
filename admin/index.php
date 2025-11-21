@@ -24,15 +24,19 @@ require_once './models/AdminDatTour.php';
 require_once './models/AdminTaiKhoan.php';
 
 
+
 // Route
 $act = $_GET['act'] ?? '/';
 
-// Kiểm tra đăng nhập
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+$allowed_actions = [
+    'login',
+    'register',
+    'login-process',
+    'register-process'
+];
 
-
+// 2. Gọi hàm kiểm tra
+checkAuth($allowed_actions, $act);
 
 // Để bảo bảo tính chất chỉ gọi 1 hàm Controller để xử lý request thì mình sử dụng match
 
