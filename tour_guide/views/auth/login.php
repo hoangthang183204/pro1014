@@ -83,12 +83,16 @@
             padding: 10px;
             margin-bottom: 15px;
             border-radius: 5px;
-            display: none;
         }
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
     </style>
 </head>
@@ -96,13 +100,33 @@
     <div class="form-container">
         <h2>Đăng nhập</h2>
         
-        <!-- Thêm alert cho thông báo lỗi -->
-        <div class="alert alert-error" id="errorAlert"></div>
+        <!-- Hiển thị thông báo lỗi từ PHP -->
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error" id="phpErrorAlert">
+                <?php 
+                    echo $_SESSION['error']; 
+                    unset($_SESSION['error']); // Xóa thông báo sau khi hiển thị
+                ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success" id="phpSuccessAlert">
+                <?php 
+                    echo $_SESSION['success']; 
+                    unset($_SESSION['success']); // Xóa thông báo sau khi hiển thị
+                ?>
+            </div>
+        <?php endif; ?>
+        
+        <!-- Thêm alert cho thông báo lỗi từ JavaScript -->
+        <div class="alert alert-error" id="jsErrorAlert" style="display: none;"></div>
         
         <form id="loginForm" action="?act=login-process" method="post">
             <div class="input-group">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" placeholder="Email" required>
+                <input type="email" name="email" id="email" placeholder="Email" required 
+                       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                 <div class="error-message" id="email_error"></div>
             </div>
 
@@ -118,16 +142,16 @@
             <p>Chưa có tài khoản? <a href="?act=register">Đăng ký</a></p>
         </div>
         
-        <!-- Thêm nút test -->
-    
+        
     </div>
 
     <script>
+
         class LoginValidator {
             constructor() {
                 this.form = document.getElementById('loginForm');
                 this.submitBtn = document.getElementById('submitBtn');
-                this.errorAlert = document.getElementById('errorAlert');
+                this.errorAlert = document.getElementById('jsErrorAlert');
                 this.init();
             }
 
@@ -175,14 +199,17 @@
 
                 if (isValid) {
                     console.log('🎉 Validation passed, submitting form...');
+                    console.log('Form data:', {
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    });
+                    
                     this.submitBtn.disabled = true;
                     this.submitBtn.textContent = 'Đang đăng nhập...';
                     
-                    // Submit form sau 1 giây
-                    setTimeout(() => {
-                        console.log('🚀 Submitting form now...');
-                        this.form.submit();
-                    }, 1000);
+                    // Submit form ngay lập tức (không delay)
+                    console.log('🚀 Submitting form now...');
+                    this.form.submit();
                 } else {
                     console.log('❌ Validation failed');
                     this.showAlert('Vui lòng kiểm tra lại thông tin đăng nhập');
@@ -283,30 +310,6 @@
             }
         }
 
-        // Test function
-        function testValidation() {
-            console.log('🧪 Testing validation...');
-            
-            // Test case 1: Empty fields
-            document.getElementById('email').value = '';
-            document.getElementById('password').value = '';
-            window.loginValidator.validateForm(new Event('submit'));
-            
-            // Test case 2: Invalid email
-            setTimeout(() => {
-                document.getElementById('email').value = 'invalid-email';
-                document.getElementById('password').value = '123';
-                window.loginValidator.validateForm(new Event('submit'));
-            }, 2000);
-            
-            // Test case 3: Valid data
-            setTimeout(() => {
-                document.getElementById('email').value = 'test@example.com';
-                document.getElementById('password').value = '123456';
-                window.loginValidator.validateForm(new Event('submit'));
-            }, 4000);
-        }
-
         // Initialize validator when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Page loaded, initializing LoginValidator...');
@@ -314,11 +317,12 @@
             // Kiểm tra xem các element có tồn tại không
             console.log('Form element:', document.getElementById('loginForm'));
             console.log('Submit button:', document.getElementById('submitBtn'));
-            console.log('Error alert:', document.getElementById('errorAlert'));
+            console.log('Error alert:', document.getElementById('jsErrorAlert'));
             
             window.loginValidator = new LoginValidator();
             
-
+            // Auto test với tài khoản demo (có thể xóa sau)
+            console.log('💡 Gợi ý: Click nút "Test Login" để điền thông tin test');
         });
     </script>
 </body>

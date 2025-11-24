@@ -42,13 +42,71 @@ function deleteFile($file){
     }
 }
 
-function checkAuth(array $allowed_actions, string $current_action) {
-    // Nếu action hiện tại KHÔNG nằm trong danh sách cho phép
-    // VÀ session 'admin_id' chưa được thiết lập (chưa đăng nhập)
-    if (!in_array($current_action, $allowed_actions) && !isset($_SESSION['admin_id'])) {
-        // Chuyển hướng người dùng về trang đăng nhập
-        header('Location: ' . BASE_URL_ADMIN . '?act=login');
+
+
+
+function getRoleName($vai_tro) {
+    $roles = [
+        'admin' => 'Quản trị viên',
+        'nhan_vien' => 'Nhân viên',
+        'huong_dan_vien' => 'Hướng dẫn viên',
+        'huong_dan_yien' => 'Hướng dẫn viên' // Xử lý lỗi chính tả nếu có
+    ];
+    
+    return $roles[$vai_tro] ?? 'Người dùng';
+}
+
+function checkGuideLogin() {
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    return isset($_SESSION['guide_id']) && 
+           isset($_SESSION['guide_logged_in']) && 
+           $_SESSION['guide_logged_in'] === true;
+}
+
+/**
+ * Kiểm tra vai trò Guide
+ */
+function hasGuideRole($required_role) {
+    return isset($_SESSION['guide_vai_tro']) && $_SESSION['guide_vai_tro'] === $required_role;
+}
+
+/**
+ * Redirect nếu chưa đăng nhập Guide
+ */
+function requireGuideLogin() {
+    if (!checkGuideLogin()) {
+        $_SESSION['error'] = "Vui lòng đăng nhập để tiếp tục!";
+        header('Location: ' . BASE_URL_GUIDE . '?act=login');
         exit();
     }
 }
 
+/**
+ * Redirect nếu không có quyền Guide
+ */
+function requireGuideRole($required_role) {
+    requireGuideLogin();
+    if (!hasGuideRole($required_role)) {
+        $_SESSION['error'] = "Bạn không có quyền truy cập trang này!";
+        header('Location: ' . BASE_URL_GUIDE);
+        exit();
+    }
+}
+
+/**
+ * Lấy thông tin user đang đăng nhập (Guide)
+ */
+function getCurrentGuide() {
+    if (checkGuideLogin()) {
+        return [
+            'id' => $_SESSION['guide_id'],
+            'name' => $_SESSION['guide_name'],
+            'vai_tro' => $_SESSION['guide_vai_tro'],
+            'email' => $_SESSION['guide_email'] ?? ''
+        ];
+    }
+    return null;
+}
