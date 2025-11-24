@@ -15,3 +15,7 @@ define('DB_PASSWORD', '');
 define('DB_NAME'    , 'pro1014');  // Tên database
 
 define('PATH_ROOT'    , __DIR__ . '/../');
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}

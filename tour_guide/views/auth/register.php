@@ -104,6 +104,18 @@
         .input-group.success select {
             border-color: #28a745;
         }
+        /* Thêm vào phần style */
+@media (max-width: 480px) {
+    .form-container {
+        margin: 20px;
+        padding: 15px 20px;
+    }
+    
+    body {
+        height: auto;
+        padding: 20px 0;
+    }
+}
     </style>
 </head>
 
