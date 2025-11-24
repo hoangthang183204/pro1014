@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập</title>
+    <title>Đăng nhập ADMIN</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -114,9 +114,7 @@
 
             <button type="submit" class="btn-login" id="submitBtn">Đăng nhập</button>
         </form>
-        <div class="form-footer">
-            <p>Chưa có tài khoản? <a href="?act=register">Đăng ký</a></p>
-        </div>
+       
         
         <!-- Thêm nút test -->
     
