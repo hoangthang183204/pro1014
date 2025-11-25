@@ -8,10 +8,12 @@ require_once '../commons/function.php';
 
 require_once './controllers/ProductController.php';
 require_once './controllers/GuideTaiKhoanController.php';
+require_once './controllers/DashBoardHDVController.php';
 
 // Require Models
 require_once './models/ProductModel.php';
 require_once './models/GuideTaiKhoan.php';
+require_once './models/DashBoardHDVModel.php';
 
 
 
@@ -49,7 +51,7 @@ elseif (!in_array($act, $public_routes) && $act !== '/' && !checkGuideLogin()) {
 
 match ($act) {
     // Trang chủ guide - CHỈ hiển thị khi đã đăng nhập
-    '/' => (new GuideTaiKhoanController())->home(),
+    '/' => (new DashboardHDVController())->home(),
     
     // Auth routes
     'login' => (new GuideTaiKhoanController())->login(),
@@ -59,7 +61,7 @@ match ($act) {
     'logout' => (new GuideTaiKhoanController())->logout(),
     
     // Guide routes
-    'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
+    // 'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
     
-    default => (new GuideTaiKhoanController())->home(),
+    default => (new DashboardHDVController())->home(),
 };
