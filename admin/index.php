@@ -140,6 +140,21 @@ match ($act) {
     'huy-phan-cong' => (new AdminLichKhoiHanhController())->huyPhanCong(),
     'checklist-truoc-tour' => (new AdminLichKhoiHanhController())->checklistTruocTour(),
 
-    // Default
-    default => (new DashboardController())->home(),
+
+    // Quản lý Đặt Tour
+    'dat-tour' => (new AdminDatTourController())->index(),
+    'dat-tour-show' => (new AdminDatTourController())->show(),
+    'dat-tour-update-status' => (new AdminDatTourController())->updateStatus(),
+    'dat-tour-delete' => (new AdminDatTourController())->delete(),
+    'dat-tour-get-lich-khoi-hanh' => (new AdminDatTourController())->getLichKhoiHanhInfo(),
+
+    // Đặt tour theo loại khách
+    'dat-tour-le' => (new AdminDatTourController())->datTourLe(),
+    'dat-tour-doan' => (new AdminDatTourController())->datTourDoan(),
+    'dat-tour-store-booking' => (new AdminDatTourController())->storeBooking(),
+
+    // Thống kê và tìm kiếm
+    'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
+    'dat-tour-print' => (new AdminDatTourController())->print()
+    // 'dat-tour-tim-kiem' => (new AdminDatTourController())->timKiemBooking(),
 };

@@ -213,6 +213,6 @@ class AdminLichKhoiHanhController
 
         $checklist = $this->lichKhoiHanhModel->getChecklistTruocTour($lich_khoi_hanh_id);
 
-        require_once './views/lichtrinhkhoihanh/listKhoiHanh.php';
+        require_once './views/lichtrinhkhoihanh/checkListChuanbi.php';
     }
 }
