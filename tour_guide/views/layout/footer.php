@@ -1,27 +1,24 @@
-<footer>
-        <p>WEBSITE LATA &copy; 2023 - Hệ thống quản lý tour du lịch</p>
+</div> <!-- Kết thúc .main-container -->
+
+    <footer>
+        <p>WEBSITE LATA &copy; <?php echo date("Y"); ?> - Hệ thống quản lý tour du lịch</p>
     </footer>
 
     <script>
-        // JavaScript cho chuyển trang khi click sidebar
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarItems = document.querySelectorAll('.sidebar li');
             const pageContents = document.querySelectorAll('.page-content');
             
-            // Hàm chuyển trang
+            // Hàm chuyển trang (Tab switching)
             function switchPage(pageId) {
-                // Ẩn tất cả các trang
-                pageContents.forEach(page => {
-                    page.classList.remove('active');
-                });
+                // Ẩn tất cả content
+                pageContents.forEach(page => page.classList.remove('active'));
                 
-                // Hiển thị trang được chọn
+                // Hiển thị content được chọn
                 const activePage = document.getElementById(pageId);
-                if (activePage) {
-                    activePage.classList.add('active');
-                }
+                if (activePage) activePage.classList.add('active');
                 
-                // Cập nhật trạng thái active trên sidebar
+                // Cập nhật active trên sidebar
                 sidebarItems.forEach(item => {
                     item.classList.remove('active');
                     if (item.getAttribute('data-page') === pageId) {
@@ -30,32 +27,21 @@
                 });
             }
             
-            // Thêm sự kiện click cho từng mục sidebar
+            // Bắt sự kiện click menu
             sidebarItems.forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault(); // Ngăn chặn load lại trang nếu dùng thẻ a href="#"
                     const pageId = this.getAttribute('data-page');
                     switchPage(pageId);
                 });
             });
             
-            // Xử lý nút hủy trên trang đăng xuất
+            // Xử lý nút hủy logout
             const cancelLogoutBtn = document.querySelector('#logout button:last-child');
             if (cancelLogoutBtn) {
-                cancelLogoutBtn.addEventListener('click', function() {
-                    switchPage('dashboard');
-                });
+                cancelLogoutBtn.addEventListener('click', () => switchPage('dashboard'));
             }
-            
-            // Giả lập thông báo mới sau 3 giây
-            setTimeout(() => {
-                const tourCard = document.querySelector('#dashboard .card:nth-child(2) .empty-state');
-                if (tourCard) {
-                    tourCard.innerHTML = `
-                        <p><strong>Tour mới:</strong> Hà Nội - Ninh Bình</p>
-                        <p>Khởi hành: 20/06/2023</p>
-                        <button style="background-color: var(--primary-color); color: white; border: none; padding: 5px 10px; border-radius: 4px; margin-top: 10px;">Xem chi tiết</button>
-                    `;
-                }
-            }, 3000);
         });
     </script>
+</body>
+</html>

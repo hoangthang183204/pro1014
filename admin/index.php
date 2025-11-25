@@ -1,32 +1,55 @@
 <?php
-// Require toàn bộ các file khai báo môi trường, thực thi,...(không require view)
+
+session_start();
 
 // Require file Common
-require_once '../commons/env.php'; // Khai báo biến môi trường
-require_once '../commons/function.php'; // Hàm hỗ trợ
+require_once '../commons/env.php';
+require_once '../commons/function.php';
 
-// Require toàn bộ file Controllers
+// Require Controllers
 require_once './controllers/DashboardController.php';
 require_once './controllers/AdminDanhMucTourController.php';
 require_once './controllers/AdminTourController.php';
 require_once './controllers/AdminLichTrinhKhoiHanhController.php';
 require_once './controllers/AdminDatTourController.php';
+require_once './controllers/AdminTaiKhoanController.php';
 
-// Require toàn bộ file Models
+// Require Models
 require_once './models/AdminDashboard.php';
 require_once './models/AdminDanhMuc.php';
 require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
 require_once './models/AdminDatTour.php';
+require_once './models/AdminTaiKhoan.php';
 
+require_once './middleware/check-login.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
+// Start session đầu tiên
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Để bảo bảo tính chất chỉ gọi 1 hàm Controller để xử lý request thì mình sử dụng match
+// Hiển thị thông báo lỗi nếu có
+if (isset($_SESSION['error'])) {
+    $error_message = $_SESSION['error'];
+    unset($_SESSION['error']);
+    // Có thể hiển thị thông báo lỗi ở đây hoặc trong template
+}
+checkLogin();
 
+
+// Routing
 match ($act) {
-    // Trang chủ
+    // PUBLIC ROUTES - Không cần đăng nhập
+    'login' => (new AdminTaiKhoanController())->login(),
+    'login-process' => (new AdminTaiKhoanController())->loginprocess(),
+    'register' => (new AdminTaiKhoanController())->register(),
+    'register-process' => (new AdminTaiKhoanController())->registerprocess(),
+    'logout-admin' => (new AdminTaiKhoanController())->logout(),
+
+    // PROTECTED ROUTES - Cần đăng nhập và không phải HDV
     '/' => (new DashboardController())->home(),
 
     // Quản lý Tour
@@ -36,6 +59,7 @@ match ($act) {
     'tour-edit' => (new AdminTourController())->edit(),
     'tour-update' => (new AdminTourController())->update(),
     'tour-delete' => (new AdminTourController())->delete(),
+
     // Quản lý Lịch trình Tour
     'tour-lich-trinh' => (new AdminTourController())->lichTrinh(),
     'lich-trinh-create' => (new AdminTourController())->createLichTrinh(),
@@ -43,6 +67,7 @@ match ($act) {
     'lich-trinh-edit' => (new AdminTourController())->editLichTrinh(),
     'lich-trinh-update' => (new AdminTourController())->updateLichTrinh(),
     'lich-trinh-delete' => (new AdminTourController())->deleteLichTrinh(),
+
     // Quản lý Phiên bản Tour
     'tour-phien-ban' => (new AdminTourController())->phienBan(),
     'phien-ban-create' => (new AdminTourController())->createPhienBan(),
@@ -52,7 +77,8 @@ match ($act) {
     'phien-ban-delete' => (new AdminTourController())->deletePhienBan(),
     'phien-ban-ap-dung' => (new AdminTourController())->apDungPhienBan(),
     'phien-ban-xem' => (new AdminTourController())->xemPhienBan(),
-    // Media Tour routes - THÊM MỚI
+
+    // Media Tour
     'tour-media' => (new AdminTourController())->media(),
     'upload-media' => (new AdminTourController())->uploadMedia(),
     'delete-media' => (new AdminTourController())->deleteMedia(),
