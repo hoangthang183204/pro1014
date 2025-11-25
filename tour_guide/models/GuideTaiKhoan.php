@@ -154,7 +154,7 @@ class GuideTaiKhoan
         $stmt->execute([$user['id']]);
 
         $_SESSION['success'] = "Đăng nhập thành công!";
-        header("Location: " . BASE_URL_GUIDE . "?act=guide-dashboard");
+        header("Location: " . BASE_URL_GUIDE );
         exit();
     }
 

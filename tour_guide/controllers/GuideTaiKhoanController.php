@@ -32,11 +32,8 @@ class GuideTaiKhoanController
         if (checkGuideLogin()) {
             $currentUser = getCurrentGuide();
             if ($currentUser['vai_tro'] === 'huong_dan_vien') {
-                header('Location: ' . BASE_URL_GUIDE . '?act=guide-dashboard');
-            } else {
-                header('Location: ' . BASE_URL_GUIDE);
+                header('Location: ' . BASE_URL_GUIDE );
             }
-            exit();
         }
         require_once __DIR__ . '/../views/auth/login.php';
     }
@@ -63,15 +60,14 @@ public function home()
     if (checkGuideLogin()) {
         $currentUser = getCurrentGuide();
         if ($currentUser['vai_tro'] === 'huong_dan_vien') {
-            header('Location: ' . BASE_URL_GUIDE . '?act=guide-dashboard');
+            header('Location: ' . BASE_URL_GUIDE );
         } else {
             header('Location: ' . BASE_URL_GUIDE . '?act=profile');
         }
         exit();
     }
     
-    // Nếu chưa đăng nhập, hiển thị trang chủ
-    require_once __DIR__ . '/../views/guide/home.php';
+    
 }
 
 public function guideDashboard() {
@@ -88,7 +84,7 @@ public function guideDashboard() {
         exit();
     }
     
-    require_once './views/guide/dashboard.php';
+    require_once './views/trangchu.php';
 }
    
 }
