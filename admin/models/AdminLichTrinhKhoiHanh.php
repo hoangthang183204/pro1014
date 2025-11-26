@@ -214,7 +214,6 @@ class AdminLichKhoiHanh
     }
 
     // Lấy tất cả hướng dẫn viên đang làm việc
-    // Lấy tất cả hướng dẫn viên đang làm việc
     public function getAllHuongDanVien()
     {
         try {
@@ -232,7 +231,41 @@ class AdminLichKhoiHanh
         }
     }
 
-    // Lấy phân công HDV hiện tại - SỬA LẠI CHO ĐÚNG
+    // Kiểm tra xem HDV có bị trùng lịch không
+    public function kiemTraTrungLich($huong_dan_vien_id, $lich_khoi_hanh_id, $ngay_bat_dau, $ngay_ket_thuc)
+    {
+        try {
+            $query = "SELECT COUNT(*) as so_luong_trung
+                  FROM phan_cong pc
+                  JOIN lich_khoi_hanh lkh ON pc.lich_khoi_hanh_id = lkh.id
+                  WHERE pc.huong_dan_vien_id = :huong_dan_vien_id
+                  AND pc.lich_khoi_hanh_id != :lich_khoi_hanh_id
+                  AND lkh.trang_thai NOT IN ('đã hoàn thành', 'đã hủy')
+                  AND (
+                      (:ngay_bat_dau BETWEEN lkh.ngay_bat_dau AND lkh.ngay_ket_thuc)
+                      OR (:ngay_ket_thuc BETWEEN lkh.ngay_bat_dau AND lkh.ngay_ket_thuc)
+                      OR (lkh.ngay_bat_dau BETWEEN :ngay_bat_dau_2 AND :ngay_ket_thuc_2)
+                  )";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':huong_dan_vien_id' => $huong_dan_vien_id,
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':ngay_bat_dau' => $ngay_bat_dau,
+                ':ngay_ket_thuc' => $ngay_ket_thuc,
+                ':ngay_bat_dau_2' => $ngay_bat_dau,
+                ':ngay_ket_thuc_2' => $ngay_ket_thuc
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['so_luong_trung'] > 0;
+        } catch (PDOException $e) {
+            error_log("Lỗi kiemTraTrungLich: " . $e->getMessage());
+            return true; // Trả về true để an toàn, không cho phân công nếu có lỗi
+        }
+    }
+
+    // Lấy phân công HDV hiện tại
     public function getPhanCongHDV($lich_khoi_hanh_id)
     {
         try {
@@ -252,26 +285,43 @@ class AdminLichKhoiHanh
         }
     }
 
-    // Phân công HDV - SỬA LẠI CHO ĐÚNG
-    public function phanCongHDV($lich_khoi_hanh_id, $huong_dan_vien_id, $ghi_chu = '')
+    // Phân công HDV với validation
+    public function phanCongHDV($lich_khoi_hanh_id, $huong_dan_vien_id, $ngay_bat_dau, $ngay_ket_thuc, $ghi_chu = '')
     {
         try {
             $this->conn->beginTransaction();
 
+            // Kiểm tra xem tour hiện tại đã hoàn thành chưa
+            $query_check_tour = "SELECT trang_thai FROM lich_khoi_hanh WHERE id = :lich_khoi_hanh_id";
+            $stmt_check_tour = $this->conn->prepare($query_check_tour);
+            $stmt_check_tour->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            $tour = $stmt_check_tour->fetch(PDO::FETCH_ASSOC);
+
+            if ($tour && $tour['trang_thai'] === 'đã hoàn thành') {
+                throw new Exception("Không thể phân công HDV cho tour đã hoàn thành");
+            }
+
+            // Kiểm tra trùng lịch
+            $trung_lich = $this->kiemTraTrungLich($huong_dan_vien_id, $lich_khoi_hanh_id, $ngay_bat_dau, $ngay_ket_thuc);
+
+            if ($trung_lich) {
+                throw new Exception("Hướng dẫn viên đã được phân công cho tour khác trong khoảng thời gian này");
+            }
+
             // Xóa phân công cũ nếu có
             $query_delete = "DELETE FROM phan_cong 
-                         WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
-                         AND loai_phan_cong = 'hướng dẫn viên'";
+                     WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                     AND loai_phan_cong = 'hướng dẫn viên'";
             $stmt_delete = $this->conn->prepare($query_delete);
             $stmt_delete->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
 
-            // Thêm phân công mới - SỬA TÊN TRƯỜNG CHO ĐÚNG
+            // Thêm phân công mới
             $query_insert = "INSERT INTO phan_cong 
-                         (lich_khoi_hanh_id, huong_dan_vien_id, loai_phan_cong, 
-                          trang_thai_xac_nhan, ghi_chu, nguoi_tao) 
-                         VALUES 
-                         (:lich_khoi_hanh_id, :huong_dan_vien_id, 'hướng dẫn viên', 
-                          'đã xác nhận', :ghi_chu, :nguoi_tao)";
+                     (lich_khoi_hanh_id, huong_dan_vien_id, loai_phan_cong, 
+                      trang_thai_xac_nhan, ghi_chu, nguoi_tao) 
+                     VALUES 
+                     (:lich_khoi_hanh_id, :huong_dan_vien_id, 'hướng dẫn viên', 
+                      'đã xác nhận', :ghi_chu, :nguoi_tao)";
 
             $stmt_insert = $this->conn->prepare($query_insert);
             $stmt_insert->execute([
@@ -282,31 +332,64 @@ class AdminLichKhoiHanh
             ]);
 
             $this->conn->commit();
-            return true;
-        } catch (PDOException $e) {
+            return ['success' => true, 'message' => 'Phân công HDV thành công'];
+        } catch (Exception $e) {
             $this->conn->rollBack();
             error_log("Lỗi phanCongHDV: " . $e->getMessage());
-            return false;
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
 
-    // Hủy phân công HDV - GIỮ NGUYÊN (ĐÃ ĐÚNG)
+    // Hủy phân công HDV
     public function huyPhanCongHDV($lich_khoi_hanh_id)
     {
         try {
+            // Kiểm tra xem tour đã hoàn thành chưa
+            $query_check_tour = "SELECT trang_thai FROM lich_khoi_hanh WHERE id = :lich_khoi_hanh_id";
+            $stmt_check_tour = $this->conn->prepare($query_check_tour);
+            $stmt_check_tour->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            $tour = $stmt_check_tour->fetch(PDO::FETCH_ASSOC);
+
+            if ($tour && $tour['trang_thai'] === 'đã hoàn thành') {
+                throw new Exception("Không thể hủy phân công HDV cho tour đã hoàn thành");
+            }
+
             $query = "DELETE FROM phan_cong 
-                  WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
-                  AND loai_phan_cong = 'hướng dẫn viên'";
+              WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+              AND loai_phan_cong = 'hướng dẫn viên'";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
 
-            return $stmt->rowCount() > 0;
-        } catch (PDOException $e) {
+            return ['success' => true, 'message' => 'Hủy phân công HDV thành công'];
+        } catch (Exception $e) {
             error_log("Lỗi huyPhanCongHDV: " . $e->getMessage());
-            return false;
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
+
+    // Lấy danh sách HDV có sẵn (không bị trùng lịch)
+    public function getHuongDanVienCoSan($lich_khoi_hanh_id, $ngay_bat_dau, $ngay_ket_thuc)
+    {
+        try {
+            $all_hdv = $this->getAllHuongDanVien();
+            $hdv_co_san = [];
+
+            foreach ($all_hdv as $hdv) {
+                $trung_lich = $this->kiemTraTrungLich($hdv['id'], $lich_khoi_hanh_id, $ngay_bat_dau, $ngay_ket_thuc);
+                if (!$trung_lich) {
+                    $hdv_co_san[] = $hdv;
+                }
+            }
+
+            return $hdv_co_san;
+        } catch (PDOException $e) {
+            error_log("Lỗi getHuongDanVienCoSan: " . $e->getMessage());
+            return [];
+        }
+    }
+
+
     // Lấy checklist trước tour
     public function getChecklistTruocTour($lich_khoi_hanh_id)
     {

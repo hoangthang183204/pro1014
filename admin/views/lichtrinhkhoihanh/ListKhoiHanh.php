@@ -92,6 +92,25 @@
                                     </thead>
                                     <tbody>
                                         <?php foreach ($lich_khoi_hanh as $lich): ?>
+                                            <?php
+                                            // Tự động cập nhật trạng thái dựa trên ngày hiện tại
+                                            $today = date('Y-m-d');
+                                            $ngay_bat_dau = $lich['ngay_bat_dau'];
+                                            $ngay_ket_thuc = $lich['ngay_ket_thuc'];
+                                            $trang_thai_hien_tai = $lich['trang_thai'];
+                                            
+                                            // Chỉ cập nhật nếu trạng thái chưa phải là "đã hủy" hoặc "đã hoàn thành"
+                                            if ($trang_thai_hien_tai !== 'đã hủy' && $trang_thai_hien_tai !== 'đã hoàn thành') {
+                                                if ($today >= $ngay_bat_dau && $today <= $ngay_ket_thuc) {
+                                                    $trang_thai_hien_tai = 'đang diễn ra';
+                                                } elseif ($today > $ngay_ket_thuc) {
+                                                    $trang_thai_hien_tai = 'đã hoàn thành';
+                                                }
+                                            }
+                                            
+                                            // Kiểm tra quyền xoá (chỉ được xoá khi trạng thái là "đã hủy")
+                                            $cho_phep_xoa = ($trang_thai_hien_tai === 'đã hủy');
+                                            ?>
                                             <tr>
                                                 <td>
                                                     <div>
@@ -138,17 +157,17 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <span class="badge bg-<?php
-                                                                            echo match ($lich['trang_thai']) {
-                                                                                'đã lên lịch' => 'success',
-                                                                                'đang diễn ra' => 'warning',
-                                                                                'đã hoàn thành' => 'primary',
-                                                                                'đã hủy' => 'danger',
-                                                                                default => 'secondary'
-                                                                            };
-                                                                            ?>">
-                                                        <?php echo htmlspecialchars($lich['trang_thai']); ?>
+                                                        echo match ($trang_thai_hien_tai) {
+                                                            'đã lên lịch' => 'success',
+                                                            'đang diễn ra' => 'warning',
+                                                            'đã hoàn thành' => 'primary',
+                                                            'đã hủy' => 'danger',
+                                                            default => 'secondary'
+                                                        };
+                                                    ?>">
+                                                        <?php echo htmlspecialchars($trang_thai_hien_tai); ?>
                                                     </span>
-                                                    <?php if ($lich['trang_thai'] === 'đã lên lịch'): ?>
+                                                    <?php if ($trang_thai_hien_tai === 'đã lên lịch'): ?>
                                                         <?php
                                                         $ngay_con_lai = floor((strtotime($lich['ngay_bat_dau']) - time()) / (60 * 60 * 24));
                                                         if ($ngay_con_lai > 0) {
@@ -157,28 +176,59 @@
                                                             echo '<br><small class="text-warning">Khởi hành hôm nay</small>';
                                                         }
                                                         ?>
+                                                    <?php elseif ($trang_thai_hien_tai === 'đang diễn ra'): ?>
+                                                        <?php
+                                                        $ngay_da_di = floor((time() - strtotime($lich['ngay_bat_dau'])) / (60 * 60 * 24)) + 1;
+                                                        $tong_ngay = floor((strtotime($lich['ngay_ket_thuc']) - strtotime($lich['ngay_bat_dau'])) / (60 * 60 * 24)) + 1;
+                                                        echo '<br><small class="text-info">Ngày ' . $ngay_da_di . '/' . $tong_ngay . '</small>';
+                                                        ?>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="?act=lich-khoi-hanh-edit&id=<?php echo $lich['id']; ?>"
-                                                            class="btn btn-primary" title="Sửa lịch">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <a href="?act=phan-cong&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
-                                                            class="btn btn-info" title="Phân công HDV">
-                                                            <i class="fas fa-user-tie"></i>
-                                                        </a>
+                                                        <!-- Nút Sửa - Hiển thị với mọi trạng thái trừ "đã hoàn thành" và "đã hủy" -->
+                                                        <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
+                                                            <a href="?act=lich-khoi-hanh-edit&id=<?php echo $lich['id']; ?>"
+                                                                class="btn btn-primary" title="Sửa lịch">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-secondary" disabled title="Không thể sửa">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+
+                                                        <!-- Nút Phân công HDV - Hiển thị với mọi trạng thái trừ "đã hoàn thành" và "đã hủy" -->
+                                                        <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
+                                                            <a href="?act=phan-cong&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
+                                                                class="btn btn-info" title="Phân công HDV">
+                                                                <i class="fas fa-user-tie"></i>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-secondary" disabled title="Không thể phân công">
+                                                                <i class="fas fa-user-tie"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+
+                                                        <!-- Nút Checklist - Hiển thị với mọi trạng thái -->
                                                         <a href="?act=checklist-truoc-tour&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
                                                             class="btn btn-warning" title="Checklist">
                                                             <i class="fas fa-tasks"></i>
                                                         </a>
-                                                        <a href="?act=lich-khoi-hanh-delete&id=<?php echo $lich['id']; ?>"
-                                                            class="btn btn-danger"
-                                                            onclick="return confirm('Bạn có chắc muốn xóa lịch này?')"
-                                                            title="Xóa">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
+
+                                                        <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "đã hủy" -->
+                                                        <?php if ($cho_phep_xoa): ?>
+                                                            <a href="?act=lich-khoi-hanh-delete&id=<?php echo $lich['id']; ?>"
+                                                                class="btn btn-danger"
+                                                                onclick="return confirm('Bạn có chắc muốn xóa lịch này?')"
+                                                                title="Xóa">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-secondary" disabled title="Chỉ được xoá khi tour đã hủy">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -205,6 +255,10 @@
                                 <div class="text-muted small">
                                     Đang xem <strong>1</strong> đến <strong><?php echo count($lich_khoi_hanh); ?></strong> trong tổng số <strong><?php echo count($lich_khoi_hanh); ?></strong> mục
                                 </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>Lưu ý:</strong> Trạng thái tự động cập nhật theo ngày hiện tại
+                                </div>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -215,10 +269,6 @@
 </div>
 
 <?php include './views/layout/footer.php'; ?>
-
-<script>
-
-</script>
 
 <style>
     .form-control,
@@ -274,6 +324,11 @@
         background-color: #f8f9fa;
         border-top: 1px solid #dee2e6;
         padding: 12px 20px;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     /* Responsive */
