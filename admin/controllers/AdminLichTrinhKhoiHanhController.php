@@ -126,7 +126,6 @@ class AdminLichKhoiHanhController
         header('Location: ?act=lich-khoi-hanh');
     }
 
-    // Phân công HDV
     public function phanCong()
     {
         $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
@@ -145,7 +144,20 @@ class AdminLichKhoiHanhController
             return;
         }
 
-        $huong_dan_vien_list = $this->lichKhoiHanhModel->getAllHuongDanVien();
+        // Kiểm tra nếu tour đã hoàn thành
+        if ($lich_khoi_hanh['trang_thai'] === 'đã hoàn thành') {
+            $_SESSION['error'] = 'Không thể phân công HDV cho tour đã hoàn thành';
+            header('Location: ?act=lich-khoi-hanh');
+            return;
+        }
+
+        // Lấy danh sách HDV có sẵn (không bị trùng lịch)
+        $huong_dan_vien_list = $this->lichKhoiHanhModel->getHuongDanVienCoSan(
+            $lich_khoi_hanh_id,
+            $lich_khoi_hanh['ngay_bat_dau'],
+            $lich_khoi_hanh['ngay_ket_thuc']
+        );
+
         $phan_cong_hien_tai = $this->lichKhoiHanhModel->getPhanCongHDV($lich_khoi_hanh_id);
 
         require_once './views/lichtrinhkhoihanh/phanHuongDanVien.php';
@@ -165,12 +177,27 @@ class AdminLichKhoiHanhController
                 return;
             }
 
-            $result = $this->lichKhoiHanhModel->phanCongHDV($lich_khoi_hanh_id, $huong_dan_vien_id, $ghi_chu);
+            // Lấy thông tin lịch khởi hành để lấy ngày bắt đầu và kết thúc
+            $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
 
-            if ($result) {
-                $_SESSION['success'] = 'Phân công HDV thành công';
+            if (!$lich_khoi_hanh) {
+                $_SESSION['error'] = 'Lịch khởi hành không tồn tại';
+                header('Location: ?act=phan-cong&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+                return;
+            }
+
+            $result = $this->lichKhoiHanhModel->phanCongHDV(
+                $lich_khoi_hanh_id,
+                $huong_dan_vien_id,
+                $lich_khoi_hanh['ngay_bat_dau'],
+                $lich_khoi_hanh['ngay_ket_thuc'],
+                $ghi_chu
+            );
+
+            if ($result['success']) {
+                $_SESSION['success'] = $result['message'];
             } else {
-                $_SESSION['error'] = 'Có lỗi xảy ra khi phân công HDV';
+                $_SESSION['error'] = $result['message'];
             }
 
             header('Location: ?act=phan-cong&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
@@ -190,10 +217,10 @@ class AdminLichKhoiHanhController
 
         $result = $this->lichKhoiHanhModel->huyPhanCongHDV($lich_khoi_hanh_id);
 
-        if ($result) {
-            $_SESSION['success'] = 'Hủy phân công HDV thành công';
+        if ($result['success']) {
+            $_SESSION['success'] = $result['message'];
         } else {
-            $_SESSION['error'] = 'Có lỗi xảy ra khi hủy phân công HDV';
+            $_SESSION['error'] = $result['message'];
         }
 
         header('Location: ?act=phan-cong&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);

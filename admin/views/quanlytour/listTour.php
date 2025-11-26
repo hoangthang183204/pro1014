@@ -21,13 +21,13 @@
 
             <div class="container mt-4">
                 <!-- Thông báo -->
-                  <?php if (isset($_GET['success'])): ?>
-                      <div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
-                  <?php endif; ?>
+                <?php if (isset($_GET['success'])): ?>
+                    <div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
+                <?php endif; ?>
 
-                  <?php if (isset($_GET['error'])): ?>
-                      <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
-                  <?php endif; ?>
+                <?php if (isset($_GET['error'])): ?>
+                    <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
+                <?php endif; ?>
 
                 <!-- Bộ lọc -->
                 <div class="card mb-4">
@@ -86,11 +86,15 @@
                                             <th width="150">Danh mục</th>
                                             <th width="150" class="text-center">Giá</th>
                                             <th width="120" class="text-center">Trạng thái</th>
-                                            <th width="150" class="text-center">Thao tác</th>
+                                            <th width="180" class="text-center">Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($tours as $tour): ?>
+                                            <?php
+                                            // Kiểm tra quyền xoá (chỉ được xoá khi trạng thái là "tạm dừng")
+                                            $cho_phep_xoa = ($tour['trang_thai'] === 'tạm dừng');
+                                            ?>
                                             <tr>
                                                 <td>
                                                     <strong class="text-primary"><?php echo htmlspecialchars($tour['ma_tour']); ?></strong>
@@ -121,25 +125,39 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="btn-group">
-                                                        <a href="?act=tour-edit&id=<?php echo $tour['id']; ?>" 
-                                                           class="btn btn-primary btn-sm" title="Sửa tour">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <!-- Nút Sửa - Luôn hiển thị -->
+                                                        <a href="?act=tour-edit&id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-primary" title="Sửa tour">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <a href="?act=tour-lich-trinh&tour_id=<?php echo $tour['id']; ?>" 
-                                                           class="btn btn-info btn-sm" title="Lịch trình">
+
+                                                        <!-- Nút Lịch trình - Luôn hiển thị -->
+                                                        <a href="?act=tour-lich-trinh&tour_id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-info" title="Lịch trình">
                                                             <i class="fas fa-route"></i>
                                                         </a>
-                                                        <a href="?act=tour-media&tour_id=<?php echo $tour['id']; ?>" 
-                                                           class="btn btn-warning btn-sm" title="Hình ảnh">
+
+                                                        <!-- Nút Hình ảnh - Luôn hiển thị -->
+                                                        <a href="?act=tour-media&tour_id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-warning" title="Hình ảnh">
                                                             <i class="fas fa-images"></i>
                                                         </a>
-                                                        <a href="?act=tour-delete&id=<?php echo $tour['id']; ?>" 
-                                                           class="btn btn-danger btn-sm" 
-                                                           onclick="return confirm('Bạn có chắc muốn xóa tour này?')"
-                                                           title="Xóa tour">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
+
+                                                        <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "tạm dừng" -->
+                                                        <?php if ($cho_phep_xoa): ?>
+                                                            <a href="?act=tour-delete&id=<?php echo $tour['id']; ?>"
+                                                                class="btn btn-danger"
+                                                                onclick="return confirm('Bạn có chắc muốn xóa tour này?')"
+                                                                title="Xóa tour">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-secondary" disabled
+                                                                title="Chỉ được xoá khi tour ở trạng thái tạm dừng">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -158,13 +176,17 @@
                             </div>
                         <?php endif; ?>
                     </div>
-                    
+
                     <!-- Footer với thông tin phân trang -->
                     <?php if (!empty($tours)): ?>
                         <div class="card-footer">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="text-muted small">
                                     Đang xem <strong>1</strong> đến <strong><?php echo count($tours); ?></strong> trong tổng số <strong><?php echo count($tours); ?></strong> mục
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>Lưu ý:</strong> Chỉ có thể xoá tour khi trạng thái là "Tạm dừng"
                                 </div>
                             </div>
                         </div>
@@ -177,17 +199,121 @@
 
 <?php include './views/layout/footer.php'; ?>
 
-<script>
-
-</script>
-
 <style>
-.form-control,
-.form-select {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    font-size: 14px;
-}
+    .form-control,
+    .form-select {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+    }
 
+    .btn-primary {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        padding: 12px 8px;
+    }
+
+    .table td {
+        padding: 12px 8px;
+        vertical-align: middle;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, .02);
+    }
+
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+        border-radius: 4px;
+    }
+
+    .badge {
+        font-size: 0.75em;
+        padding: 0.4em 0.6em;
+    }
+
+    .card-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 12px 20px;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 10px;
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+
+        .btn-group .btn {
+            padding: 0.2rem 0.4rem;
+            margin: 0 1px;
+        }
+
+        .text-center.py-4 {
+            padding: 2rem 1rem !important;
+        }
+
+        .card-footer .d-flex {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .navbar-brand {
+            font-size: 1rem;
+        }
+
+        .btn-success {
+            font-size: 0.875rem;
+            padding: 6px 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+            min-width: 36px;
+            font-size: 0.75rem;
+        }
+
+        .card-footer {
+            padding: 10px 15px;
+        }
+
+        .card-footer .text-muted {
+            font-size: 0.875rem;
+        }
+    }
 </style>
