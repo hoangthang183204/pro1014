@@ -1,5 +1,7 @@
 <?php 
 
+ob_start(); 
+session_start();
 
 
 require_once '../commons/env.php'; 
@@ -72,3 +74,4 @@ match ($act) {
     
     default => (new DashboardHDVController())->home(),
 };
+?>
