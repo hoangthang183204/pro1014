@@ -50,7 +50,6 @@ function getRoleName($vai_tro) {
         'admin' => 'Quản trị viên',
         'nhan_vien' => 'Nhân viên',
         'huong_dan_vien' => 'Hướng dẫn viên',
-        'huong_dan_yien' => 'Hướng dẫn viên' // Xử lý lỗi chính tả nếu có
     ];
     
     return $roles[$vai_tro] ?? 'Người dùng';

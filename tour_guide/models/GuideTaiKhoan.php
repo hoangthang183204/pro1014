@@ -135,35 +135,61 @@ class GuideTaiKhoan
             exit();
         }
 
-        // Lưu session - sửa lỗi chính tả vai trò nếu có
         $vai_tro = $user['vai_tro'];
-        if ($vai_tro === 'huong_dan_yien') {
-            $vai_tro = 'huong_dan_vien';
+
+        if ($vai_tro !== 'huong_dan_vien') {
+            $_SESSION['error'] = "Tài khoản này không có quyền truy cập! Chỉ Hướng Dẫn Viên mới được đăng nhập.";
+            header("Location: " . BASE_URL_GUIDE . "?act=login");
+            session_write_close(); // 🚨 QUAN TRỌNG: Đảm bảo session được ghi
+            exit();
         }
 
-        // Lưu thông tin user vào session
+        // 🔥 CHỈ lưu session khi đã pass tất cả validation
         $_SESSION['guide_id'] = $user['id'];
         $_SESSION['guide_name'] = $user['ho_ten'];
         $_SESSION['guide_email'] = $user['email'];
         $_SESSION['guide_vai_tro'] = $vai_tro;
         $_SESSION['guide_logged_in'] = true;
+        $_SESSION['success'] = "Đăng nhập thành công!";
 
         // Cập nhật last_login
         $sqlUpdate = "UPDATE nguoi_dung SET last_login = NOW() WHERE id = ?";
         $stmt = $this->conn->prepare($sqlUpdate);
         $stmt->execute([$user['id']]);
 
-        $_SESSION['success'] = "Đăng nhập thành công!";
-        header("Location: " . BASE_URL_GUIDE );
+        header("Location: " . BASE_URL_GUIDE);
         exit();
     }
+
+
+    // Lưu session - sửa lỗi chính tả vai trò nếu có
+    // $vai_tro = $user['vai_tro'];
+    // if ($vai_tro === 'huong_dan_yien') {
+    //     $vai_tro = 'huong_dan_vien';
+    // }
+
+    // // Lưu thông tin user vào session
+    // $_SESSION['guide_id'] = $user['id'];
+    // $_SESSION['guide_name'] = $user['ho_ten'];
+    // $_SESSION['guide_email'] = $user['email'];
+    // $_SESSION['guide_vai_tro'] = $vai_tro;
+    // $_SESSION['guide_logged_in'] = true;
+
+    // // Cập nhật last_login
+    // $sqlUpdate = "UPDATE nguoi_dung SET last_login = NOW() WHERE id = ?";
+    // $stmt = $this->conn->prepare($sqlUpdate);
+    // $stmt->execute([$user['id']]);
+
+    // $_SESSION['success'] = "Đăng nhập thành công!";
+    // header("Location: " . BASE_URL_GUIDE );
+    // exit();
 
     // Thêm phương thức logout
     public function logout()
     {
         // Xóa tất cả session
         session_destroy();
-        
+
         // Chuyển hướng về trang login
         header("Location: " . BASE_URL_GUIDE . "?act=login");
         exit();
