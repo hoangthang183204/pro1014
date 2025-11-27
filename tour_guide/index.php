@@ -9,11 +9,13 @@ require_once '../commons/function.php';
 require_once './controllers/ProductController.php';
 require_once './controllers/GuideTaiKhoanController.php';
 require_once './controllers/DashBoardHDVController.php';
+require_once './controllers/NhatKyController.php';
 
 // Require Models
 require_once './models/ProductModel.php';
 require_once './models/GuideTaiKhoan.php';
 require_once './models/DashBoardHDVModel.php';
+require_once './models/NhatKyModel.php';
 
 
 
@@ -60,8 +62,11 @@ match ($act) {
     'register-process' => (new GuideTaiKhoanController())->registerprocess(),
     'logout' => (new GuideTaiKhoanController())->logout(),
     
-    // Guide routes
-    // 'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
+    // Nhật ký tour routes
+    'nhat_ky' => (new NhatKyController())->index(),
+    'nhat_ky_add' => (new NhatKyController())->create(),
+    'nhat_ky_update' => (new NhatKyController())->update(),
+    'nhat_ky_edit' => (new NhatKyController())->edit(),
     
     default => (new DashboardHDVController())->home(),
 };
