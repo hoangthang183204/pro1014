@@ -92,16 +92,16 @@
                         <form method="GET">
                             <input type="hidden" name="act" value="thanh-vien-tour-tim-kiem">
                             <div class="row g-3">
-                                <div class="col-md-8">
+                                <div class="col-md-9">
                                     <input type="text" name="tu_khoa" class="form-control" 
                                            placeholder="Tìm theo tên, CCCD, tên khách hàng hoặc tên tour..."
                                            value="<?php echo htmlspecialchars($_GET['tu_khoa'] ?? ''); ?>">
                                 </div>
-                                <div class="col-md-4">
-                                    <button type="submit" class="btn btn-primary w-100">
+                                <div class="col-md-3 d-flex">
+                                    <button type="submit" class="btn btn-primary w-100 mx-2">
                                         <i class="fas fa-search me-1"></i> Tìm kiếm
                                     </button>
-                                    <a href="?act=thanh-vien-tour" class="btn btn-secondary w-100 mt-2">
+                                    <a href="?act=thanh-vien-tour" class="btn btn-secondary w-100">
                                         <i class="fas fa-refresh me-1"></i> Làm mới
                                     </a>
                                 </div>

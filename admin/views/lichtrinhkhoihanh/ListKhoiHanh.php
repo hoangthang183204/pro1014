@@ -43,7 +43,9 @@
                                         value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
                                 </div>
                                 <div class="col-md-3">
-                                    <select name="trang_thai" class="form-select">
+                                    <select name="trang_thai"
+                                        class="form-select shadow-sm py-2 border p-2"
+                                        style="border-radius: 0.5rem !important;">
                                         <option value="">Tất cả trạng thái</option>
                                         <option value="đã lên lịch" <?php echo ($_GET['trang_thai'] ?? '') === 'đã lên lịch' ? 'selected' : ''; ?>>Đã lên lịch</option>
                                         <option value="đang diễn ra" <?php echo ($_GET['trang_thai'] ?? '') === 'đang diễn ra' ? 'selected' : ''; ?>>Đang diễn ra</option>
@@ -52,7 +54,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <select name="thang" class="form-select">
+                                    <select name="thang" class="form-select shadow-sm py-2 border p-2" style="border-radius: 0.5rem !important;">>
                                         <option value="">Tất cả tháng</option>
                                         <?php for ($i = 1; $i <= 12; $i++): ?>
                                             <option value="<?php echo $i; ?>" <?php echo ($_GET['thang'] ?? '') == $i ? 'selected' : ''; ?>>
