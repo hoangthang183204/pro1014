@@ -118,7 +118,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <canvas id="tourChart" height="250"></canvas>
+                            <canvas id="tourChart" height="120"></canvas>
                         </div>
                     </div>
                 </div>

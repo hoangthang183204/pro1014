@@ -148,7 +148,10 @@ match ($act) {
     'phan-cong-store' => (new AdminLichKhoiHanhController())->phanCongStore(),
     'huy-phan-cong' => (new AdminLichKhoiHanhController())->huyPhanCong(),
     'checklist-truoc-tour' => (new AdminLichKhoiHanhController())->checklistTruocTour(),
-
+    'checklist-them' => (new AdminLichKhoiHanhController())->themChecklist(),
+    'checklist-update' => (new AdminLichKhoiHanhController())->updateChecklist(),
+    'checklist-xoa' => (new AdminLichKhoiHanhController())->xoaChecklist(),
+    
     // Quản lý Khách hàng
     'khach-hang' => (new AdminKhachHangController())->index(),
     'khach-hang-chi-tiet' => (new AdminKhachHangController())->show(),

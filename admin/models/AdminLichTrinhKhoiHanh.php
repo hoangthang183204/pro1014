@@ -192,16 +192,17 @@ class AdminLichKhoiHanh
         }
     }
 
-    // Lấy phân công HDV hiện tại
+    // Lấy phân công HDV
     public function getPhanCongHDV($lich_khoi_hanh_id)
     {
         try {
-            $query = "SELECT pc.*, hdv.ho_ten, hdv.so_dien_thoai, hdv.email, hdv.ngon_ngu, 
-                         hdv.chuyen_mon, hdv.loai_huong_dan_vien
+            $query = "SELECT hdv.ho_ten as ten_hdv 
                   FROM phan_cong pc
                   JOIN huong_dan_vien hdv ON pc.huong_dan_vien_id = hdv.id
-                  WHERE pc.lich_khoi_hanh_id = :lich_khoi_hanh_id
-                  AND pc.loai_phan_cong = 'hướng dẫn viên'";
+                  WHERE pc.lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                  AND pc.loai_phan_cong = 'hướng dẫn viên'
+                  AND pc.trang_thai_xac_nhan = 'đã xác nhận'
+                  LIMIT 1";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
@@ -317,13 +318,18 @@ class AdminLichKhoiHanh
     }
 
 
-    // Lấy checklist trước tour
+    // Lấy checklist với sắp xếp
     public function getChecklistTruocTour($lich_khoi_hanh_id)
     {
         try {
-            $query = "SELECT * FROM checklist_truoc_tour 
-                      WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
-                      ORDER BY created_at";
+            $query = "SELECT *, 
+                  CASE 
+                    WHEN hoan_thanh = 1 THEN 1
+                    ELSE 0 
+                  END as sort_order
+                  FROM checklist_truoc_tour 
+                  WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                  ORDER BY sort_order, created_at";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
@@ -333,6 +339,71 @@ class AdminLichKhoiHanh
             return [];
         }
     }
+
+    // Thêm checklist mới
+    public function themChecklist($data)
+    {
+        try {
+            $query = "INSERT INTO checklist_truoc_tour 
+                  (lich_khoi_hanh_id, cong_viec, nguoi_tao, created_at) 
+                  VALUES (:lich_khoi_hanh_id, :cong_viec, :nguoi_tao, NOW())";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':lich_khoi_hanh_id' => $data['lich_khoi_hanh_id'],
+                ':cong_viec' => $data['cong_viec'],
+                ':nguoi_tao' => $data['nguoi_tao']
+            ]);
+
+            return ['success' => true, 'message' => 'Thêm checklist thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi themChecklist: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+    // Cập nhật checklist
+    public function updateChecklist($id, $data)
+    {
+        try {
+            $query = "UPDATE checklist_truoc_tour 
+                  SET hoan_thanh = :hoan_thanh,
+                      nguoi_hoan_thanh = :nguoi_hoan_thanh,
+                      thoi_gian_hoan_thanh = :thoi_gian_hoan_thanh
+                  WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':hoan_thanh' => $data['hoan_thanh'],
+                ':nguoi_hoan_thanh' => $data['nguoi_hoan_thanh'],
+                ':thoi_gian_hoan_thanh' => $data['thoi_gian_hoan_thanh'],
+                ':id' => $id
+            ]);
+
+            return ['success' => true, 'message' => 'Cập nhật thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi updateChecklist: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+    // Xóa checklist
+    public function xoaChecklist($id)
+    {
+        try {
+            $query = "DELETE FROM checklist_truoc_tour WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+
+            return ['success' => true, 'message' => 'Xóa checklist thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi xoaChecklist: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+
 
     // Cập nhật số chỗ còn lại
     public function updateSoChoConLai($lich_khoi_hanh_id, $so_cho_da_dat)

@@ -108,11 +108,11 @@
                                         <option value="hoàn tất" <?php echo ($_GET['trang_thai'] ?? '') === 'hoàn tất' ? 'selected' : ''; ?>>Hoàn tất</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-primary w-100">
+                                <div class="col-3 d-flex">
+                                    <button type="submit" class="btn btn-primary w-100 mx-2">
                                         <i class="fas fa-search me-1"></i> Tìm kiếm
                                     </button>
-                                    <a href="?act=khach-hang" class="btn btn-secondary w-100 mt-2">
+                                    <a href="?act=khach-hang" class="btn btn-secondary w-100">
                                         <i class="fas fa-refresh me-1"></i> Làm mới
                                     </a>
                                 </div>

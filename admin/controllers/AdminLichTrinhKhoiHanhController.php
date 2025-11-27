@@ -242,4 +242,52 @@ class AdminLichKhoiHanhController
 
         require_once './views/lichtrinhkhoihanh/checkListChuanbi.php';
     }
+
+    public function themChecklist()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
+            $cong_viec = $_POST['cong_viec'] ?? '';
+
+            if (empty($cong_viec)) {
+                echo json_encode(['success' => false, 'message' => 'Vui lòng nhập công việc']);
+                return;
+            }
+
+            $result = $this->lichKhoiHanhModel->themChecklist([
+                'lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                'cong_viec' => $cong_viec,
+                'nguoi_tao' => $_SESSION['user_id'] ?? 1
+            ]);
+
+            echo json_encode($result);
+        }
+    }
+
+    public function updateChecklist()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? 0;
+            $hoan_thanh = $_POST['hoan_thanh'] ?? 0;
+
+            $result = $this->lichKhoiHanhModel->updateChecklist($id, [
+                'hoan_thanh' => $hoan_thanh,
+                'nguoi_hoan_thanh' => $_SESSION['user_id'] ?? 1,
+                'thoi_gian_hoan_thanh' => $hoan_thanh ? date('Y-m-d H:i:s') : null
+            ]);
+
+            echo json_encode($result);
+        }
+    }
+
+    public function xoaChecklist()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? 0;
+
+            $result = $this->lichKhoiHanhModel->xoaChecklist($id);
+
+            echo json_encode($result);
+        }
+    }
 }
