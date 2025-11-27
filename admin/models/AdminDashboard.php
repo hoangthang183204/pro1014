@@ -19,7 +19,17 @@ class AdminDashboard
             
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $thongKe = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Thêm dữ liệu biểu đồ
+            $thongKe['tour_theo_thang'] = $this->getTourTheoThang(date('Y'));
+            $thongKe['tour_hoan_thanh_theo_thang'] = $this->getTourHoanThanhTheoThang(date('Y'));
+            $thongKe['tour_da_len_lich'] = $this->countTourByStatus('đã lên lịch');
+            $thongKe['tour_dang_dien_ra'] = $this->countTourByStatus('đang diễn ra');
+            $thongKe['tour_da_hoan_thanh'] = $this->countTourByStatus('đã hoàn thành');
+            $thongKe['tour_da_huy'] = $this->countTourByStatus('đã hủy');
+            
+            return $thongKe;
             
         } catch (PDOException $e) {
             error_log("Dashboard Error: " . $e->getMessage());
@@ -27,8 +37,80 @@ class AdminDashboard
                 'tong_tour' => 0,
                 'tour_sap_khoi_hanh' => 0,
                 'su_co_hom_nay' => 0,
-                'hdv_dang_lam' => 0
+                'hdv_dang_lam' => 0,
+                'tour_theo_thang' => array_fill(0, 12, 0),
+                'tour_hoan_thanh_theo_thang' => array_fill(0, 12, 0),
+                'tour_da_len_lich' => 0,
+                'tour_dang_dien_ra' => 0,
+                'tour_da_hoan_thanh' => 0,
+                'tour_da_huy' => 0
             ];
+        }
+    }
+
+    // Lấy số tour theo tháng
+    public function getTourTheoThang($nam) {
+        try {
+            $query = "SELECT MONTH(ngay_bat_dau) as thang, COUNT(*) as so_luong 
+                      FROM lich_khoi_hanh 
+                      WHERE YEAR(ngay_bat_dau) = :nam 
+                      GROUP BY MONTH(ngay_bat_dau) 
+                      ORDER BY thang";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':nam' => $nam]);
+            
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $data = array_fill(0, 12, 0); // Index 0-11 cho tháng 1-12
+            
+            foreach ($result as $row) {
+                $data[$row['thang'] - 1] = (int)$row['so_luong'];
+            }
+            
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Lỗi getTourTheoThang: " . $e->getMessage());
+            return array_fill(0, 12, 0);
+        }
+    }
+
+    // Lấy số tour đã hoàn thành theo tháng
+    public function getTourHoanThanhTheoThang($nam) {
+        try {
+            $query = "SELECT MONTH(ngay_ket_thuc) as thang, COUNT(*) as so_luong 
+                      FROM lich_khoi_hanh 
+                      WHERE YEAR(ngay_ket_thuc) = :nam AND trang_thai = 'đã hoàn thành'
+                      GROUP BY MONTH(ngay_ket_thuc) 
+                      ORDER BY thang";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':nam' => $nam]);
+            
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $data = array_fill(0, 12, 0); // Index 0-11 cho tháng 1-12
+            
+            foreach ($result as $row) {
+                $data[$row['thang'] - 1] = (int)$row['so_luong'];
+            }
+            
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Lỗi getTourHoanThanhTheoThang: " . $e->getMessage());
+            return array_fill(0, 12, 0);
+        }
+    }
+
+    // Đếm tour theo trạng thái
+    public function countTourByStatus($trang_thai) {
+        try {
+            $query = "SELECT COUNT(*) as so_luong 
+                      FROM lich_khoi_hanh 
+                      WHERE trang_thai = :trang_thai";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':trang_thai' => $trang_thai]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['so_luong'] ?? 0;
+        } catch (PDOException $e) {
+            error_log("Lỗi countTourByStatus: " . $e->getMessage());
+            return 0;
         }
     }
 
@@ -92,7 +174,7 @@ class AdminDashboard
                       FROM phieu_dat_tour 
                       WHERE MONTH(created_at) = :thang 
                       AND YEAR(created_at) = :nam
-                      AND trang_thai IN ('đã xác nhận', 'đã hoàn thành')";
+                      AND trang_thai IN ('hoàn tất', 'đã cọc')";
             
             $stmt = $this->conn->prepare($query);
             $stmt->bindValue(':thang', $thang, PDO::PARAM_INT);
@@ -127,6 +209,32 @@ class AdminDashboard
         } catch (PDOException $e) {
             error_log("Booking Moi Error: " . $e->getMessage());
             return 0;
+        }
+    }
+
+    // Lấy dữ liệu doanh thu theo tháng
+    public function getDoanhThuTheoThang($nam) {
+        try {
+            $query = "SELECT MONTH(created_at) as thang, COALESCE(SUM(tong_tien), 0) as doanh_thu
+                      FROM phieu_dat_tour 
+                      WHERE YEAR(created_at) = :nam 
+                      AND trang_thai IN ('hoàn tất', 'đã cọc')
+                      GROUP BY MONTH(created_at) 
+                      ORDER BY thang";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':nam' => $nam]);
+            
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $data = array_fill(0, 12, 0);
+            
+            foreach ($result as $row) {
+                $data[$row['thang'] - 1] = (float)$row['doanh_thu'];
+            }
+            
+            return $data;
+        } catch (PDOException $e) {
+            error_log("Lỗi getDoanhThuTheoThang: " . $e->getMessage());
+            return array_fill(0, 12, 0);
         }
     }
 }

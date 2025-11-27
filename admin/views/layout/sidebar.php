@@ -13,7 +13,7 @@
           <img src="./assets/dist/img/avatar5.png" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">ADMIN</a>
+          <a href="#" class="d-block"><?= $_SESSION['admin_name'] ?? 'Khách' ?></a>
         </div>
       </div>
 
@@ -62,6 +62,23 @@
               <i class="nav-icon fas fa-calendar-check"></i>
               <p>
                 BooKing Tour
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href=" <?= BASE_URL_ADMIN . '?act=dat-tour' ?> " class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Quản Lý Khách Hàng
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href=" <?= BASE_URL_ADMIN . '?act=dat-tour' ?> " class="nav-link">
+              <i class="nav-icon fas fa-user-clock"></i>
+              <p>
+                Lịch Làm Việc HDV
               </p>
             </a>
           </li>
