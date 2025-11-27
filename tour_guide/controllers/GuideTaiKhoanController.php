@@ -48,6 +48,7 @@ class GuideTaiKhoanController
     // Đăng xuất
     public function logout()
     {
+        session_name('GUIDE_SESSION');
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
