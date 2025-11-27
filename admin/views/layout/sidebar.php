@@ -65,17 +65,31 @@
               </p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href=" <?= BASE_URL_ADMIN . '?act=dat-tour' ?> " class="nav-link">
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
               <i class="nav-icon fas fa-users"></i>
               <p>
                 Quản Lý Khách Hàng
+                <i class="right fas fa-angle-left"></i>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<?= BASE_URL_ADMIN . '?act=khach-hang' ?>" class="nav-link">
+                  <i class="fas fa-user-friends nav-icon"></i>
+                  <p>Khách Hàng</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?= BASE_URL_ADMIN . '?act=thanh-vien-tour' ?>" class="nav-link">
+                  <i class="fas fa-user-check nav-icon"></i>
+                  <p>Thành Viên</p>
+                </a>
+              </li>
+            </ul>
           </li>
-
           <li class="nav-item">
-            <a href=" <?= BASE_URL_ADMIN . '?act=dat-tour' ?> " class="nav-link">
+            <a href=" <?= BASE_URL_ADMIN . '?act=lich-lam-viec-hdv' ?> " class="nav-link">
               <i class="nav-icon fas fa-user-clock"></i>
               <p>
                 Lịch Làm Việc HDV
@@ -90,3 +104,17 @@
     </div>
     <!-- /.sidebar -->
   </aside>
+
+  <style>
+    .nav-treeview {
+      padding-left: 20px;
+    }
+
+    .nav-treeview .nav-link {
+      padding-left: 40px !important;
+    }
+
+    .nav-treeview .nav-icon {
+      margin-left: 10px;
+    }
+  </style>
