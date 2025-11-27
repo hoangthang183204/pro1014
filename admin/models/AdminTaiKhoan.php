@@ -6,7 +6,6 @@ class AdminTaiKhoan
 
     public function __construct()
     {
-       
 
         $this->conn = connectDB();
     }
@@ -88,53 +87,62 @@ class AdminTaiKhoan
         exit();
     }
 
-  public function loginprocess()
-{
-    if (empty($_POST['email']) || empty($_POST['mat_khau'])) {
-        $_SESSION['error'] = "Vui lòng nhập đầy đủ thông tin!";
+    public function loginprocess()
+    {
+        if (empty($_POST['email']) || empty($_POST['mat_khau'])) {
+            $_SESSION['error'] = "Vui lòng nhập đầy đủ thông tin!";
+             session_write_close(); // 🚨 QUAN TRỌNG: Đảm bảo session được ghi
+            header("Location: " . BASE_URL_ADMIN . "?act=login");
+            exit();
+        }
+
+        $email = $_POST['email'];
+        $matKhau = $_POST['mat_khau'];
+
+        // Kiểm tra email
+        $sqlCheck = "SELECT * FROM nguoi_dung WHERE email = ?";
+        $stmt = $this->conn->prepare($sqlCheck);
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            $_SESSION['error'] = "Email không tồn tại!";
+            header("Location: " . BASE_URL_ADMIN . "?act=login");
+             session_write_close(); // 🚨 QUAN TRỌNG: Đảm bảo session được ghi
+            exit();
+        }
+
+        // Kiểm tra mật khẩu
+        if (!password_verify($matKhau, $user['mat_khau'])) {
+            $_SESSION['error'] = "Mật khẩu không chính xác!";
+            header("Location: " . BASE_URL_ADMIN . "?act=login");
+             session_write_close(); // 🚨 QUAN TRỌNG: Đảm bảo session được ghi
+            exit();
+        }
+
+        // Kiểm tra trạng thái tài khoản
+        if ($user['trang_thai'] !== 'hoạt động') {
+            $_SESSION['error'] = "Tài khoản của bạn đã bị khóa!";
+            header("Location: " . BASE_URL_ADMIN . "?act=login");
+             session_write_close(); // 🚨 QUAN TRỌNG: Đảm bảo session được ghi
+            exit();
+        }
+
+        // Lưu session - sửa lỗi chính tả vai trò nếu có
+          $vai_tro = $user['vai_tro'];
+    
+    if ($vai_tro !== 'admin') {
+        $_SESSION['error'] = "Tài khoản này không có quyền truy cập! Chỉ Admin mới được đăng nhập.";
         header("Location: " . BASE_URL_ADMIN . "?act=login");
+         session_write_close(); // 🚨 QUAN TRỌNG: Đảm bảo session được ghi
         exit();
     }
 
-    $email = $_POST['email'];
-    $matKhau = $_POST['mat_khau'];
-
-    // Kiểm tra email
-    $sqlCheck = "SELECT * FROM nguoi_dung WHERE email = ?";
-    $stmt = $this->conn->prepare($sqlCheck);
-    $stmt->execute([$email]);
-    $user = $stmt->fetch();
-
-    if (!$user) {
-        $_SESSION['error'] = "Email không tồn tại!";
-        header("Location: " . BASE_URL_ADMIN . "?act=login");
-        exit();
-    }
-
-    // Kiểm tra mật khẩu
-    if (!password_verify($matKhau, $user['mat_khau'])) {
-        $_SESSION['error'] = "Mật khẩu không chính xác!";
-        header("Location: " . BASE_URL_ADMIN . "?act=login");
-        exit();
-    }
-
-    // Kiểm tra trạng thái tài khoản
-    if ($user['trang_thai'] !== 'hoạt động') {
-        $_SESSION['error'] = "Tài khoản của bạn đã bị khóa!";
-        header("Location: " . BASE_URL_ADMIN . "?act=login");
-        exit();
-    }
-
-    // Lưu session - sửa lỗi chính tả vai trò nếu có
-    $vai_tro = $user['vai_tro'];
-    if ($vai_tro === 'admin') {
-        $vai_tro = 'admin';
-    }
-
+    // 🔥 CHỈ lưu session khi đã pass tất cả validation
     $_SESSION['admin_id'] = $user['id'];
     $_SESSION['admin_name'] = $user['ho_ten'];
     $_SESSION['admin_vai_tro'] = $vai_tro;
-    $_SESSION['success'] = "Đăng nhập thành công! Vai trò: " . getRoleName($vai_tro);
+    $_SESSION['success'] = "Đăng nhập thành công!";
 
     // Cập nhật last_login
     $sqlUpdate = "UPDATE nguoi_dung SET last_login = NOW() WHERE id = ?";
@@ -144,7 +152,6 @@ class AdminTaiKhoan
     header("Location: " . BASE_URL_ADMIN);
     exit();
 }
+    }
 
     // ... các phương thức khác giữ nguyên
-}
-

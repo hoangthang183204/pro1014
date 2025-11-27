@@ -9,27 +9,22 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Thêm Danh Mục Tour Mới</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="?act=/">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="?act=danh-muc">Danh mục</a></li>
-                        <li class="breadcrumb-item"><a href="?act=danh-muc-tour">Danh mục tour</a></li>
-                        <li class="breadcrumb-item active">Thêm mới</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main content -->
     <section class="content">
-        <div class="container-fluid">
+        <div class="container-fluid p-0">
+            <nav class="navbar navbar-dark bg-dark">
+                <a class="navbar-brand" href="">
+                    <i class="nav-icon fas fa-folder me-2"></i>
+                    Thêm Danh Mục Tour Mới
+                </a>
+                <div>
+                    <a href="?act=danh-muc-tour" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <div class="container mt-4">
             <!-- Thông báo lỗi -->
             <?php if (isset($_GET['error'])): ?>
                 <div class="alert alert-danger alert-dismissible">
@@ -40,18 +35,17 @@
             <?php endif; ?>
 
             <div class="row">
-                <div class="col-md-8 mx-auto">
+                <div class="col">
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title">Thông tin danh mục tour</h3>
                         </div>
-                        <!-- form start -->
                         <form action="?act=danh-muc-tour-store" method="POST">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="ten_danh_muc">Tên danh mục <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="ten_danh_muc" name="ten_danh_muc" 
-                                           placeholder="Nhập tên danh mục" required>
+                                    <input type="text" class="form-control" id="ten_danh_muc" name="ten_danh_muc"
+                                        placeholder="Nhập tên danh mục" required>
                                 </div>
 
                                 <div class="form-group">
@@ -63,7 +57,7 @@
                                         <option value="theo yêu cầu">Tour theo yêu cầu</option>
                                     </select>
                                     <small class="form-text text-muted">
-                                        <i class="fas fa-info-circle"></i> 
+                                        <i class="fas fa-info-circle"></i>
                                         <strong>Tour trong nước:</strong> Tour tham quan các địa điểm trong nước<br>
                                         <strong>Tour quốc tế:</strong> Tour tham quan các nước ngoài<br>
                                         <strong>Tour theo yêu cầu:</strong> Tour thiết kế riêng theo yêu cầu khách hàng
@@ -72,8 +66,8 @@
 
                                 <div class="form-group">
                                     <label for="mo_ta">Mô tả</label>
-                                    <textarea class="form-control" id="mo_ta" name="mo_ta" rows="4" 
-                                              placeholder="Nhập mô tả về danh mục tour"></textarea>
+                                    <textarea class="form-control" id="mo_ta" name="mo_ta" rows="4"
+                                        placeholder="Nhập mô tả về danh mục tour"></textarea>
                                 </div>
 
                                 <div class="form-group">
