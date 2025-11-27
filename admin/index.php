@@ -1,7 +1,8 @@
 <?php
 
-session_start();
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // Require file Common
 require_once '../commons/env.php';
 require_once '../commons/function.php';
@@ -26,19 +27,19 @@ require_once './middleware/check-login.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
-// Start session đầu tiên
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Hiển thị thông báo lỗi nếu có
+// 🚨 QUAN TRỌNG: Xử lý thông báo session TRƯỚC KHI checkLogin()
 if (isset($_SESSION['error'])) {
     $error_message = $_SESSION['error'];
-    unset($_SESSION['error']);
-    // Có thể hiển thị thông báo lỗi ở đây hoặc trong template
+    // KHÔNG unset ở đây, để checkLogin() xử lý redirect
 }
-checkLogin();
 
+if (isset($_SESSION['success'])) {
+    $success_message = $_SESSION['success'];
+    // KHÔNG unset ở đây
+}
+
+// 🚨 Gọi checkLogin() SAU KHI đã lấy thông báo session
+checkLogin();
 
 // Routing
 match ($act) {
