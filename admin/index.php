@@ -23,6 +23,7 @@ require_once './controllers/AdminTaiKhoanController.php';
 require_once './controllers/AdminKhachHangController.php';
 require_once './controllers/AdminThanhVienController.php';
 require_once './controllers/AdminLichLamViecHDVController.php';
+require_once './controllers/AdminPhanPhongController.php';
 
 // Require Models
 require_once './models/AdminDashboard.php';
@@ -34,6 +35,7 @@ require_once './models/AdminTaiKhoan.php';
 require_once './models/AdminKhachHang.php';
 require_once './models/AdminThanhVien.php';
 require_once './models/AdminLichLamViecHDV.php';
+require_once './models/AdminPhanPhong.php';
 
 require_once './middleware/check-login.php';
 // Route
@@ -157,13 +159,14 @@ match ($act) {
     'checklist-them' => (new AdminLichKhoiHanhController())->themChecklist(),
     'checklist-update' => (new AdminLichKhoiHanhController())->updateChecklist(),
     'checklist-xoa' => (new AdminLichKhoiHanhController())->xoaChecklist(),
-    
+
     // Quản lý Khách hàng
     'khach-hang' => (new AdminKhachHangController())->index(),
     'khach-hang-chi-tiet' => (new AdminKhachHangController())->show(),
     'khach-hang-tim-kiem' => (new AdminKhachHangController())->search(),
     'khach-hang-thong-ke' => (new AdminKhachHangController())->thongKe(),
     'khach-hang-export' => (new AdminKhachHangController())->export(),
+
 
     // Quản lý Thành viên Tour
     'thanh-vien-tour' => (new AdminThanhVienTourController())->index(),
@@ -185,6 +188,15 @@ match ($act) {
     'lich-lam-viec-hdv-cap-nhat' => (new AdminLichLamViecHDVController())->update(),
     'lich-lam-viec-hdv-xoa' => (new AdminLichLamViecHDVController())->delete(),
     'lich-lam-viec-hdv-loc' => (new AdminLichLamViecHDVController())->filter(),
+
+    // Quản lý phân phòng khách sạn
+    'phan-phong' => (new AdminPhanPhongController())->index(),
+    'phan-phong-them' => (new AdminPhanPhongController())->create(),
+    'phan-phong-cap-nhat' => (new AdminPhanPhongController())->update(),
+    'phan-phong-xoa' => (new AdminPhanPhongController())->delete(),
+    'phan-phong-hang-loat' => (new AdminPhanPhongController())->phanPhongHangLoat(),
+    'api-phan-phong' => (new AdminPhanPhongController())->apiGetPhanPhong(),
+
 
     // Đặt tour theo loại khách
     'dat-tour-le' => (new AdminDatTourController())->datTourLe(),

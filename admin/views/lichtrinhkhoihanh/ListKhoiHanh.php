@@ -248,6 +248,13 @@
                                                             <i class="fas fa-tasks"></i>
                                                         </a>
 
+                                                        <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
+                                                            <a href="?act=phan-phong&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
+                                                                class="btn btn-info" title="Phân phòng">
+                                                                <i class="fas fa-hotel"></i>
+                                                            </a>
+                                                        <?php endif; ?>
+
                                                         <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "đã hủy" -->
                                                         <?php if ($cho_phep_xoa): ?>
                                                             <a href="?act=lich-khoi-hanh-delete&id=<?php echo $lich['id']; ?>"
