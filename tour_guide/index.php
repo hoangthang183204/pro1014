@@ -67,6 +67,8 @@ match ($act) {
     'nhat_ky_add' => (new NhatKyController())->create(),
     'nhat_ky_update' => (new NhatKyController())->update(),
     'nhat_ky_edit' => (new NhatKyController())->edit(),
+    'nhat_ky_store' => (new NhatKyController())->store(),
+    'nhat_ky_delete' => (new NhatKyController())->delete(),
     
     default => (new DashboardHDVController())->home(),
 };

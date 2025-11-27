@@ -1,13 +1,16 @@
 <nav class="sidebar">
     <ul>
-        <li  data-page="dashboard">
+        <li data-page="dashboard">
             <a href="<?= BASE_URL_GUIDE ?>"><i class="fas fa-tachometer-alt"></i> Tổng Quan</a>
         </li>
 
-        <li class="<?= (isset($_GET['act']) && ($_GET['act'] == 'nhat_ky' || $_GET['act'] == 'nhat_ky_detail')) ? 'active' : '' ?>" data-page="nhat-ky">
-            <a href="<?= BASE_URL_GUIDE ?>?act=nhat_ky"><i class="fas fa-book"></i> Nhật Ký Tour</a>
+        <li class="nav-item">
+            <a href="index.php?act=nhat_ky" class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && $_GET['act'] == 'nhat_ky') ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-book"></i>
+                <p class="m-0 pl-2">Nhật Ký Tour</p>
+            </a>
         </li>
-        
+
         <li data-page="my-tours">
             <a href="#"><i class="fas fa-route"></i> Tour Của Tôi</a>
         </li>
