@@ -1,8 +1,14 @@
 <?php
 
+session_name('ADMIN_SESSION');
+session_start();
+
+
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 // Require file Common
 require_once '../commons/env.php';
 require_once '../commons/function.php';

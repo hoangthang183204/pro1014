@@ -1,5 +1,5 @@
 <?php 
-
+session_name('GUIDE_SESSION');
 ob_start(); 
 session_start();
 

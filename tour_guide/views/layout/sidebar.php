@@ -1,7 +1,13 @@
+<?php 
+        // Kiểm tra xem có đang ở trang chủ không (không có ?act=...)
+        $is_home = !isset($_GET['act']); 
+        ?>
 <nav class="sidebar">
     <ul>
-        <li data-page="dashboard">
-            <a href="<?= BASE_URL_GUIDE ?>"><i class="fas fa-tachometer-alt"></i> Tổng Quan</a>
+        <li class="nav-item <?= $is_home ? 'active' : '' ?>" <?= $is_home ? 'data-page="dashboard"' : '' ?>>
+            <a href="<?= BASE_URL_GUIDE ?>">
+                <i class="fas fa-tachometer-alt"></i> Tổng Quan
+            </a>
         </li>
 
         <li class="nav-item">
