@@ -5,81 +5,8 @@ class AdminLichKhoiHanh
 
     public function __construct()
     {
-        $this->conn = $this->connectDB();
-    }
-
-    private function connectDB()
-    {
-        try {
-            $host = 'localhost';
-            $dbname = 'pro1014';
-            $username = 'root';
-            $password = '';
-
-            $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $conn;
-        } catch (PDOException $e) {
-            die("Lỗi kết nối database: " . $e->getMessage());
-        }
-    }
-
-    // Lấy tất cả lịch khởi hành với filter
-    public function getAllLichKhoiHanh($search = '', $trang_thai = '', $thang = '', $nam = '')
-    {
-        try {
-            $query = "SELECT lkh.*, t.ma_tour, t.ten_tour, dm.ten_danh_muc
-                      FROM lich_khoi_hanh lkh 
-                      JOIN tour t ON lkh.tour_id = t.id 
-                      LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id 
-                      WHERE 1=1";
-
-            $params = [];
-
-            if (!empty($search)) {
-                $query .= " AND (t.ma_tour LIKE :search OR t.ten_tour LIKE :search)";
-                $params[':search'] = "%$search%";
-            }
-
-            if (!empty($trang_thai)) {
-                $query .= " AND lkh.trang_thai = :trang_thai";
-                $params[':trang_thai'] = $trang_thai;
-            }
-
-            if (!empty($thang) && !empty($nam)) {
-                $query .= " AND MONTH(lkh.ngay_bat_dau) = :thang AND YEAR(lkh.ngay_bat_dau) = :nam";
-                $params[':thang'] = $thang;
-                $params[':nam'] = $nam;
-            }
-
-            $query .= " ORDER BY lkh.ngay_bat_dau DESC, lkh.created_at DESC";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute($params);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getAllLichKhoiHanh: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    // Lấy lịch khởi hành theo ID
-    public function getLichKhoiHanhById($id)
-    {
-        try {
-            $query = "SELECT lkh.*, t.ma_tour, t.ten_tour, t.danh_muc_id, dm.ten_danh_muc
-                      FROM lich_khoi_hanh lkh 
-                      JOIN tour t ON lkh.tour_id = t.id 
-                      LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id 
-                      WHERE lkh.id = :id";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getLichKhoiHanhById: " . $e->getMessage());
-            return null;
-        }
+        $this->conn = connectDB();
+        $this->autoUpdateTrangThai();
     }
 
     // Lấy tất cả tour đang hoạt động
@@ -427,5 +354,150 @@ class AdminLichKhoiHanh
             error_log("Lỗi updateSoChoConLai: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function autoUpdateTrangThai()
+    {
+        try {
+            $today = date('Y-m-d');
+
+            // Cập nhật tour đang diễn ra
+            $query_dang_dien_ra = "UPDATE lich_khoi_hanh 
+                                  SET trang_thai = 'đang diễn ra' 
+                                  WHERE ngay_bat_dau <= ? 
+                                  AND ngay_ket_thuc >= ? 
+                                  AND trang_thai != 'đã hủy'";
+
+            $stmt1 = $this->conn->prepare($query_dang_dien_ra);
+            $stmt1->execute([$today, $today]);
+
+            // Cập nhật tour đã hoàn thành
+            $query_da_hoan_thanh = "UPDATE lich_khoi_hanh 
+                                   SET trang_thai = 'đã hoàn thành' 
+                                   WHERE ngay_ket_thuc < ? 
+                                   AND trang_thai NOT IN ('đã hoàn thành', 'đã hủy')";
+
+            $stmt2 = $this->conn->prepare($query_da_hoan_thanh);
+            $stmt2->execute([$today]);
+
+            // Cập nhật tour đã lên lịch (tương lai)
+            $query_da_len_lich = "UPDATE lich_khoi_hanh 
+                                 SET trang_thai = 'đã lên lịch' 
+                                 WHERE ngay_bat_dau > ? 
+                                 AND trang_thai NOT IN ('đã lên lịch', 'đã hủy')";
+
+            $stmt3 = $this->conn->prepare($query_da_len_lich);
+            $stmt3->execute([$today]);
+
+            error_log("Đã tự động cập nhật trạng thái lịch khởi hành - Ngày: " . $today);
+        } catch (PDOException $e) {
+            error_log("Lỗi autoUpdateTrangThai: " . $e->getMessage());
+        }
+    }
+
+    // Lấy trạng thái hiện tại (tính toán real-time, không lưu DB)
+    public function getTrangThaiHienTai($ngay_bat_dau, $ngay_ket_thuc, $trang_thai_hien_tai)
+    {
+        if ($trang_thai_hien_tai == 'đã hủy') {
+            return 'đã hủy';
+        }
+
+        $today = date('Y-m-d');
+
+        if ($ngay_bat_dau <= $today && $ngay_ket_thuc >= $today) {
+            return 'đang diễn ra';
+        } elseif ($ngay_ket_thuc < $today) {
+            return 'đã hoàn thành';
+        } elseif ($ngay_bat_dau > $today) {
+            return 'đã lên lịch';
+        }
+
+        return $trang_thai_hien_tai;
+    }
+
+    // Sửa hàm getAllLichKhoiHanh để HIỂN THỊ trạng thái real-time
+    public function getAllLichKhoiHanh($search = '', $trang_thai = '', $thang = '', $nam = '')
+    {
+        try {
+            $query = "SELECT lkh.*, t.ma_tour, t.ten_tour, dm.ten_danh_muc
+                      FROM lich_khoi_hanh lkh 
+                      JOIN tour t ON lkh.tour_id = t.id 
+                      LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id 
+                      WHERE 1=1";
+
+            $params = [];
+
+            if (!empty($search)) {
+                $query .= " AND (t.ma_tour LIKE :search OR t.ten_tour LIKE :search)";
+                $params[':search'] = "%$search%";
+            }
+
+            if (!empty($trang_thai)) {
+                $query .= " AND lkh.trang_thai = :trang_thai";
+                $params[':trang_thai'] = $trang_thai;
+            }
+
+            if (!empty($thang) && !empty($nam)) {
+                $query .= " AND MONTH(lkh.ngay_bat_dau) = :thang AND YEAR(lkh.ngay_bat_dau) = :nam";
+                $params[':thang'] = $thang;
+                $params[':nam'] = $nam;
+            }
+
+            $query .= " ORDER BY lkh.ngay_bat_dau DESC, lkh.created_at DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute($params);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // CẬP NHẬT TRẠNG THÁI REAL-TIME CHO KẾT QUẢ
+            foreach ($results as &$result) {
+                $result['trang_thai_hien_tai'] = $this->getTrangThaiHienTai(
+                    $result['ngay_bat_dau'],
+                    $result['ngay_ket_thuc'],
+                    $result['trang_thai']
+                );
+            }
+
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Lỗi getAllLichKhoiHanh: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Sửa hàm getLichKhoiHanhById để HIỂN THỊ trạng thái real-time
+    public function getLichKhoiHanhById($id)
+    {
+        try {
+            $query = "SELECT lkh.*, t.ma_tour, t.ten_tour, t.danh_muc_id, dm.ten_danh_muc
+                      FROM lich_khoi_hanh lkh 
+                      JOIN tour t ON lkh.tour_id = t.id 
+                      LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id 
+                      WHERE lkh.id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($result) {
+                // THÊM TRẠNG THÁI REAL-TIME
+                $result['trang_thai_hien_tai'] = $this->getTrangThaiHienTai(
+                    $result['ngay_bat_dau'],
+                    $result['ngay_ket_thuc'],
+                    $result['trang_thai']
+                );
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichKhoiHanhById: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    // Hàm để chạy cập nhật thủ công (nếu cần)
+    public function manualUpdateAllTrangThai()
+    {
+        return $this->autoUpdateTrangThai();
     }
 }

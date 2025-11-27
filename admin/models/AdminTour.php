@@ -5,26 +5,8 @@ class AdminTour
 
     public function __construct()
     {
-        $this->conn = $this->connectDB();
+       $this->conn = connectDB();
     }
-
-    private function connectDB()
-    {
-        try {
-            $host = 'localhost';
-            $dbname = 'pro1014';
-            $username = 'root';
-            $password = '';
-
-            $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            return $conn;
-        } catch (PDOException $e) {
-            die("Lỗi kết nối database: " . $e->getMessage());
-        }
-    }
-
-    // ==================== TOUR METHODS ====================
 
     // Lấy tất cả tour với filter
     public function getAllTours($search = '', $trang_thai = '', $danh_muc_id = '')
