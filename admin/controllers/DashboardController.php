@@ -14,6 +14,12 @@ class DashboardController
         $tourSapKhoiHanh = $this->dashboardModel->getTourSapKhoiHanh();
         $suCoCanXuLy = $this->dashboardModel->getSuCoCanXuLy();
         
+        // Thêm dữ liệu doanh thu
+        $doanhThuThang = $this->dashboardModel->getDoanhThuThang();
+        $bookingMoi = $this->dashboardModel->getBookingMoiThang();
+        $doanhThuTheoThang = $this->dashboardModel->getDoanhThuTheoThang(date('Y'));
+        
         require_once './views/home.php';
     }
 }
+?>
