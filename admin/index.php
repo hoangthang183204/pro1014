@@ -13,6 +13,9 @@ require_once './controllers/AdminTourController.php';
 require_once './controllers/AdminLichTrinhKhoiHanhController.php';
 require_once './controllers/AdminDatTourController.php';
 require_once './controllers/AdminTaiKhoanController.php';
+require_once './controllers/AdminKhachHangController.php';
+require_once './controllers/AdminThanhVienController.php';
+require_once './controllers/AdminLichLamViecHDVController.php';
 
 // Require Models
 require_once './models/AdminDashboard.php';
@@ -21,6 +24,9 @@ require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
 require_once './models/AdminDatTour.php';
 require_once './models/AdminTaiKhoan.php';
+require_once './models/AdminKhachHang.php';
+require_once './models/AdminThanhVien.php';
+require_once './models/AdminLichLamViecHDV.php';
 
 require_once './middleware/check-login.php';
 // Route
@@ -59,6 +65,8 @@ match ($act) {
     'tour-edit' => (new AdminTourController())->edit(),
     'tour-update' => (new AdminTourController())->update(),
     'tour-delete' => (new AdminTourController())->delete(),
+
+
 
     // Quản lý Lịch trình Tour
     'tour-lich-trinh' => (new AdminTourController())->lichTrinh(),
@@ -140,6 +148,19 @@ match ($act) {
     'huy-phan-cong' => (new AdminLichKhoiHanhController())->huyPhanCong(),
     'checklist-truoc-tour' => (new AdminLichKhoiHanhController())->checklistTruocTour(),
 
+    // Quản lý Khách hàng
+    'khach-hang' => (new AdminKhachHangController())->index(),
+    'khach-hang-chi-tiet' => (new AdminKhachHangController())->show(),
+    'khach-hang-tim-kiem' => (new AdminKhachHangController())->search(),
+    'khach-hang-thong-ke' => (new AdminKhachHangController())->thongKe(),
+    'khach-hang-export' => (new AdminKhachHangController())->export(),
+
+    // Quản lý Thành viên Tour
+    'thanh-vien-tour' => (new AdminThanhVienTourController())->index(),
+    'thanh-vien-tour-chi-tiet' => (new AdminThanhVienTourController())->show(),
+    'thanh-vien-tour-tim-kiem' => (new AdminThanhVienTourController())->search(),
+    'thanh-vien-tour-cap-nhat' => (new AdminThanhVienTourController())->update(),
+    'thanh-vien-tour-xu-ly-yeu-cau' => (new AdminThanhVienTourController())->xuLyYeuCau(),
 
     // Quản lý Đặt Tour
     'dat-tour' => (new AdminDatTourController())->index(),
@@ -147,6 +168,13 @@ match ($act) {
     'dat-tour-update-status' => (new AdminDatTourController())->updateStatus(),
     'dat-tour-delete' => (new AdminDatTourController())->delete(),
     'dat-tour-get-lich-khoi-hanh' => (new AdminDatTourController())->getLichKhoiHanhInfo(),
+
+    // Quản lý Lịch Làm Việc HDV
+    'lich-lam-viec-hdv' => (new AdminLichLamViecHDVController())->index(),
+    'lich-lam-viec-hdv-them' => (new AdminLichLamViecHDVController())->create(),
+    'lich-lam-viec-hdv-cap-nhat' => (new AdminLichLamViecHDVController())->update(),
+    'lich-lam-viec-hdv-xoa' => (new AdminLichLamViecHDVController())->delete(),
+    'lich-lam-viec-hdv-loc' => (new AdminLichLamViecHDVController())->filter(),
 
     // Đặt tour theo loại khách
     'dat-tour-le' => (new AdminDatTourController())->datTourLe(),
@@ -157,4 +185,7 @@ match ($act) {
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
     'dat-tour-print' => (new AdminDatTourController())->print()
     // 'dat-tour-tim-kiem' => (new AdminDatTourController())->timKiemBooking(),
+
+
+
 };
