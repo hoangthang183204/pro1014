@@ -5,7 +5,7 @@
         </li>
 
         <li class="nav-item">
-            <a href="index.php?act=nhat_ky" class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && $_GET['act'] == 'nhat_ky') ? 'active' : '' ?>">
+            <a href="<?= BASE_URL_GUIDE . '?act=nhat_ky' ?>" class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && $_GET['act'] == 'nhat_ky') ? 'active' : '' ?>">
                 <i class="nav-icon fas fa-book"></i>
                 <p class="m-0 pl-2">Nhật Ký Tour</p>
             </a>
@@ -23,8 +23,11 @@
         <li data-page="customers">
             <a href="#"><i class="fas fa-users"></i> Phản Hồi</a>
         </li>
-        <li data-page="logout">
-            <a href="?act=logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+        <li class="nav-item">
+            <a href="index.php?act=logout" class="nav-link d-flex align-items-center" onclick="return confirm('Bạn có chắc chắn muốn đăng xuất không?');">
+                <i class="nav-icon fas fa-sign-out-alt"></i>
+                <p class="m-0 pl-2">Đăng Xuất</p>
+            </a>
         </li>
     </ul>
 </nav>
