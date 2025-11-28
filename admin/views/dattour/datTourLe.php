@@ -134,6 +134,7 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
+                                    
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -215,7 +216,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h5 class="card-title mb-0">
                                             <i class="fas fa-users me-2 text-warning"></i>
-                                            Thành Viên Đi Kèm
+                                            Thành Viên 
                                             <span class="badge bg-warning ms-2" id="so_thanh_vien_badge">0</span>
                                         </h5>
                                         <div class="btn-group">
@@ -231,14 +232,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="alert alert-warning border-0 mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            <small>Thêm các thành viên đi kèm (người thân, bạn bè,...). Thông tin CCCD và ngày sinh là bắt buộc.</small>
-                                        </div>
-                                    </div>
-                                    
+                                <div class="card-body">                                    
                                     <div id="danh_sach_thanh_vien">
                                         <!-- Danh sách thành viên sẽ được thêm vào đây -->
                                     </div>
@@ -283,7 +277,19 @@
                                 <div class="card-body">
                                     <div class="text-center mb-4">
                                         <div class="display-4 text-primary fw-bold" id="tong_so_khach">0</div>
-                                        <div class="text-muted">Tổng số khách</div>
+                                        <div class="text-muted">Tổng số khách đặt tour</div>
+                                    </div>
+
+                                    <!-- Chi tiết số lượng -->
+                                    <div class="mb-3 p-3 bg-light rounded">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">Khách hàng chính:</small>
+                                            <small class="fw-bold text-success">Miễn phí</small>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">Thành viên đi kèm:</small>
+                                            <small class="fw-bold" id="so_thanh_vien_display">0 người</small>
+                                        </div>
                                     </div>
 
                                     <div class="border-top pt-3">
@@ -356,15 +362,15 @@
                                     <ul class="list-unstyled small mb-0">
                                         <li class="mb-2">
                                             <i class="fas fa-check text-success me-2"></i>
+                                            Khách hàng chính miễn phí
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>
                                             Giảm giá nhóm từ 4 người
                                         </li>
                                         <li class="mb-2">
                                             <i class="fas fa-check text-success me-2"></i>
                                             Hỗ trợ đón tận nơi
-                                        </li>
-                                        <li class="mb-2">
-                                            <i class="fas fa-check text-success me-2"></i>
-                                            Tư vấn 24/7
                                         </li>
                                         <li>
                                             <i class="fas fa-check text-success me-2"></i>
@@ -584,6 +590,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Kiểm tra nếu có giá trị POST trước đó
         checkPreviousValues();
+        
+        // Khởi tạo tổng số khách mặc định là 0 (chỉ tính thành viên)
+        updateAll();
     }
 
     function handleLichKhoiHanhChange() {
@@ -663,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        const tongSoKhachHienTai = getTongSoKhach();
+        const tongSoKhachHienTai = getTongSoKhach(); // Chỉ tính thành viên
         const soChoConLaiHienTai = soChoConLai - tongSoKhachHienTai;
         
         if (soLuong > soChoConLaiHienTai) {
@@ -693,18 +702,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Real-time validation
         const hoTenInput = thanhVienItem.querySelector('.thanh-vien-ho-ten');
         hoTenInput.addEventListener('input', function() {
-            updateThongTinThanhToan();
+            updateAll();
         });
 
         danhSachThanhVien.appendChild(clone);
         updateAll();
     }
 
-    function updateAll() {
-        updateEmptyState();
-        updateThongTinThanhToan();
-        updateSoThanhVienBadge();
-        updateThongBaoCho();
+    // Hàm quan trọng: Tính tổng số khách (CHỈ tính thành viên đi kèm)
+    function getTongSoKhach() {
+        return getSoThanhVienHopLe(); // Chỉ trả về số thành viên hợp lệ
     }
 
     function getSoThanhVienHopLe() {
@@ -719,8 +726,12 @@ document.addEventListener('DOMContentLoaded', function() {
         return count;
     }
 
-    function getTongSoKhach() {
-        return getSoThanhVienHopLe() + 1; // +1 cho khách hàng chính
+    function updateAll() {
+        updateEmptyState();
+        updateThongTinThanhToan();
+        updateSoThanhVienBadge();
+        updateSoThanhVienDisplay();
+        updateThongBaoCho();
     }
 
     function updateEmptyState() {
@@ -732,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateThongTinThanhToan() {
-        const tongSoKhach = getTongSoKhach();
+        const tongSoKhach = getTongSoKhach(); // Chỉ tính thành viên
         const tongTien = tongSoKhach * giaTour;
         
         document.getElementById('tong_so_khach').textContent = tongSoKhach;
@@ -740,20 +751,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('tong_tien').textContent = formatCurrency(tongTien);
     }
 
-    function updateThongBaoCho() {
-        const tongSoKhach = getTongSoKhach();
-        const thongBao = document.getElementById('thong_bao_cho');
-        
-        if (soChoConLai > 0) {
-            if (tongSoKhach <= soChoConLai) {
-                const choConLai = soChoConLai - tongSoKhach;
-                thongBao.innerHTML = `<span class="text-success">Có thể đặt tối đa ${soChoConLai} khách. Đang đặt: ${tongSoKhach}/${soChoConLai} (còn ${choConLai} chỗ)</span>`;
-            } else {
-                thongBao.innerHTML = `<span class="text-danger">Vượt quá số chỗ còn lại! Tối đa: ${soChoConLai} khách</span>`;
-            }
-        } else {
-            thongBao.innerHTML = `<span class="text-danger">Tour đã hết chỗ trống</span>`;
-        }
+    function updateSoThanhVienDisplay() {
+        const soThanhVienHopLe = getSoThanhVienHopLe();
+        document.getElementById('so_thanh_vien_display').textContent = `${soThanhVienHopLe} người`;
     }
 
     function updateSoThanhVienBadge() {
@@ -761,11 +761,27 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('so_thanh_vien_badge').textContent = soThanhVienHopLe;
     }
 
+    function updateThongBaoCho() {
+        const tongSoKhach = getTongSoKhach(); // Chỉ tính thành viên
+        
+        if (soChoConLai > 0) {
+            if (tongSoKhach <= soChoConLai) {
+                const choConLai = soChoConLai - tongSoKhach;
+                document.getElementById('thong_bao_cho').innerHTML = `<span class="text-success">Có thể đặt tối đa ${soChoConLai} khách. Đang đặt: ${tongSoKhach}/${soChoConLai} (còn ${choConLai} chỗ)</span>`;
+            } else {
+                document.getElementById('thong_bao_cho').innerHTML = `<span class="text-danger">Vượt quá số chỗ còn lại! Tối đa: ${soChoConLai} khách</span>`;
+            }
+        } else {
+            document.getElementById('thong_bao_cho').innerHTML = `<span class="text-danger">Tour đã hết chỗ trống</span>`;
+        }
+    }
+
     function resetThongTinThanhToan() {
-        document.getElementById('tong_so_khach').textContent = '1';
+        document.getElementById('tong_so_khach').textContent = '0';
         document.getElementById('tong_tien').textContent = '0 VNĐ';
         document.getElementById('gia_tour_don').textContent = '0 VNĐ';
-        document.getElementById('so_luong_khach_display').textContent = '1';
+        document.getElementById('so_luong_khach_display').textContent = '0';
+        document.getElementById('so_thanh_vien_display').textContent = '0 người';
         document.getElementById('thong_bao_cho').textContent = 'Vui lòng chọn lịch khởi hành để xem số chỗ còn lại';
         updateSoThanhVienBadge();
     }
@@ -792,7 +808,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        // Kiểm tra số chỗ
+        // Kiểm tra số chỗ (chỉ tính thành viên)
         const tongSoKhach = getTongSoKhach();
         if (tongSoKhach > soChoConLai) {
             showAlert(`Số khách (${tongSoKhach}) vượt quá số chỗ còn lại (${soChoConLai})!`, 'warning');
