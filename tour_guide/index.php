@@ -1,6 +1,5 @@
 <?php 
 session_name('GUIDE_SESSION');
-ob_start(); 
 session_start();
 
 
@@ -12,12 +11,14 @@ require_once './controllers/ProductController.php';
 require_once './controllers/GuideTaiKhoanController.php';
 require_once './controllers/DashBoardHDVController.php';
 require_once './controllers/NhatKyController.php';
+require_once './controllers/KhachDoanController.php';
 
 // Require Models
 require_once './models/ProductModel.php';
 require_once './models/GuideTaiKhoan.php';
 require_once './models/DashBoardHDVModel.php';
 require_once './models/NhatKyModel.php';
+require_once './models/KhachDoanModel.php';
 
 
 
@@ -72,6 +73,10 @@ match ($act) {
     'nhat_ky_store' => (new NhatKyController())->store(),
     'nhat_ky_delete' => (new NhatKyController())->delete(),
     
+    // Khách đoàn routes
+    'xem_danh_sach_khach' => (new KhachDoanController())->index(),
+    'check_in_khach' => (new KhachDoanController())->update_checkin_status(),
+
     default => (new DashboardHDVController())->home(),
 };
 ?>

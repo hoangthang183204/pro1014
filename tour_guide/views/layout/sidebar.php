@@ -1,7 +1,7 @@
-<?php 
-        // Kiểm tra xem có đang ở trang chủ không (không có ?act=...)
-        $is_home = !isset($_GET['act']); 
-        ?>
+<?php
+// Kiểm tra xem có đang ở trang chủ không (không có ?act=...)
+$is_home = !isset($_GET['act']);
+?>
 <nav class="sidebar">
     <ul>
         <li class="nav-item <?= $is_home ? 'active' : '' ?>" <?= $is_home ? 'data-page="dashboard"' : '' ?>>
@@ -23,8 +23,12 @@
         <li data-page="customers">
             <a href="#"><i class="fas fa-users"></i> Lịch Trình</a>
         </li>
-        <li data-page="customers">
-            <a href="#"><i class="fas fa-users"></i> Khách Hàng</a>
+        <li class="nav-item">
+            <a href="<?= BASE_URL_GUIDE . '?act=xem_danh_sach_khach' ?>"
+                class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && $_GET['act'] == 'xem_danh_sach_khach') ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-users"></i>
+                <p class="m-0 pl-2">Danh Sách Khách</p>
+            </a>
         </li>
         <li data-page="customers">
             <a href="#"><i class="fas fa-users"></i> Phản Hồi</a>
