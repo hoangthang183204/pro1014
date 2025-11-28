@@ -29,20 +29,20 @@
             
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped mb-0">
+                    <table class="table table-hover table-striped mb-0 align-middle">
                         <thead class="bg-light text-secondary">
                             <tr>
                                 <th class="px-4 py-3">STT</th>
                                 <th class="px-4 py-3">Họ và Tên</th>
                                 <th class="px-4 py-3">Thông tin</th>
                                 <th class="px-4 py-3">Nhóm / Mã Vé</th>
-                                <th class="px-4 py-3">Liên hệ (Người đặt)</th>
+                                <th class="px-4 py-3">Liên hệ</th>
                                 <th class="px-4 py-3">Ghi chú</th>
-                            </tr>
+                                <th class="px-4 py-3 text-center" style="width: 160px;">Trạng thái Check-in</th> </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($dsKhach)): ?>
-                                <tr><td colspan="6" class="text-center py-5 text-muted"><i class="fas fa-user-slash fa-2x mb-3"></i><br>Chưa có khách trong danh sách.</td></tr>
+                                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-user-slash fa-2x mb-3"></i><br>Chưa có khách trong danh sách.</td></tr>
                             <?php else: ?>
                                 <?php $i = 1; foreach ($dsKhach as $k): ?>
                                     <tr>
@@ -50,6 +50,7 @@
                                         <td class="px-4">
                                             <div class="fw-bold text-dark"><?= htmlspecialchars($k['ho_ten']) ?></div>
                                         </td>
+                                        
                                         <td class="px-4">
                                             <span class="badge bg-light text-dark border"><?= $k['gioi_tinh'] ?></span>
                                             <?php if($k['tuoi']): ?>
@@ -78,7 +79,27 @@
                                                 <span class="text-muted">-</span> 
                                             <?php endif; ?>
                                         </td>
-                                    </tr>
+
+                                        <td class="px-4 text-center">
+                                            <select class="form-select form-select-sm status-select fw-bold border-0 shadow-sm" 
+                                                    data-id="<?= $k['id'] ?>"
+                                                    style="cursor: pointer;
+                                                    background-color: 
+                                                        <?= $k['trang_thai_checkin'] == 'đã đến' ? '#d1e7dd' : 
+                                                           ($k['trang_thai_checkin'] == 'vắng mặt' ? '#f8d7da' : 
+                                                           ($k['trang_thai_checkin'] == 'trễ' ? '#fff3cd' : '#f8f9fa')) ?>;
+                                                    color: 
+                                                        <?= $k['trang_thai_checkin'] == 'đã đến' ? '#0f5132' : 
+                                                           ($k['trang_thai_checkin'] == 'vắng mặt' ? '#842029' : 
+                                                           ($k['trang_thai_checkin'] == 'trễ' ? '#664d03' : '#212529')) ?>;">
+                                                
+                                                <option value="chưa đến" <?= $k['trang_thai_checkin'] == 'chưa đến' ? 'selected' : '' ?>>⚪ Chưa đến</option>
+                                                <option value="đã đến" <?= $k['trang_thai_checkin'] == 'đã đến' ? 'selected' : '' ?>>🟢 Đã đến</option>
+                                                <option value="trễ" <?= $k['trang_thai_checkin'] == 'trễ' ? 'selected' : '' ?>>🟡 Đến trễ</option>
+                                                <option value="vắng mặt" <?= $k['trang_thai_checkin'] == 'vắng mặt' ? 'selected' : '' ?>>🔴 Vắng mặt</option>
+                                            </select>
+                                        </td>
+                                        </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </tbody>
@@ -86,10 +107,48 @@
                 </div>
             </div>
             <div class="card-footer bg-white text-muted small">
-                <i class="fas fa-info-circle me-1"></i> Danh sách hiển thị những khách hàng đã đặt cọc hoặc thanh toán hoàn tất.
+                <i class="fas fa-info-circle me-1"></i> Dữ liệu check-in sẽ được tự động lưu ngay khi bạn chọn.
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.status-select').change(function() {
+        var status = $(this).val();
+        var id = $(this).data('id');
+        var element = $(this);
+
+        // Hiệu ứng đổi màu UI
+        if(status == 'đã đến') { 
+            element.css({'background-color': '#d1e7dd', 'color': '#0f5132'});
+        } else if(status == 'trễ') { 
+            element.css({'background-color': '#fff3cd', 'color': '#664d03'});
+        } else if(status == 'vắng mặt') { 
+            element.css({'background-color': '#f8d7da', 'color': '#842029'});
+        } else { // chưa đến
+            element.css({'background-color': '#f8f9fa', 'color': '#212529'});
+        }
+
+        // Gửi Ajax cập nhật
+        $.ajax({
+            url: '?act=check_in_khach',
+            type: 'POST',
+            data: {
+                id: id,
+                status: status
+            },
+            success: function(response) {
+                console.log('Đã cập nhật check-in');
+            },
+            error: function() {
+                alert('Lỗi kết nối! Vui lòng thử lại.');
+            }
+        });
+    });
+});
+</script>
 
 <?php include './views/layout/footer.php'; ?>
