@@ -15,10 +15,10 @@
                 <div class="container-fluid">
                     <a class="navbar-brand" href="">
                         <i class="nav-icon fas fa-folder me-2"></i>
-                        Quản Lý Danh Mục Tour
+                        Quản Lý Loại Tour
                     </a>
                     <div>
-                        <a href="?act=danh-muc" class="btn btn-outline-light">
+                        <a href="?act=/" class="btn btn-outline-light">
                             <i class="fas fa-arrow-left me-1"></i> Quay lại
                         </a>
                     </div>
