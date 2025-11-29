@@ -24,6 +24,7 @@ require_once './controllers/AdminKhachHangController.php';
 require_once './controllers/AdminThanhVienController.php';
 require_once './controllers/AdminLichLamViecHDVController.php';
 require_once './controllers/AdminPhanPhongController.php';
+require_once './controllers/AdminThanhToanController.php';
 
 // Require Models
 require_once './models/AdminDashboard.php';
@@ -36,6 +37,7 @@ require_once './models/AdminKhachHang.php';
 require_once './models/AdminThanhVien.php';
 require_once './models/AdminLichLamViecHDV.php';
 require_once './models/AdminPhanPhong.php';
+require_once './models/AdminThanhToan.php';
 
 require_once './middleware/check-login.php';
 // Route
@@ -196,6 +198,10 @@ match ($act) {
     'phan-phong-xoa' => (new AdminPhanPhongController())->delete(),
     'phan-phong-hang-loat' => (new AdminPhanPhongController())->phanPhongHangLoat(),
     'api-phan-phong' => (new AdminPhanPhongController())->apiGetPhanPhong(),
+
+    // Quản lý Thanh toán
+    'thanh-toan-nhanh-modal' => (new AdminThanhToanController())->modalThanhToanNhanh(),
+    'thanh-toan-nhanh-process' => (new AdminThanhToanController())->processThanhToanNhanh(),
 
 
     // Đặt tour theo loại khách
