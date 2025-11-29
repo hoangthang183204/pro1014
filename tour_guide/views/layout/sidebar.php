@@ -22,6 +22,9 @@
         <li data-page="reports">
             <a href="#"><i class="fas fa-file-invoice-dollar"></i> Báo Cáo</a>
         </li>
+         <li>
+            <a href="<?= BASE_URL_GUIDE ?>?act=my-profile"><i class="fas fa-user-circle"></i> Thông tin tài khoản</a>
+        </li>
         <li data-page="settings">
             <a href="#"><i class="fas fa-cog"></i> Cài Đặt</a>
         </li>

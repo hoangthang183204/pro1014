@@ -3,10 +3,10 @@
 // Biến môi trường, dùng chung toàn hệ thống
 // Khai báo dưới dạng HẰNG SỐ để không phải dùng $GLOBALS
 
-define('BASE_URL'       , 'http://localhost/pro1014/pro1014/');
+define('BASE_URL'       , 'http://localhost/pro1014/');
 
-define('BASE_URL_ADMIN'       , 'http://localhost/pro1014/pro1014/admin/');
-define('BASE_URL_GUIDE'       , 'http://localhost/pro1014/pro1014/tour_guide/');
+define('BASE_URL_ADMIN'       , 'http://localhost/pro1014/admin/');
+define('BASE_URL_GUIDE'       , 'http://localhost/pro1014/tour_guide/');
 
 define('DB_HOST'    , 'localhost');
 define('DB_PORT'    , 3306);
