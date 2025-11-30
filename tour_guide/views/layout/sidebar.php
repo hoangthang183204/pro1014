@@ -30,8 +30,11 @@ $is_home = !isset($_GET['act']);
                 <p class="m-0 pl-2">Danh Sách Khách</p>
             </a>
         </li>
-        <li data-page="customers">
-            <a href="#"><i class="fas fa-users"></i> Phản Hồi</a>
+         <li>
+            <a href="<?= BASE_URL_GUIDE ?>?act=my-profile"><i class="fas fa-user-circle"></i> Thông tin tài khoản</a>
+        </li>
+        <li data-page="settings">
+            <a href="#"><i class="fas fa-cog"></i> Cài Đặt</a>
         </li>
         <li class="nav-item">
             <a href="index.php?act=logout" class="nav-link d-flex align-items-center" onclick="return confirm('Bạn có chắc chắn muốn đăng xuất không?');">

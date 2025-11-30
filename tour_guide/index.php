@@ -10,6 +10,7 @@ require_once '../commons/function.php';
 require_once './controllers/ProductController.php';
 require_once './controllers/GuideTaiKhoanController.php';
 require_once './controllers/DashBoardHDVController.php';
+require_once './controllers/PersonalGuideController.php';
 require_once './controllers/NhatKyController.php';
 require_once './controllers/KhachDoanController.php';
 
@@ -17,6 +18,8 @@ require_once './controllers/KhachDoanController.php';
 require_once './models/ProductModel.php';
 require_once './models/GuideTaiKhoan.php';
 require_once './models/DashBoardHDVModel.php';
+require_once './models/Database.php';
+require_once './models/PersonalGuideModel.php';
 require_once './models/NhatKyModel.php';
 require_once './models/KhachDoanModel.php';
 
@@ -65,6 +68,14 @@ match ($act) {
     'register-process' => (new GuideTaiKhoanController())->registerprocess(),
     'logout' => (new GuideTaiKhoanController())->logout(),
     
+    // Guide routes
+    // 'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
+  
+    //Thông tin tài khoản
+    'my-profile' => (new PersonalGuideController())->showProfile(),
+    'profile-settings' => (new PersonalGuideController())->showProfileSettings(),
+    'update-profile' => (new PersonalGuideController())->updateProfile(),
+  
     // Nhật ký tour routes
     'nhat_ky' => (new NhatKyController())->index(),
     'nhat_ky_add' => (new NhatKyController())->create(),
