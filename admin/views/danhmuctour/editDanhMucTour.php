@@ -9,27 +9,21 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Sửa Danh Mục Tour</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="?act=/">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="?act=danh-muc">Danh mục</a></li>
-                        <li class="breadcrumb-item"><a href="?act=danh-muc-tour">Danh mục tour</a></li>
-                        <li class="breadcrumb-item active">Sửa danh mục</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+            <nav class="navbar navbar-dark bg-dark">
+                <a class="navbar-brand" href="">
+                    <i class="nav-icon fas fa-folder me-2"></i>
+                    Sửa Danh Mục Tour
+                </a>
+                <div>
+                    <a href="?act=danh-muc-tour" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="container mt-4">
             <!-- Thông báo lỗi -->
             <?php if (isset($_GET['error'])): ?>
                 <div class="alert alert-danger alert-dismissible">
@@ -40,62 +34,62 @@
             <?php endif; ?>
 
             <?php if ($danh_muc): ?>
-            <div class="row">
-                <div class="col-md-8 mx-auto">
-                    <div class="card card-warning">
-                        <div class="card-header">
-                            <h3 class="card-title">Sửa thông tin danh mục tour</h3>
+                <div class="row">
+                    <div class="col">
+                        <div class="card card-warning">
+                            <div class="card-header">
+                                <h3 class="card-title">Sửa thông tin danh mục tour</h3>
+                            </div>
+                            <!-- form start -->
+                            <form action="?act=danh-muc-tour-update" method="POST">
+                                <input type="hidden" name="id" value="<?php echo $danh_muc['id']; ?>">
+
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="ten_danh_muc">Tên danh mục <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ten_danh_muc" name="ten_danh_muc"
+                                            value="<?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?>"
+                                            placeholder="Nhập tên danh mục" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="loai_tour">Loại tour <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="loai_tour" name="loai_tour" required>
+                                            <option value="">-- Chọn loại tour --</option>
+                                            <option value="trong nước" <?php echo $danh_muc['loai_tour'] == 'trong nước' ? 'selected' : ''; ?>>Tour trong nước</option>
+                                            <option value="quốc tế" <?php echo $danh_muc['loai_tour'] == 'quốc tế' ? 'selected' : ''; ?>>Tour quốc tế</option>
+                                            <option value="theo yêu cầu" <?php echo $danh_muc['loai_tour'] == 'theo yêu cầu' ? 'selected' : ''; ?>>Tour theo yêu cầu</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="mo_ta">Mô tả</label>
+                                        <textarea class="form-control" id="mo_ta" name="mo_ta" rows="4"
+                                            placeholder="Nhập mô tả về danh mục tour"><?php echo htmlspecialchars($danh_muc['mo_ta'] ?? ''); ?></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="trang_thai">Trạng thái</label>
+                                        <select class="form-control" id="trang_thai" name="trang_thai">
+                                            <option value="hoạt động" <?php echo $danh_muc['trang_thai'] == 'hoạt động' ? 'selected' : ''; ?>>Hoạt động</option>
+                                            <option value="khóa" <?php echo $danh_muc['trang_thai'] == 'khóa' ? 'selected' : ''; ?>>Khóa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- /.card-body -->
+
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-save mr-1"></i> Cập nhật
+                                    </button>
+                                    <a href="?act=danh-muc-tour" class="btn btn-default">
+                                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                                    </a>
+                                </div>
+                            </form>
                         </div>
-                        <!-- form start -->
-                        <form action="?act=danh-muc-tour-update" method="POST">
-                            <input type="hidden" name="id" value="<?php echo $danh_muc['id']; ?>">
-                            
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label for="ten_danh_muc">Tên danh mục <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="ten_danh_muc" name="ten_danh_muc" 
-                                           value="<?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?>" 
-                                           placeholder="Nhập tên danh mục" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="loai_tour">Loại tour <span class="text-danger">*</span></label>
-                                    <select class="form-control" id="loai_tour" name="loai_tour" required>
-                                        <option value="">-- Chọn loại tour --</option>
-                                        <option value="trong nước" <?php echo $danh_muc['loai_tour'] == 'trong nước' ? 'selected' : ''; ?>>Tour trong nước</option>
-                                        <option value="quốc tế" <?php echo $danh_muc['loai_tour'] == 'quốc tế' ? 'selected' : ''; ?>>Tour quốc tế</option>
-                                        <option value="theo yêu cầu" <?php echo $danh_muc['loai_tour'] == 'theo yêu cầu' ? 'selected' : ''; ?>>Tour theo yêu cầu</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="mo_ta">Mô tả</label>
-                                    <textarea class="form-control" id="mo_ta" name="mo_ta" rows="4" 
-                                              placeholder="Nhập mô tả về danh mục tour"><?php echo htmlspecialchars($danh_muc['mo_ta'] ?? ''); ?></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="trang_thai">Trạng thái</label>
-                                    <select class="form-control" id="trang_thai" name="trang_thai">
-                                        <option value="hoạt động" <?php echo $danh_muc['trang_thai'] == 'hoạt động' ? 'selected' : ''; ?>>Hoạt động</option>
-                                        <option value="khóa" <?php echo $danh_muc['trang_thai'] == 'khóa' ? 'selected' : ''; ?>>Khóa</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <!-- /.card-body -->
-
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-warning">
-                                    <i class="fas fa-save mr-1"></i> Cập nhật
-                                </button>
-                                <a href="?act=danh-muc-tour" class="btn btn-default">
-                                    <i class="fas fa-arrow-left mr-1"></i> Quay lại
-                                </a>
-                            </div>
-                        </form>
                     </div>
                 </div>
-            </div>
             <?php endif; ?>
         </div>
     </section>

@@ -1,5 +1,6 @@
 <?php 
-
+session_name('GUIDE_SESSION');
+session_start();
 
 
 require_once '../commons/env.php'; 
@@ -10,6 +11,8 @@ require_once './controllers/ProductController.php';
 require_once './controllers/GuideTaiKhoanController.php';
 require_once './controllers/DashBoardHDVController.php';
 require_once './controllers/PersonalGuideController.php';
+require_once './controllers/NhatKyController.php';
+require_once './controllers/KhachDoanController.php';
 
 // Require Models
 require_once './models/ProductModel.php';
@@ -17,6 +20,8 @@ require_once './models/GuideTaiKhoan.php';
 require_once './models/DashBoardHDVModel.php';
 require_once './models/Database.php';
 require_once './models/PersonalGuideModel.php';
+require_once './models/NhatKyModel.php';
+require_once './models/KhachDoanModel.php';
 
 
 
@@ -65,10 +70,24 @@ match ($act) {
     
     // Guide routes
     // 'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
-
+  
+    //Thông tin tài khoản
     'my-profile' => (new PersonalGuideController())->showProfile(),
     'profile-settings' => (new PersonalGuideController())->showProfileSettings(),
     'update-profile' => (new PersonalGuideController())->updateProfile(),
+  
+    // Nhật ký tour routes
+    'nhat_ky' => (new NhatKyController())->index(),
+    'nhat_ky_add' => (new NhatKyController())->create(),
+    'nhat_ky_update' => (new NhatKyController())->update(),
+    'nhat_ky_edit' => (new NhatKyController())->edit(),
+    'nhat_ky_store' => (new NhatKyController())->store(),
+    'nhat_ky_delete' => (new NhatKyController())->delete(),
     
+    // Khách đoàn routes
+    'xem_danh_sach_khach' => (new KhachDoanController())->index(),
+    'check_in_khach' => (new KhachDoanController())->update_checkin_status(),
+
     default => (new DashboardHDVController())->home(),
 };
+?>

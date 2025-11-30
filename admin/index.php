@@ -1,6 +1,13 @@
 <?php
 
+session_name('ADMIN_SESSION');
 session_start();
+
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Require file Common
 require_once '../commons/env.php';
@@ -13,6 +20,11 @@ require_once './controllers/AdminTourController.php';
 require_once './controllers/AdminLichTrinhKhoiHanhController.php';
 require_once './controllers/AdminDatTourController.php';
 require_once './controllers/AdminTaiKhoanController.php';
+require_once './controllers/AdminKhachHangController.php';
+require_once './controllers/AdminThanhVienController.php';
+require_once './controllers/AdminLichLamViecHDVController.php';
+require_once './controllers/AdminPhanPhongController.php';
+require_once './controllers/AdminThanhToanController.php';
 
 // Require Models
 require_once './models/AdminDashboard.php';
@@ -21,24 +33,29 @@ require_once './models/AdminTour.php';
 require_once './models/AdminLichTrinhKhoiHanh.php';
 require_once './models/AdminDatTour.php';
 require_once './models/AdminTaiKhoan.php';
+require_once './models/AdminKhachHang.php';
+require_once './models/AdminThanhVien.php';
+require_once './models/AdminLichLamViecHDV.php';
+require_once './models/AdminPhanPhong.php';
+require_once './models/AdminThanhToan.php';
 
 require_once './middleware/check-login.php';
 // Route
 $act = $_GET['act'] ?? '/';
 
-// Start session đầu tiên
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Hiển thị thông báo lỗi nếu có
+// 🚨 QUAN TRỌNG: Xử lý thông báo session TRƯỚC KHI checkLogin()
 if (isset($_SESSION['error'])) {
     $error_message = $_SESSION['error'];
-    unset($_SESSION['error']);
-    // Có thể hiển thị thông báo lỗi ở đây hoặc trong template
+    // KHÔNG unset ở đây, để checkLogin() xử lý redirect
 }
-checkLogin();
 
+if (isset($_SESSION['success'])) {
+    $success_message = $_SESSION['success'];
+    // KHÔNG unset ở đây
+}
+
+// 🚨 Gọi checkLogin() SAU KHI đã lấy thông báo session
+checkLogin();
 
 // Routing
 match ($act) {
@@ -59,6 +76,8 @@ match ($act) {
     'tour-edit' => (new AdminTourController())->edit(),
     'tour-update' => (new AdminTourController())->update(),
     'tour-delete' => (new AdminTourController())->delete(),
+
+
 
     // Quản lý Lịch trình Tour
     'tour-lich-trinh' => (new AdminTourController())->lichTrinh(),
@@ -139,7 +158,24 @@ match ($act) {
     'phan-cong-store' => (new AdminLichKhoiHanhController())->phanCongStore(),
     'huy-phan-cong' => (new AdminLichKhoiHanhController())->huyPhanCong(),
     'checklist-truoc-tour' => (new AdminLichKhoiHanhController())->checklistTruocTour(),
+    'checklist-them' => (new AdminLichKhoiHanhController())->themChecklist(),
+    'checklist-update' => (new AdminLichKhoiHanhController())->updateChecklist(),
+    'checklist-xoa' => (new AdminLichKhoiHanhController())->xoaChecklist(),
 
+    // Quản lý Khách hàng
+    'khach-hang' => (new AdminKhachHangController())->index(),
+    'khach-hang-chi-tiet' => (new AdminKhachHangController())->show(),
+    'khach-hang-tim-kiem' => (new AdminKhachHangController())->search(),
+    'khach-hang-thong-ke' => (new AdminKhachHangController())->thongKe(),
+    'khach-hang-export' => (new AdminKhachHangController())->export(),
+
+
+    // Quản lý Thành viên Tour
+    'thanh-vien-tour' => (new AdminThanhVienTourController())->index(),
+    'thanh-vien-tour-chi-tiet' => (new AdminThanhVienTourController())->show(),
+    'thanh-vien-tour-tim-kiem' => (new AdminThanhVienTourController())->search(),
+    'thanh-vien-tour-cap-nhat' => (new AdminThanhVienTourController())->update(),
+    'thanh-vien-tour-xu-ly-yeu-cau' => (new AdminThanhVienTourController())->xuLyYeuCau(),
 
     // Quản lý Đặt Tour
     'dat-tour' => (new AdminDatTourController())->index(),
@@ -147,6 +183,26 @@ match ($act) {
     'dat-tour-update-status' => (new AdminDatTourController())->updateStatus(),
     'dat-tour-delete' => (new AdminDatTourController())->delete(),
     'dat-tour-get-lich-khoi-hanh' => (new AdminDatTourController())->getLichKhoiHanhInfo(),
+
+    // Quản lý Lịch Làm Việc HDV
+    'lich-lam-viec-hdv' => (new AdminLichLamViecHDVController())->index(),
+    'lich-lam-viec-hdv-them' => (new AdminLichLamViecHDVController())->create(),
+    'lich-lam-viec-hdv-cap-nhat' => (new AdminLichLamViecHDVController())->update(),
+    'lich-lam-viec-hdv-xoa' => (new AdminLichLamViecHDVController())->delete(),
+    'lich-lam-viec-hdv-loc' => (new AdminLichLamViecHDVController())->filter(),
+
+    // Quản lý phân phòng khách sạn
+    'phan-phong' => (new AdminPhanPhongController())->index(),
+    'phan-phong-them' => (new AdminPhanPhongController())->create(),
+    'phan-phong-cap-nhat' => (new AdminPhanPhongController())->update(),
+    'phan-phong-xoa' => (new AdminPhanPhongController())->delete(),
+    'phan-phong-hang-loat' => (new AdminPhanPhongController())->phanPhongHangLoat(),
+    'api-phan-phong' => (new AdminPhanPhongController())->apiGetPhanPhong(),
+
+    // Quản lý Thanh toán
+    'thanh-toan-nhanh-modal' => (new AdminThanhToanController())->modalThanhToanNhanh(),
+    'thanh-toan-nhanh-process' => (new AdminThanhToanController())->processThanhToanNhanh(),
+
 
     // Đặt tour theo loại khách
     'dat-tour-le' => (new AdminDatTourController())->datTourLe(),
@@ -157,4 +213,7 @@ match ($act) {
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
     'dat-tour-print' => (new AdminDatTourController())->print()
     // 'dat-tour-tim-kiem' => (new AdminDatTourController())->timKiemBooking(),
+
+
+
 };

@@ -23,8 +23,8 @@
                           Quản Lý Điểm Đến
                       </a>
                       <div>
-                          <a href="?act=danh-muc" class="btn btn-outline-light me-2">
-                              <i class="fas fa-arrow-left me-1"></i> Danh mục
+                          <a href="?act=/" class="btn btn-outline-light me-2">
+                              <i class="fas fa-arrow-left me-1"></i> Quay lại
                           </a>
                           <a href="?act=danh-muc-diem-den-create" class="btn btn-success">
                               <i class="fas fa-plus me-1"></i> Thêm mới

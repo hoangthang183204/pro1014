@@ -9,26 +9,24 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Quản Lý Danh Mục Tour</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="?act=/">Trang chủ</a></li>
-                        <li class="breadcrumb-item"><a href="?act=danh-muc">Danh mục</a></li>
-                        <li class="breadcrumb-item active">Danh mục tour</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="">
+                        <i class="nav-icon fas fa-folder me-2"></i>
+                        Quản Lý Loại Tour
+                    </a>
+                    <div>
+                        <a href="?act=/" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="container mt-4">
             <!-- Thông báo -->
             <?php if (isset($_GET['success'])): ?>
                 <div class="alert alert-success alert-dismissible">
@@ -76,10 +74,10 @@
                                         <td><?php echo $index + 1; ?></td>
                                         <td><?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?></td>
                                         <td>
-                                            <?php 
+                                            <?php
                                             $badge_class = [
                                                 'trong nước' => 'badge-primary',
-                                                'quốc tế' => 'badge-success', 
+                                                'quốc tế' => 'badge-success',
                                                 'theo yêu cầu' => 'badge-info'
                                             ];
                                             $class = $badge_class[$danh_muc['loai_tour']] ?? 'badge-secondary';
@@ -103,15 +101,15 @@
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="?act=danh-muc-tour-edit&id=<?php echo $danh_muc['id']; ?>" 
-                                                   class="btn btn-sm btn-warning" title="Sửa">
+                                                <a href="?act=danh-muc-tour-edit&id=<?php echo $danh_muc['id']; ?>"
+                                                    class="btn btn-sm btn-warning" title="Sửa">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-danger btn-delete" 
-                                                        data-id="<?php echo $danh_muc['id']; ?>"
-                                                        data-name="<?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?>"
-                                                        title="Xóa">
+                                                <button type="button"
+                                                    class="btn btn-sm btn-danger btn-delete"
+                                                    data-id="<?php echo $danh_muc['id']; ?>"
+                                                    data-name="<?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?>"
+                                                    title="Xóa">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
@@ -164,24 +162,24 @@
 <?php include './views/layout/footer.php'; ?>
 
 <script>
-$(document).ready(function() {
-    // DataTable
-    $('#example1').DataTable({
-        "responsive": true,
-        "autoWidth": false,
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
-        }
-    });
+    $(document).ready(function() {
+        // DataTable
+        $('#example1').DataTable({
+            "responsive": true,
+            "autoWidth": false,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+            }
+        });
 
-    // Xử lý xóa
-    $('.btn-delete').on('click', function() {
-        var id = $(this).data('id');
-        var name = $(this).data('name');
-        
-        $('#deleteName').text(name);
-        $('#confirmDelete').attr('href', '?act=danh-muc-tour-delete&id=' + id);
-        $('#deleteModal').modal('show');
+        // Xử lý xóa
+        $('.btn-delete').on('click', function() {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+
+            $('#deleteName').text(name);
+            $('#confirmDelete').attr('href', '?act=danh-muc-tour-delete&id=' + id);
+            $('#deleteModal').modal('show');
+        });
     });
-});
 </script>
