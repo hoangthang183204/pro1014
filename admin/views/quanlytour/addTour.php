@@ -139,14 +139,14 @@
                                     </select>
                                     <small class="form-text text-muted">Có thể chọn nhiều tags để phân loại tour</small>
                                 </div>
-
+<!-- 
                                 <div class="form-group">
                                     <label for="duong_dan_online">Đường dẫn Online</label>
                                     <input type="url" id="duong_dan_online" name="duong_dan_online" class="form-control"
                                         placeholder="https://tour.com/duong-dan-tour"
                                         value="<?php echo htmlspecialchars($_POST['duong_dan_online'] ?? ''); ?>">
                                     <small class="form-text text-muted">Link trang đặt tour online (nếu có)</small>
-                                </div>
+                                </div> -->
 
                                 <div class="form-group">
                                     <label>Trạng thái</label>

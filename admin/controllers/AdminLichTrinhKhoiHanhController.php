@@ -160,6 +160,9 @@ class AdminLichKhoiHanhController
 
         $phan_cong_hien_tai = $this->lichKhoiHanhModel->getPhanCongHDV($lich_khoi_hanh_id);
 
+        // Lấy tất cả HDV để hiển thị thông tin những người bận
+        $all_hdv = $this->lichKhoiHanhModel->getAllHuongDanVien();
+
         require_once './views/lichtrinhkhoihanh/phanHuongDanVien.php';
     }
 

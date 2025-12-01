@@ -140,38 +140,22 @@ class AdminLichKhoiHanh
         }
     }
 
-    // Lấy tất cả hướng dẫn viên đang làm việc
-    public function getAllHuongDanVien()
-    {
-        try {
-            $query = "SELECT id, ho_ten, ngon_ngu, chuyen_mon, so_dien_thoai, email, 
-                         loai_huong_dan_vien, danh_gia_trung_binh, so_tour_da_dan, trang_thai
-                  FROM huong_dan_vien 
-                  WHERE trang_thai = 'đang làm việc' 
-                  ORDER BY ho_ten";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getAllHuongDanVien: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    // Kiểm tra xem HDV có bị trùng lịch không
+    // Kiểm tra trùng lịch HDV
     public function kiemTraTrungLich($huong_dan_vien_id, $lich_khoi_hanh_id, $ngay_bat_dau, $ngay_ket_thuc)
     {
         try {
-            $query = "SELECT COUNT(*) as so_luong_trung
+            $query = "SELECT COUNT(*) as count 
                   FROM phan_cong pc
                   JOIN lich_khoi_hanh lkh ON pc.lich_khoi_hanh_id = lkh.id
                   WHERE pc.huong_dan_vien_id = :huong_dan_vien_id
                   AND pc.lich_khoi_hanh_id != :lich_khoi_hanh_id
-                  AND lkh.trang_thai NOT IN ('đã hoàn thành', 'đã hủy')
+                  AND pc.loai_phan_cong = 'hướng dẫn viên'
+                  AND pc.trang_thai_xac_nhan = 'đã xác nhận'
                   AND (
-                      (:ngay_bat_dau BETWEEN lkh.ngay_bat_dau AND lkh.ngay_ket_thuc)
-                      OR (:ngay_ket_thuc BETWEEN lkh.ngay_bat_dau AND lkh.ngay_ket_thuc)
-                      OR (lkh.ngay_bat_dau BETWEEN :ngay_bat_dau_2 AND :ngay_ket_thuc_2)
+                      (lkh.ngay_bat_dau BETWEEN :ngay_bat_dau AND :ngay_ket_thuc) OR
+                      (lkh.ngay_ket_thuc BETWEEN :ngay_bat_dau AND :ngay_ket_thuc) OR
+                      (:ngay_bat_dau BETWEEN lkh.ngay_bat_dau AND lkh.ngay_ket_thuc) OR
+                      (:ngay_ket_thuc BETWEEN lkh.ngay_bat_dau AND lkh.ngay_ket_thuc)
                   )";
 
             $stmt = $this->conn->prepare($query);
@@ -179,37 +163,14 @@ class AdminLichKhoiHanh
                 ':huong_dan_vien_id' => $huong_dan_vien_id,
                 ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
                 ':ngay_bat_dau' => $ngay_bat_dau,
-                ':ngay_ket_thuc' => $ngay_ket_thuc,
-                ':ngay_bat_dau_2' => $ngay_bat_dau,
-                ':ngay_ket_thuc_2' => $ngay_ket_thuc
+                ':ngay_ket_thuc' => $ngay_ket_thuc
             ]);
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['so_luong_trung'] > 0;
+            return $result['count'] > 0;
         } catch (PDOException $e) {
             error_log("Lỗi kiemTraTrungLich: " . $e->getMessage());
             return true; // Trả về true để an toàn, không cho phân công nếu có lỗi
-        }
-    }
-
-    // Lấy phân công HDV
-    public function getPhanCongHDV($lich_khoi_hanh_id)
-    {
-        try {
-            $query = "SELECT hdv.ho_ten as ten_hdv 
-                  FROM phan_cong pc
-                  JOIN huong_dan_vien hdv ON pc.huong_dan_vien_id = hdv.id
-                  WHERE pc.lich_khoi_hanh_id = :lich_khoi_hanh_id 
-                  AND pc.loai_phan_cong = 'hướng dẫn viên'
-                  AND pc.trang_thai_xac_nhan = 'đã xác nhận'
-                  LIMIT 1";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getPhanCongHDV: " . $e->getMessage());
-            return null;
         }
     }
 
@@ -313,6 +274,63 @@ class AdminLichKhoiHanh
             return $hdv_co_san;
         } catch (PDOException $e) {
             error_log("Lỗi getHuongDanVienCoSan: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getPhanCongHDV($lich_khoi_hanh_id)
+    {
+        try {
+            $query = "SELECT 
+                    pc.huong_dan_vien_id,
+                    hdv.ho_ten,
+                    hdv.so_dien_thoai,
+                    hdv.email,
+                    hdv.ngon_ngu,
+                    hdv.chuyen_mon,
+                    hdv.loai_huong_dan_vien,
+                    hdv.kinh_nghiem,
+                    pc.ghi_chu,
+                    pc.trang_thai_xac_nhan,
+                    pc.created_at
+                FROM phan_cong pc
+                JOIN huong_dan_vien hdv ON pc.huong_dan_vien_id = hdv.id
+                WHERE pc.lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                AND pc.loai_phan_cong = 'hướng dẫn viên'
+                AND pc.trang_thai_xac_nhan = 'đã xác nhận'
+                LIMIT 1";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getPhanCongHDV: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    // Lấy tất cả HDV để hiển thị thông tin
+    public function getAllHuongDanVien()
+    {
+        try {
+            $query = "SELECT 
+                    id,
+                    ho_ten,
+                    so_dien_thoai,
+                    email,
+                    ngon_ngu,
+                    chuyen_mon,
+                    loai_huong_dan_vien,
+                    trang_thai
+                FROM huong_dan_vien 
+                WHERE trang_thai = 'đang làm việc'
+                ORDER BY ho_ten";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getAllHuongDanVien: " . $e->getMessage());
             return [];
         }
     }
