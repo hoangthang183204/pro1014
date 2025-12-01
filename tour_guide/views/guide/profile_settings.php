@@ -1,3 +1,5 @@
+[file name]: profile_settings.php
+[file content begin]
 <?php
 // Tệp: views/guide/profile_settings.php
 
@@ -17,6 +19,8 @@ unset($_SESSION['success'], $_SESSION['error']);
 // Lấy dữ liệu từ controller (đã được truyền qua $GLOBALS)
 $profile = $GLOBALS['profile'] ?? [];
 
+// Lấy thông tin thống kê
+$stats = $GLOBALS['stats'] ?? ['so_tour_da_dan' => 0, 'danh_gia_trung_binh' => 0];
 
 function getDefaultAvatar($name) {
     $initial = mb_substr($name, 0, 1, 'UTF-8');
@@ -59,6 +63,37 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
     <?php if ($errorMessage): ?>
         <div class="alert alert-error"><i class="fas fa-times-circle"></i> <?= htmlspecialchars($errorMessage) ?></div>
     <?php endif; ?>
+
+    <!-- Thống kê hiển thị -->
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-suitcase"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number"><?= htmlspecialchars($stats['so_tour_da_dan'] ?? 0) ?></div>
+                <div class="stat-label">Tour đã dẫn</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number"><?= number_format($stats['danh_gia_trung_binh'] ?? 0, 1) ?></div>
+                <div class="stat-label">Đánh giá trung bình</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-number"><?= htmlspecialchars($profile['loai_huong_dan_vien'] ?? 'Nội địa') ?></div>
+                <div class="stat-label">Loại hướng dẫn viên</div>
+            </div>
+        </div>
+    </div>
 
     <form action="<?= BASE_URL_GUIDE ?>?act=update-profile" method="POST" enctype="multipart/form-data" class="profile-settings-form">
         
@@ -159,6 +194,39 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
             </div>
         </div>
 
+        <!-- Card thống kê có thể sửa -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Thống Kê Hoạt Động (Có thể chỉnh sửa)</h2>
+            </div>
+            <div class="card-content">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="so_tour_da_dan">Số tour đã dẫn *</label>
+                        <input type="number" id="so_tour_da_dan" name="so_tour_da_dan" 
+                               value="<?= htmlspecialchars($stats['so_tour_da_dan'] ?? 0) ?>" 
+                               min="0" max="999" step="1" required>
+                        <small>Số lượng tour đã hoàn thành (tối đa 999)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="danh_gia_trung_binh">Đánh giá trung bình *</label>
+                        <input type="number" id="danh_gia_trung_binh" name="danh_gia_trung_binh" 
+                               value="<?= number_format($stats['danh_gia_trung_binh'] ?? 0, 1) ?>" 
+                               min="0" max="5" step="0.1" required>
+                        <small>Điểm đánh giá từ khách hàng (0.0 - 5.0)</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <div class="rating-preview">
+                            <div class="rating-stars-preview">
+                                <span id="star-preview"></span>
+                            </div>
+                            <span id="rating-text-preview" class="rating-text">(<?= number_format($stats['danh_gia_trung_binh'] ?? 0, 1) ?>/5.0)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Lưu Thay Đổi</button>
             <a href="<?= BASE_URL_GUIDE ?>?act=my-profile" class="btn btn-outline">Hủy</a>
@@ -170,6 +238,52 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
 .profile-settings-form {
     max-width: 1000px;
     margin: 0 auto;
+}
+
+/* Thống kê summary */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
 }
 
 .profile-form-layout {
@@ -238,6 +352,16 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+.form-group input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .form-group textarea {
     resize: vertical;
     min-height: 80px;
@@ -251,6 +375,31 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
     margin-top: 5px;
     color: #6b7280;
     font-size: 12px;
+}
+
+/* Hiển thị rating preview */
+.rating-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.rating-stars-preview {
+    color: #fbbf24;
+    font-size: 1.2rem;
+}
+
+.rating-stars-preview i {
+    margin-right: 3px;
+}
+
+.rating-text {
+    color: #6b7280;
+    font-weight: 600;
 }
 
 .form-actions {
@@ -344,6 +493,19 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
 }
 
 @media (max-width: 768px) {
+    .stats-summary {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
     .profile-form-layout {
         flex-direction: column;
         gap: 20px;
@@ -365,12 +527,32 @@ $languages = json_decode($profile['ngon_ngu'] ?? '[]', true);
         flex-direction: column;
     }
 }
+
+@media (max-width: 480px) {
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-icon {
+        font-size: 1.5rem;
+    }
+    
+    .rating-preview {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
 </style>
 
 <script>
 const avatarInput = document.getElementById('avatar');
 const avatarPreview = document.getElementById('avatar-img-preview');
+const ratingInput = document.getElementById('danh_gia_trung_binh');
+const starPreview = document.getElementById('star-preview');
+const ratingTextPreview = document.getElementById('rating-text-preview');
 
+// Preview avatar
 if (avatarInput && avatarPreview) {
     avatarInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -383,6 +565,79 @@ if (avatarInput && avatarPreview) {
         }
     });
 }
+
+// Hiển thị rating preview
+function updateRatingPreview() {
+    const rating = parseFloat(ratingInput.value) || 0;
+    
+    // Giới hạn giá trị từ 0-5
+    if (rating < 0) ratingInput.value = 0;
+    if (rating > 5) ratingInput.value = 5;
+    
+    const validRating = Math.min(Math.max(rating, 0), 5);
+    const fullStars = Math.floor(validRating);
+    const halfStar = (validRating - fullStars) >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    
+    let starsHtml = '';
+    
+    // Sao đầy
+    for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<i class="fas fa-star"></i>';
+    }
+    
+    // Sao nửa
+    if (halfStar) {
+        starsHtml += '<i class="fas fa-star-half-alt"></i>';
+    }
+    
+    // Sao rỗng
+    for (let i = 0; i < emptyStars; i++) {
+        starsHtml += '<i class="far fa-star"></i>';
+    }
+    
+    starPreview.innerHTML = starsHtml;
+    ratingTextPreview.textContent = `(${validRating.toFixed(1)}/5.0)`;
+}
+
+// Khởi tạo rating preview
+if (ratingInput && starPreview && ratingTextPreview) {
+    updateRatingPreview();
+    
+    // Cập nhật khi giá trị thay đổi
+    ratingInput.addEventListener('input', updateRatingPreview);
+    ratingInput.addEventListener('change', updateRatingPreview);
+}
+
+// Kiểm tra dữ liệu trước khi submit
+document.querySelector('.profile-settings-form').addEventListener('submit', function(e) {
+    const tourCount = document.getElementById('so_tour_da_dan');
+    const rating = document.getElementById('danh_gia_trung_binh');
+    
+    // Kiểm tra số tour
+    if (tourCount.value < 0) {
+        alert('Số tour đã dẫn không thể âm');
+        tourCount.focus();
+        e.preventDefault();
+        return;
+    }
+    
+    if (tourCount.value > 999) {
+        alert('Số tour đã dẫn tối đa là 999');
+        tourCount.focus();
+        e.preventDefault();
+        return;
+    }
+    
+    // Kiểm tra đánh giá
+    if (rating.value < 0 || rating.value > 5) {
+        alert('Đánh giá phải nằm trong khoảng 0.0 đến 5.0');
+        rating.focus();
+        e.preventDefault();
+        return;
+    }
+});
 </script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
+[file content end]

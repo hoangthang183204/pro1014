@@ -106,10 +106,6 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
                                     <span class="stat-number"><?= number_format($stats['danh_gia_trung_binh'] ?? 0, 1) ?></span>
                                     <span class="stat-label">Đánh giá TB</span>
                                 </div>
-                                <div class="profile-stat">
-                                    <span class="stat-number"><?= $activeTours ?></span>
-                                    <span class="stat-label">Tour đang hoạt động</span>
-                                </div>
                             </div>
                         </div>
                     </div>
