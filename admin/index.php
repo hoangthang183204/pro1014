@@ -188,11 +188,12 @@ match ($act) {
 
     // Quản lý phân phòng khách sạn
     'phan-phong' => (new AdminPhanPhongController())->index(),
-    'phan-phong-them' => (new AdminPhanPhongController())->create(),
-    'phan-phong-cap-nhat' => (new AdminPhanPhongController())->update(),
-    'phan-phong-xoa' => (new AdminPhanPhongController())->delete(),
+    'phan-phong-create' => (new AdminPhanPhongController())->create(),
+    'phan-phong-update' => (new AdminPhanPhongController())->update(),
+    'phan-phong-delete' => (new AdminPhanPhongController())->delete(),
     'phan-phong-hang-loat' => (new AdminPhanPhongController())->phanPhongHangLoat(),
-    'api-phan-phong' => (new AdminPhanPhongController())->apiGetPhanPhong(),
+    'phan-phong-api' => (new AdminPhanPhongController())->apiGetPhanPhong(),
+    'phan-phong-api-phong' => (new AdminPhanPhongController())->apiGetPhong(),
 
     // Quản lý Thanh toán
     'thanh-toan-nhanh-modal' => (new AdminThanhToanController())->modalThanhToanNhanh(),

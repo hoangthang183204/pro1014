@@ -63,9 +63,9 @@
                                         $hdv_phan_cong = $this->lichKhoiHanhModel->getPhanCongHDV($lich_khoi_hanh['id']);
                                     }
 
-                                    if ($hdv_phan_cong && !empty($hdv_phan_cong['ten_hdv'])):
+                                    if ($hdv_phan_cong && !empty($hdv_phan_cong['ho_ten'])):
                                     ?>
-                                        <span class="badge bg-info"><?php echo htmlspecialchars($hdv_phan_cong['ten_hdv']); ?></span>
+                                        <span class="badge bg-info"><?php echo htmlspecialchars($hdv_phan_cong['ho_ten']); ?></span>
                                     <?php else: ?>
                                         <span class="badge bg-warning">Chưa phân công</span>
                                     <?php endif; ?>
