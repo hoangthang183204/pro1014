@@ -14,12 +14,8 @@
                         Quản Lý Đặt Tour
                     </a>
                     <div class="d-flex gap-5">
-                        <a href="?act=dat-tour-le" class="btn btn-success mx-2">
-                            <i class="fas fa-user-plus me-1"></i> Đặt Khách Lẻ
-                        </a>
-
-                        <a href="?act=dat-tour-doan" class="btn btn-info">
-                            <i class="fas fa-users me-1"></i> Đặt Tour Đoàn
+                        <a href="?act=dat-tour-create" class="btn btn-success mx-2">
+                            <i class="fas fa-plus me-1"></i> Đặt Tour Mới
                         </a>
                     </div>
                 </div>
@@ -53,78 +49,6 @@
                     <?php unset($_SESSION['error']); ?>
                 <?php endif; ?>
 
-                <!-- Stats Cards
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card stats-card border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="icon bg-warning">
-                                            <i class="fas fa-clock"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="card-title text-muted mb-1">Chờ Xác Nhận</h6>
-                                        <h4 class="mb-0 text-dark"><?php echo $stats['cho_xac_nhan'] ?? 0; ?></h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card stats-card border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="icon bg-success">
-                                            <i class="fas fa-check-circle"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="card-title text-muted mb-1">Đã Xác Nhận</h6>
-                                        <h4 class="mb-0 text-dark"><?php echo $stats['da_xac_nhan'] ?? 0; ?></h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card stats-card border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="icon bg-info">
-                                            <i class="fas fa-users"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="card-title text-muted mb-1">Tổng Khách</h6>
-                                        <h4 class="mb-0 text-dark"><?php echo $stats['tong_khach'] ?? 0; ?></h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card stats-card border-0 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="icon bg-primary">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="card-title text-muted mb-1">Doanh Thu</h6>
-                                        <h4 class="mb-0 text-dark"><?php echo number_format($stats['doanh_thu'] ?? 0, 0, ',', '.'); ?>₫</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-
                 <!-- Bộ lọc -->
                 <div class="card mb-4 border-0 shadow-sm">
                     <div class="card-header bg-white">
@@ -134,49 +58,45 @@
                         <form method="GET">
                             <input type="hidden" name="act" value="dat-tour">
                             <div class="row g-3">
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <input type="text" name="search" class="form-control"
                                         placeholder="Tìm mã, tên, SĐT..."
                                         value="<?php echo htmlspecialchars($search ?? ''); ?>">
                                 </div>
-                                <!-- <div class="col-md-2">
+                                <div class="col-md-2">
                                     <select name="trang_thai" class="form-select">
                                         <option value="">Tất cả trạng thái</option>
                                         <option value="chờ xác nhận" <?php echo ($trang_thai ?? '') === 'chờ xác nhận' ? 'selected' : ''; ?>>Chờ xác nhận</option>
-                                        <option value="đã xác nhận" <?php echo ($trang_thai ?? '') === 'đã xác nhận' ? 'selected' : ''; ?>>Đã xác nhận</option>
-                                        <option value="đã hủy" <?php echo ($trang_thai ?? '') === 'đã hủy' ? 'selected' : ''; ?>>Đã hủy</option>
-                                        <option value="đã hoàn thành" <?php echo ($trang_thai ?? '') === 'đã hoàn thành' ? 'selected' : ''; ?>>Đã hoàn thành</option>
+                                        <option value="đã cọc" <?php echo ($trang_thai ?? '') === 'đã cọc' ? 'selected' : ''; ?>>Đã cọc</option>
+                                        <option value="hoàn tất" <?php echo ($trang_thai ?? '') === 'hoàn tất' ? 'selected' : ''; ?>>Hoàn tất</option>
+                                        <option value="hủy" <?php echo ($trang_thai ?? '') === 'hủy' ? 'selected' : ''; ?>>Đã hủy</option>
                                     </select>
-                                </div> -->
-                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-3">
                                     <select name="lich_khoi_hanh_id" class="form-select">
                                         <option value="">Tất cả lịch trình</option>
                                         <?php foreach ($lich_khoi_hanh_list as $lkh): ?>
                                             <option value="<?php echo $lkh['id']; ?>"
                                                 <?php echo ($lich_khoi_hanh_id ?? '') == $lkh['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($lkh['ten_tour']); ?> - <?php echo date('d/m/Y', strtotime($lkh['ngay_bat_dau'])); ?>
+                                                (Còn <?php echo $lkh['so_cho_thuc_te'] ?? $lkh['so_cho_toi_da']; ?> chỗ)
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                <div class="col-md-3">
-                                    <select name="loai_khach" class="form-select">
-                                        <option value="">Tất cả loại</option>
-                                        <option value="le" <?php echo ($loai_khach ?? '') === 'le' ? 'selected' : ''; ?>>Khách lẻ</option>
-                                        <option value="doan" <?php echo ($loai_khach ?? '') === 'doan' ? 'selected' : ''; ?>>Khách Đoàn</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <div class="d-flex justify-content-around">
                                         <button type="submit" class="btn btn-primary">
                                             <i class="fas fa-search me-1"></i> Tìm Kiếm
                                         </button>
                                         <a href="?act=dat-tour-thong-ke" class="btn btn-success">
-                                            <i class="fas fa-file-alt"></i> Thống Kê
+                                            <i class="fas fa-chart-bar me-1"></i> Thống Kê
+                                        </a>
+                                        <a href="?act=dat-tour" class="btn btn-secondary">
+                                            <i class="fas fa-refresh me-1"></i> Làm Mới
                                         </a>
                                     </div>
                                 </div>
-
                             </div>
                         </form>
                     </div>
@@ -200,7 +120,7 @@
                                 <table class="table table-striped table-bordered mb-0" id="datTourTable">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th width="120">MÃ TOUR</th>
+                                            <th width="120">MÃ ĐẶT TOUR</th>
                                             <th>TOUR & LỊCH TRÌNH</th>
                                             <th width="160">KHÁCH HÀNG</th>
                                             <th width="80" class="text-center">SỐ KHÁCH</th>
@@ -223,18 +143,14 @@
                                                 <td>
                                                     <div class="fw-bold"><?php echo htmlspecialchars($dat_tour['ten_tour']); ?></div>
                                                     <div class="text-muted small">
+                                                        <i class="fas fa-calendar me-1"></i>
                                                         <?php echo date('d/m/Y', strtotime($dat_tour['ngay_bat_dau'])); ?> -
                                                         <?php echo date('d/m/Y', strtotime($dat_tour['ngay_ket_thuc'])); ?>
                                                     </div>
-                                                    <?php if ($dat_tour['loai_khach'] == 'doan'): ?>
-                                                        <span class="badge bg-info">
-                                                            <i class="fas fa-users me-1"></i></i>Khách đoàn
-                                                        </span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-primary">
-                                                            <i class="fas fa-user me-1"></i>Khách lẻ
-                                                        </span>
-                                                    <?php endif; ?>
+                                                    <div class="text-muted small">
+                                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                                        <?php echo htmlspecialchars($dat_tour['diem_tap_trung'] ?? 'Chưa cập nhật'); ?>
+                                                    </div>
                                                 </td>
                                                 <td>
                                                     <div class="fw-bold"><?php echo htmlspecialchars($dat_tour['ho_ten']); ?></div>
@@ -254,11 +170,17 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="fw-bold"><?php echo date('d/m/Y', strtotime($dat_tour['ngay_bat_dau'])); ?></div>
-                                                    <div class="text-muted small"><?php echo date('H:i', strtotime($dat_tour['gio_tap_trung'] ?? '08:00')); ?></div>
+                                                    <div class="text-muted small">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        <?php echo date('H:i', strtotime($dat_tour['gio_tap_trung'] ?? '08:00')); ?>
+                                                    </div>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="text-success fw-bold">
                                                         <?php echo number_format($dat_tour['tong_tien'], 0, ',', '.'); ?>₫
+                                                    </div>
+                                                    <div class="text-muted small">
+                                                        <?php echo number_format($dat_tour['gia_tour'] ?? 0, 0, ',', '.'); ?>₫/khách
                                                     </div>
                                                 </td>
                                                 <td class="text-center">
@@ -284,6 +206,14 @@
                                                             title="Xem chi tiết">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
+                                                        <?php if ($dat_tour['trang_thai'] == 'chờ xác nhận' || $dat_tour['trang_thai'] == 'đã cọc'): ?>
+                                                            <a href="?act=dat-tour-edit&id=<?php echo $dat_tour['id']; ?>"
+                                                                class="btn btn-warning btn-sm"
+                                                                data-bs-toggle="tooltip"
+                                                                title="Sửa">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        <?php endif; ?>
                                                         <?php if ($dat_tour['trang_thai'] == 'hủy'): ?>
                                                             <a href="?act=dat-tour-delete&id=<?php echo $dat_tour['id']; ?>"
                                                                 class="btn btn-danger btn-sm"
@@ -293,6 +223,12 @@
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         <?php endif; ?>
+                                                        <a href="?act=dat-tour-print&id=<?php echo $dat_tour['id']; ?>"
+                                                            class="btn btn-info btn-sm"
+                                                            data-bs-toggle="tooltip"
+                                                            title="In hóa đơn">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -306,11 +242,8 @@
                                 <h5 class="text-muted">Không có đặt tour nào</h5>
                                 <p class="text-muted">Chưa có đặt tour nào được tạo</p>
                                 <div class="mt-3">
-                                    <a href="?act=dat-tour-le" class="btn btn-success me-2">
-                                        <i class="fas fa-user-plus me-2"></i>Đặt Khách Lẻ
-                                    </a>
-                                    <a href="?act=dat-tour-cong-ty" class="btn btn-info">
-                                        <i class="fas fa-building me-2"></i>Đặt Công Ty
+                                    <a href="?act=dat-tour-create" class="btn btn-success">
+                                        <i class="fas fa-plus me-2"></i>Đặt Tour Mới
                                     </a>
                                 </div>
                             </div>
@@ -324,6 +257,12 @@
                                 <div class="text-muted small">
                                     Đang xem <strong>1</strong> đến <strong><?php echo count($dat_tours); ?></strong> trong tổng số <strong><?php echo count($dat_tours); ?></strong> mục
                                 </div>
+                                <div class="text-muted small">
+                                    Tổng doanh thu: <strong class="text-success"><?php 
+                                        $tong_doanh_thu = array_sum(array_column($dat_tours, 'tong_tien'));
+                                        echo number_format($tong_doanh_thu, 0, ',', '.'); ?>₫
+                                    </strong>
+                                </div>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -336,7 +275,6 @@
 <?php include 'views/layout/footer.php'; ?>
 
 <style>
-    /* Stats Cards */
     .stats-card {
         border-radius: 8px;
         transition: transform 0.2s;
@@ -357,7 +295,6 @@
         font-size: 1.25rem;
     }
 
-    /* Form Controls */
     .form-control,
     .form-select {
         padding: 8px 14px;
@@ -366,7 +303,6 @@
         font-size: 14px;
     }
 
-    /* Table Styles */
     .table th {
         background: #f8f9fa;
         border-bottom: 2px solid #e9ecef;
@@ -388,19 +324,16 @@
         background-color: #f8f9fa;
     }
 
-    /* Badge Styles */
     .badge {
         font-size: 0.75rem;
         font-weight: 500;
     }
 
-    /* Button Group */
     .btn-group .btn-sm {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
         .container {
             padding: 0 10px;

@@ -177,12 +177,19 @@ match ($act) {
     'thanh-vien-tour-cap-nhat' => (new AdminThanhVienTourController())->update(),
     'thanh-vien-tour-xu-ly-yeu-cau' => (new AdminThanhVienTourController())->xuLyYeuCau(),
 
-    // Quản lý Đặt Tour
     'dat-tour' => (new AdminDatTourController())->index(),
+    'dat-tour-create' => (new AdminDatTourController())->create(),
+    'dat-tour-store' => (new AdminDatTourController())->store(),
     'dat-tour-show' => (new AdminDatTourController())->show(),
+    'dat-tour-edit' => (new AdminDatTourController())->edit(),
+    'dat-tour-update' => (new AdminDatTourController())->update(),
     'dat-tour-update-status' => (new AdminDatTourController())->updateStatus(),
     'dat-tour-delete' => (new AdminDatTourController())->delete(),
+    'dat-tour-print' => (new AdminDatTourController())->print(),
     'dat-tour-get-lich-khoi-hanh' => (new AdminDatTourController())->getLichKhoiHanhInfo(),
+    // 'dat-tour-search-khach-hang' => (new AdminDatTourController())->searchKhachHang(),
+    // 'dat-tour-get-khach-hang' => (new AdminDatTourController())->getKhachHangById(),
+    'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
 
     // Quản lý Lịch Làm Việc HDV
     'lich-lam-viec-hdv' => (new AdminLichLamViecHDVController())->index(),
@@ -202,12 +209,6 @@ match ($act) {
     // Quản lý Thanh toán
     'thanh-toan-nhanh-modal' => (new AdminThanhToanController())->modalThanhToanNhanh(),
     'thanh-toan-nhanh-process' => (new AdminThanhToanController())->processThanhToanNhanh(),
-
-
-    // Đặt tour theo loại khách
-    'dat-tour-le' => (new AdminDatTourController())->datTourLe(),
-    'dat-tour-doan' => (new AdminDatTourController())->datTourDoan(),
-    'dat-tour-store-booking' => (new AdminDatTourController())->storeBooking(),
 
     // Thống kê và tìm kiếm
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
