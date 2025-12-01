@@ -3,8 +3,6 @@
 session_name('ADMIN_SESSION');
 session_start();
 
-
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -21,7 +19,6 @@ require_once './controllers/AdminLichTrinhKhoiHanhController.php';
 require_once './controllers/AdminDatTourController.php';
 require_once './controllers/AdminTaiKhoanController.php';
 require_once './controllers/AdminKhachHangController.php';
-require_once './controllers/AdminThanhVienController.php';
 require_once './controllers/AdminLichLamViecHDVController.php';
 require_once './controllers/AdminPhanPhongController.php';
 require_once './controllers/AdminThanhToanController.php';
@@ -34,7 +31,6 @@ require_once './models/AdminLichTrinhKhoiHanh.php';
 require_once './models/AdminDatTour.php';
 require_once './models/AdminTaiKhoan.php';
 require_once './models/AdminKhachHang.php';
-require_once './models/AdminThanhVien.php';
 require_once './models/AdminLichLamViecHDV.php';
 require_once './models/AdminPhanPhong.php';
 require_once './models/AdminThanhToan.php';
@@ -169,14 +165,6 @@ match ($act) {
     'khach-hang-thong-ke' => (new AdminKhachHangController())->thongKe(),
     'khach-hang-export' => (new AdminKhachHangController())->export(),
 
-
-    // Quản lý Thành viên Tour
-    'thanh-vien-tour' => (new AdminThanhVienTourController())->index(),
-    'thanh-vien-tour-chi-tiet' => (new AdminThanhVienTourController())->show(),
-    'thanh-vien-tour-tim-kiem' => (new AdminThanhVienTourController())->search(),
-    'thanh-vien-tour-cap-nhat' => (new AdminThanhVienTourController())->update(),
-    'thanh-vien-tour-xu-ly-yeu-cau' => (new AdminThanhVienTourController())->xuLyYeuCau(),
-
     'dat-tour' => (new AdminDatTourController())->index(),
     'dat-tour-create' => (new AdminDatTourController())->create(),
     'dat-tour-store' => (new AdminDatTourController())->store(),
@@ -214,7 +202,5 @@ match ($act) {
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
     'dat-tour-print' => (new AdminDatTourController())->print()
     // 'dat-tour-tim-kiem' => (new AdminDatTourController())->timKiemBooking(),
-
-
 
 };

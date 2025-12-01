@@ -109,12 +109,6 @@
                   <p>Khách Hàng</p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a href="<?= BASE_URL_ADMIN . '?act=thanh-vien-tour' ?>" class="nav-link">
-                  <i class="fas fa-user-check nav-icon"></i>
-                  <p>Thành Viên</p>
-                </a>
-              </li>
             </ul>
           </li>
           <li class="nav-item">
@@ -125,7 +119,6 @@
               </p>
             </a>
           </li>
-
           <!--  -->
         </ul>
       </nav>

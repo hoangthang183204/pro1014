@@ -3,39 +3,55 @@
 <?php include './views/layout/sidebar.php'; ?>
 
 <div class="content-wrapper">
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid p-0">
-            <!-- Header -->
             <nav class="navbar navbar-dark bg-dark">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="?act=/">
+                    <a class="navbar-brand" href="?act=khach-hang">
                         <i class="fas fa-user me-2"></i>
                         Chi Tiết Khách Hàng
                     </a>
-                    <a href="?act=khach-hang" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-1"></i> Quay lại
-                    </a>
+                    <div class="btn-group">
+                        <a href="?act=khach-hang" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                        <?php if ($thong_tin_khach_hang): ?>
+                        <a href="?act=khach-hang-edit&id=<?php echo $thong_tin_khach_hang['id']; ?>" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i> Sửa
+                        </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </nav>
 
             <div class="container mt-4">
                 <!-- Thông báo -->
-                <?php if (isset($_GET['success'])): ?>
-                    <div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <?php echo htmlspecialchars($_SESSION['success']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php unset($_SESSION['success']); ?>
                 <?php endif; ?>
 
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <?php echo htmlspecialchars($_SESSION['error']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
                 <?php endif; ?>
 
                 <?php if ($thong_tin_khach_hang): ?>
                 <div class="row">
                     <!-- Thông tin cá nhân -->
                     <div class="col-md-6">
-                        <div class="card mb-4">
+                        <div class="card mb-4 border-0 shadow-sm">
                             <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>Thông tin Cá nhân</h5>
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-circle me-2"></i>
+                                    Thông Tin Cá Nhân
+                                </h5>
                             </div>
                             <div class="card-body">
                                 <table class="table table-borderless">
@@ -84,6 +100,19 @@
                                         </td>
                                     </tr>
                                     <tr>
+                                        <th>Giới tính:</th>
+                                        <td>
+                                            <?php
+                                            $gioi_tinh_labels = [
+                                                'nam' => 'Nam',
+                                                'nữ' => 'Nữ',
+                                                'khác' => 'Khác'
+                                            ];
+                                            echo $gioi_tinh_labels[$thong_tin_khach_hang['gioi_tinh']] ?? 'Chưa xác định';
+                                            ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th>Địa chỉ:</th>
                                         <td>
                                             <?php if ($thong_tin_khach_hang['dia_chi']): ?>
@@ -91,6 +120,16 @@
                                                 <?php echo htmlspecialchars($thong_tin_khach_hang['dia_chi']); ?>
                                             <?php else: ?>
                                                 <span class="text-muted">Chưa cập nhật</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Ghi chú:</th>
+                                        <td>
+                                            <?php if ($thong_tin_khach_hang['ghi_chu']): ?>
+                                                <?php echo htmlspecialchars($thong_tin_khach_hang['ghi_chu']); ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">Không có ghi chú</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -108,9 +147,12 @@
 
                     <!-- Thông tin tour hiện tại -->
                     <div class="col-md-6">
-                        <div class="card mb-4">
+                        <div class="card mb-4 border-0 shadow-sm">
                             <div class="card-header bg-success text-white">
-                                <h5 class="mb-0"><i class="fas fa-suitcase me-2"></i>Thông tin Tour Hiện tại</h5>
+                                <h5 class="mb-0">
+                                    <i class="fas fa-suitcase me-2"></i>
+                                    Thông Tin Tour Hiện Tại
+                                </h5>
                             </div>
                             <div class="card-body">
                                 <?php if ($thong_tin_khach_hang['ten_tour']): ?>
@@ -124,7 +166,7 @@
                                             <td><?php echo htmlspecialchars($thong_tin_khach_hang['ma_tour']); ?></td>
                                         </tr>
                                         <tr>
-                                            <th>Mã đặt tour:</th>
+                                            <th>Mã booking:</th>
                                             <td>
                                                 <span class="badge bg-dark"><?php echo $thong_tin_khach_hang['ma_dat_tour']; ?></span>
                                             </td>
@@ -135,6 +177,13 @@
                                                 <i class="fas fa-calendar-alt text-muted me-2"></i>
                                                 <?php echo date('d/m/Y', strtotime($thong_tin_khach_hang['ngay_bat_dau'])); ?> - 
                                                 <?php echo date('d/m/Y', strtotime($thong_tin_khach_hang['ngay_ket_thuc'])); ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Giờ tập trung:</th>
+                                            <td>
+                                                <i class="fas fa-clock text-muted me-2"></i>
+                                                <?php echo date('H:i', strtotime($thong_tin_khach_hang['gio_tap_trung'])); ?>
                                             </td>
                                         </tr>
                                         <tr>
@@ -168,11 +217,19 @@
                                                     'hoàn tất' => 'success',
                                                     'hủy' => 'danger'
                                                 ];
-                                                $class = $trang_thai_class[$thong_tin_khach_hang['trang_thai_dat']] ?? 'secondary';
+                                                $class = $trang_thai_class[$thong_tin_khach_hang['trang_thai_dat_tour']] ?? 'secondary';
                                                 ?>
                                                 <span class="badge bg-<?php echo $class; ?>">
-                                                    <?php echo $thong_tin_khach_hang['trang_thai_dat']; ?>
+                                                    <?php echo $thong_tin_khach_hang['trang_thai_dat_tour']; ?>
                                                 </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tổng tiền:</th>
+                                            <td>
+                                                <strong class="text-success">
+                                                    <?php echo number_format($thong_tin_khach_hang['tong_tien'], 0, ',', '.'); ?> VNĐ
+                                                </strong>
                                             </td>
                                         </tr>
                                     </table>
@@ -180,6 +237,7 @@
                                     <div class="text-center py-3">
                                         <i class="fas fa-suitcase fa-2x text-muted mb-3"></i>
                                         <h6 class="text-muted">Khách hàng chưa có tour nào</h6>
+                                        <p class="text-muted small">Khách hàng chưa tham gia tour nào hoặc tour đã kết thúc</p>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -187,14 +245,14 @@
                     </div>
                 </div>
 
-                <!-- Thành viên trong tour hiện tại -->
-                <?php if ($thong_tin_khach_hang['ten_tour'] && !empty($thanh_vien_tour_hien_tai)): ?>
-                <div class="card mb-4">
+                <!-- Danh sách khách hàng cùng booking -->
+                <?php if (!empty($khach_hang_cung_booking)): ?>
+                <div class="card mb-4 border-0 shadow-sm">
                     <div class="card-header bg-warning text-white">
                         <h5 class="mb-0">
                             <i class="fas fa-users me-2"></i>
-                            Thành Viên Trong Tour Hiện Tại
-                            <span class="badge bg-light text-dark"><?php echo count($thanh_vien_tour_hien_tai); ?> người</span>
+                            Thành Viên Cùng Booking
+                            <span class="badge bg-light text-dark"><?php echo count($khach_hang_cung_booking); ?> người</span>
                         </h5>
                     </div>
                     <div class="card-body p-0">
@@ -204,26 +262,27 @@
                                     <tr>
                                         <th width="50">#</th>
                                         <th>Họ tên</th>
+                                        <th width="120" class="text-center">Số điện thoại</th>
                                         <th width="120" class="text-center">CCCD</th>
                                         <th width="100" class="text-center">Ngày sinh</th>
                                         <th width="80" class="text-center">Giới tính</th>
-                                        <th width="120" class="text-center">Yêu cầu đặc biệt</th>
-                                        <th width="100" class="text-center">Thao tác</th>
+                                        <th width="100" class="text-center">Vai trò</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($thanh_vien_tour_hien_tai as $index => $thanh_vien): ?>
+                                    <?php foreach ($khach_hang_cung_booking as $index => $khach): ?>
                                     <tr>
                                         <td class="text-center"><?php echo $index + 1; ?></td>
                                         <td>
-                                            <?php echo htmlspecialchars($thanh_vien['ho_ten']); ?>
-                                            <?php if ($thanh_vien['ho_ten'] === $thong_tin_khach_hang['ho_ten']): ?>
-                                                <span class="badge bg-primary ms-1">Người đặt</span>
+                                            <?php echo htmlspecialchars($khach['ho_ten']); ?>
+                                            <?php if ($khach['id'] == $thong_tin_khach_hang['id']): ?>
+                                                <span class="badge bg-primary ms-1">Khách hàng này</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-center"><?php echo $thanh_vien['cccd'] ?? 'Chưa cập nhật'; ?></td>
+                                        <td class="text-center"><?php echo $khach['so_dien_thoai'] ?? 'Chưa cập nhật'; ?></td>
+                                        <td class="text-center"><?php echo $khach['cccd'] ?? 'Chưa cập nhật'; ?></td>
                                         <td class="text-center">
-                                            <?php echo $thanh_vien['ngay_sinh'] ? date('d/m/Y', strtotime($thanh_vien['ngay_sinh'])) : 'Chưa cập nhật'; ?>
+                                            <?php echo $khach['ngay_sinh'] ? date('d/m/Y', strtotime($khach['ngay_sinh'])) : 'Chưa cập nhật'; ?>
                                         </td>
                                         <td class="text-center">
                                             <?php
@@ -232,31 +291,15 @@
                                                 'nữ' => 'Nữ', 
                                                 'khác' => 'Khác'
                                             ];
-                                            echo $gioi_tinh_labels[$thanh_vien['gioi_tinh']] ?? 'Chưa xác định';
+                                            echo $gioi_tinh_labels[$khach['gioi_tinh']] ?? 'Chưa xác định';
                                             ?>
                                         </td>
                                         <td class="text-center">
-                                            <?php if (!empty($thanh_vien['yeu_cau_dac_biet'])): ?>
-                                                <?php if ($thanh_vien['da_xu_ly_yeu_cau']): ?>
-                                                    <span class="badge bg-success" title="Đã xử lý">
-                                                        <i class="fas fa-check"></i> Đã xử lý
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-warning" title="Chờ xử lý">
-                                                        <i class="fas fa-clock"></i> Chờ xử lý
-                                                    </span>
-                                                <?php endif; ?>
+                                            <?php if ($khach['la_khach_chinh']): ?>
+                                                <span class="badge bg-success">Người đặt</span>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary">Không có</span>
+                                                <span class="badge bg-info">Thành viên</span>
                                             <?php endif; ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="?act=thanh-vien-tour-chi-tiet&id=<?php echo $thanh_vien['id']; ?>"
-                                                   class="btn btn-info" title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                            </div>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -268,9 +311,12 @@
                 <?php endif; ?>
 
                 <!-- Lịch sử đặt tour -->
-                <div class="card">
+                <div class="card border-0 shadow-sm">
                     <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Lịch sử Đặt Tour</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>
+                            Lịch Sử Đặt Tour
+                        </h5>
                     </div>
                     <div class="card-body p-0">
                         <?php if (!empty($lich_su_dat_tour)): ?>
@@ -278,13 +324,14 @@
                                 <table class="table table-striped table-bordered mb-0">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th width="150">Mã đặt tour</th>
+                                            <th width="150">Mã booking</th>
                                             <th>Tour</th>
                                             <th width="120" class="text-center">Ngày đặt</th>
                                             <th width="150" class="text-center">Thời gian tour</th>
+                                            <th width="120" class="text-center">Số khách</th>
                                             <th width="120" class="text-center">Tổng tiền</th>
                                             <th width="100" class="text-center">Trạng thái</th>
-                                            <th width="80" class="text-center">Thành viên</th>
+                                            <th width="120" class="text-center">Hướng dẫn viên</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -295,6 +342,7 @@
                                             </td>
                                             <td>
                                                 <div class="fw-bold"><?php echo htmlspecialchars($tour['ten_tour']); ?></div>
+                                                <small class="text-muted"><?php echo $tour['ma_tour']; ?></small>
                                             </td>
                                             <td class="text-center">
                                                 <?php echo date('d/m/Y', strtotime($tour['ngay_dat'])); ?>
@@ -306,6 +354,9 @@
                                                 <div class="small text-muted">
                                                     đến <?php echo date('d/m/Y', strtotime($tour['ngay_ket_thuc'])); ?>
                                                 </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary"><?php echo $tour['tong_thanh_vien']; ?> người</span>
                                             </td>
                                             <td class="text-center">
                                                 <strong class="text-success"><?php echo number_format($tour['tong_tien'], 0, ',', '.'); ?> VNĐ</strong>
@@ -325,11 +376,7 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <?php if (isset($tour['so_thanh_vien']) && $tour['so_thanh_vien'] > 0): ?>
-                                                    <span class="badge bg-primary"><?php echo $tour['so_thanh_vien']; ?> người</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-secondary">1 người</span>
-                                                <?php endif; ?>
+                                                <?php echo $tour['huong_dan_vien'] ? htmlspecialchars($tour['huong_dan_vien']) : '<span class="text-muted">Chưa phân công</span>'; ?>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -340,6 +387,7 @@
                             <div class="text-center py-4">
                                 <i class="fas fa-history fa-2x text-muted mb-3"></i>
                                 <h6 class="text-muted">Không có lịch sử đặt tour</h6>
+                                <p class="text-muted small">Khách hàng chưa tham gia tour nào</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -374,8 +422,12 @@
         padding: 0.4em 0.6em;
     }
 
-    .card .card-body {
-        padding: 1.25rem;
+    .card {
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0;
     }
 
     .btn-group .btn {
