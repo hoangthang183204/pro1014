@@ -5,24 +5,20 @@ class KhachDoanController
 {
     public $model;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->model = new KhachDoanModel();
     }
 
-    // THÊM: Hàm xử lý Ajax cập nhật check-in
     public function update_checkin_status() {
-        if (!checkGuideLogin()) {
-            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-            return;
-        }
+        if (!checkGuideLogin()) { echo json_encode(['success' => false]); return; }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? null;
             $status = $_POST['status'] ?? 'chưa đến';
+            $tram_id = $_POST['tram_id'] ?? null; // Nhận thêm ID trạm
 
-            if ($id) {
-                $result = $this->model->updateCheckIn($id, $status);
+            if ($id && $tram_id) {
+                $result = $this->model->updateCheckIn($id, $status, $tram_id);
                 echo json_encode(['success' => $result]);
             } else {
                 echo json_encode(['success' => false]);
@@ -30,16 +26,14 @@ class KhachDoanController
         }
     }
 
-    public function index()
-    {
+    public function index() {
         if (!checkGuideLogin()) {
-            $_SESSION['error'] = "Vui lòng đăng nhập để xem danh sách khách!";
+            $_SESSION['error'] = "Vui lòng đăng nhập!";
             header("Location: " . BASE_URL_GUIDE . "?act=login");
             exit();
         }
 
         $id_lich = $_GET['id'] ?? null;
-
         if (!$id_lich) {
             $guide_id = $_SESSION['guide_id'];
             $myTours = $this->model->getToursByGuide($guide_id);
@@ -47,21 +41,33 @@ class KhachDoanController
             return;
         }
 
+        // 1. Tự động tạo trạm nếu chưa có
+        $this->model->checkAndCreateTramMau($id_lich);
+
+        // 2. Lấy danh sách trạm & Xác định trạm hiện tại
+        $dsTram = $this->model->getTramByLich($id_lich);
+        $selected_tram_id = $_GET['tram_id'] ?? ($dsTram[0]['id'] ?? 0);
+
+        // 3. Lấy thông tin tour & Danh sách khách theo trạm
         $info = $this->model->getTourInfoById($id_lich);
         $tourInfo = [
             'ten_tour' => $info['ten_tour'] ?? 'Không tìm thấy tour',
             'ngay_di' => isset($info['ngay_bat_dau']) ? date('d/m/Y', strtotime($info['ngay_bat_dau'])) : 'N/A'
         ];
 
-        $rawList = $this->model->getKhachDoanByLich($id_lich);
+        $rawList = $this->model->getKhachDoanByLich($id_lich, $selected_tram_id);
         $dsKhach = [];
+        $daDen = 0; // Biến đếm số người đã đến
 
         if (!empty($rawList)) {
             foreach ($rawList as $row) {
-                $noteData = json_decode($row['yeu_cau_dac_biet'], true);
-                $ghiChu = isset($noteData['yeu_cau']) ? $noteData['yeu_cau'] : '';
-
-                $nhom = ($row['loai_khach'] == 'doan') ? "Đoàn: " . $row['ten_doan'] : "Nhóm: " . $row['ma_dat_tour'];
+                $ghiChu = $row['ghi_chu'] ?? ''; 
+                $nhom = "Mã vé: " . $row['ma_dat_tour'];
+                
+                // Đếm người đã check-in
+                if($row['trang_thai_checkin'] == 'đã đến') {
+                    $daDen++;
+                }
 
                 $tuoi = '';
                 if (!empty($row['ngay_sinh'])) {
@@ -71,8 +77,8 @@ class KhachDoanController
                 }
 
                 $dsKhach[] = [
-                    'id' => $row['id'], // QUAN TRỌNG: ID thành viên để update
-                    'trang_thai_checkin' => $row['trang_thai_checkin'], // QUAN TRỌNG: Trạng thái hiện tại
+                    'id' => $row['id'], 
+                    'trang_thai_checkin' => $row['trang_thai_checkin'],
                     'ho_ten' => $row['ten_khach'],
                     'gioi_tinh' => ucfirst($row['gioi_tinh']),
                     'tuoi' => $tuoi,
@@ -83,7 +89,11 @@ class KhachDoanController
                 ];
             }
         }
+        
+        $totalKhach = count($dsKhach);
+        $isDuNguoi = ($totalKhach > 0 && $daDen == $totalKhach); // Logic kiểm tra đủ người
 
         require_once './views/khachdoan/list.php';
     }
 }
+?>
