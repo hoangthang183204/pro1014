@@ -22,6 +22,9 @@
                 width: 100%;
                 margin: 0;
                 padding: 0;
+                background: white;
+                box-shadow: none;
+                border: none;
             }
             .no-print {
                 display: none !important;
@@ -31,10 +34,14 @@
             }
             .table {
                 border-collapse: collapse !important;
+                width: 100%;
             }
             .table-bordered th,
             .table-bordered td {
                 border: 1px solid #dee2e6 !important;
+            }
+            .btn {
+                display: none !important;
             }
         }
 
@@ -50,6 +57,7 @@
             }
             body {
                 background: #f8f9fa;
+                padding-bottom: 50px;
             }
         }
 
@@ -130,6 +138,14 @@
             font-size: 12px;
             line-height: 1.4;
         }
+
+        /* Control buttons */
+        .print-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -163,7 +179,7 @@
                 <div class="col-6 company-info">
                     <h3 class="mb-1">CÔNG TY DU LỊCH LATA</h3>
                     <p class="mb-1"><strong>Địa chỉ:</strong> 123 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội</p>
-                    <p class="mb-1"><strong>Hotline:</strong> 1900 1008 - <strong>Email:</strong> LATA@viettravel.com</p>
+                    <p class="mb-1"><strong>Hotline:</strong> 1900 1008 - <strong>Email:</strong> lata@viettravel.com</p>
                     <p class="mb-0"><strong>MST:</strong> 0101234567</p>
                 </div>
                 <div class="col-6 text-end">
@@ -187,15 +203,15 @@
                         <table class="table table-borderless table-sm">
                             <tr>
                                 <td width="35%"><strong>Họ tên:</strong></td>
-                                <td><?php echo isset($khach_hang['ho_ten']) ? $khach_hang['ho_ten'] : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($dat_tour['ho_ten'] ?? 'N/A'); ?></td>
                             </tr>
                             <tr>
                                 <td><strong>Số điện thoại:</strong></td>
-                                <td><?php echo isset($khach_hang['so_dien_thoai']) ? $khach_hang['so_dien_thoai'] : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($dat_tour['so_dien_thoai'] ?? 'N/A'); ?></td>
                             </tr>
                             <tr>
                                 <td><strong>Email:</strong></td>
-                                <td><?php echo isset($khach_hang['email']) ? $khach_hang['email'] : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($dat_tour['email'] ?? 'N/A'); ?></td>
                             </tr>
                         </table>
                     </div>
@@ -203,18 +219,12 @@
                         <table class="table table-borderless table-sm">
                             <tr>
                                 <td width="35%"><strong>CCCD/CMND:</strong></td>
-                                <td><?php echo isset($khach_hang['cccd']) ? $khach_hang['cccd'] : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($dat_tour['cccd'] ?? 'N/A'); ?></td>
                             </tr>
                             <tr>
                                 <td><strong>Địa chỉ:</strong></td>
-                                <td><?php echo isset($khach_hang['dia_chi']) ? $khach_hang['dia_chi'] : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($dat_tour['dia_chi'] ?? 'N/A'); ?></td>
                             </tr>
-                            <?php if (isset($dat_tour['loai_khach']) && $dat_tour['loai_khach'] == 'doan'): ?>
-                            <tr>
-                                <td><strong>Tên đoàn:</strong></td>
-                                <td><?php echo isset($dat_tour['ten_doan']) ? $dat_tour['ten_doan'] : 'N/A'; ?></td>
-                            </tr>
-                            <?php endif; ?>
                         </table>
                     </div>
                 </div>
@@ -242,17 +252,17 @@
                             <tr>
                                 <td>
                                     <strong class="text-blue">
-                                        <?php echo isset($tour['ten_tour']) ? $tour['ten_tour'] : 'N/A'; ?>
+                                        <?php echo htmlspecialchars($dat_tour['ten_tour'] ?? 'N/A'); ?>
                                     </strong>
                                     <br>
                                     <small class="text-muted">
-                                        Mã tour: <?php echo isset($tour['ma_tour']) ? $tour['ma_tour'] : 'N/A'; ?>
+                                        Mã tour: <?php echo htmlspecialchars($dat_tour['ma_tour'] ?? 'N/A'); ?>
                                     </small>
                                 </td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($lich_khoi_hanh['ngay_bat_dau']) && !empty($lich_khoi_hanh['ngay_bat_dau'])) {
-                                        echo date('d/m/Y', strtotime($lich_khoi_hanh['ngay_bat_dau']));
+                                    if (isset($dat_tour['ngay_bat_dau']) && !empty($dat_tour['ngay_bat_dau'])) {
+                                        echo date('d/m/Y', strtotime($dat_tour['ngay_bat_dau']));
                                     } else {
                                         echo 'N/A';
                                     }
@@ -260,20 +270,20 @@
                                 </td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($lich_khoi_hanh['ngay_ket_thuc']) && !empty($lich_khoi_hanh['ngay_ket_thuc'])) {
-                                        echo date('d/m/Y', strtotime($lich_khoi_hanh['ngay_ket_thuc']));
+                                    if (isset($dat_tour['ngay_ket_thuc']) && !empty($dat_tour['ngay_ket_thuc'])) {
+                                        echo date('d/m/Y', strtotime($dat_tour['ngay_ket_thuc']));
                                     } else {
                                         echo 'N/A';
                                     }
                                     ?>
                                 </td>
                                 <td class="text-center">
-                                    <?php echo isset($dat_tour['so_luong_khach']) ? $dat_tour['so_luong_khach'] . ' khách' : 'N/A'; ?>
+                                    <?php echo ($dat_tour['so_luong_khach'] ?? 0) . ' khách'; ?>
                                 </td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($tour['gia_tour'])) {
-                                        echo number_format($tour['gia_tour'], 0, ',', '.') . '₫';
+                                    if (isset($dat_tour['gia_tour'])) {
+                                        echo number_format($dat_tour['gia_tour'], 0, ',', '.') . '₫';
                                     } else {
                                         echo 'N/A';
                                     }
@@ -286,12 +296,12 @@
             </div>
         </div>
 
-        <!-- Danh sách thành viên -->
-        <?php if (!empty($thanh_vien_list) && is_array($thanh_vien_list)): ?>
+        <!-- Danh sách khách hàng -->
+        <?php if (!empty($khach_hang_list) && is_array($khach_hang_list)): ?>
         <div class="row mb-4">
             <div class="col-12">
                 <h4 class="section-title">
-                    <i class="fas fa-users me-2"></i>DANH SÁCH THÀNH VIÊN (<?php echo count($thanh_vien_list); ?> người)
+                    <i class="fas fa-users me-2"></i>DANH SÁCH KHÁCH HÀNG (<?php echo count($khach_hang_list); ?> người)
                 </h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm">
@@ -302,18 +312,18 @@
                                 <th width="15%" class="text-center">Ngày sinh</th>
                                 <th width="10%" class="text-center">Giới tính</th>
                                 <th width="20%">CCCD/CMND</th>
-                                <th width="25%">Yêu cầu đặc biệt</th>
+                                <th width="25%">Ghi chú</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($thanh_vien_list as $index => $thanh_vien): ?>
+                            <?php foreach ($khach_hang_list as $index => $khach): ?>
                             <tr>
                                 <td class="text-center"><?php echo $index + 1; ?></td>
-                                <td><?php echo isset($thanh_vien['ho_ten']) ? $thanh_vien['ho_ten'] : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($khach['ho_ten'] ?? 'N/A'); ?></td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($thanh_vien['ngay_sinh']) && !empty($thanh_vien['ngay_sinh'])) {
-                                        echo date('d/m/Y', strtotime($thanh_vien['ngay_sinh']));
+                                    if (isset($khach['ngay_sinh']) && !empty($khach['ngay_sinh'])) {
+                                        echo date('d/m/Y', strtotime($khach['ngay_sinh']));
                                     } else {
                                         echo 'N/A';
                                     }
@@ -321,30 +331,20 @@
                                 </td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($thanh_vien['gioi_tinh'])) {
-                                        echo $thanh_vien['gioi_tinh'];
+                                    if (isset($khach['gioi_tinh'])) {
+                                        echo $khach['gioi_tinh'];
                                     } else {
                                         echo 'N/A';
                                     }
                                     ?>
                                 </td>
                                 <td>
-                                    <?php echo isset($thanh_vien['cccd']) ? $thanh_vien['cccd'] : 'N/A'; ?>
+                                    <?php echo htmlspecialchars($khach['cccd'] ?? 'N/A'); ?>
                                 </td>
                                 <td>
                                     <?php 
-                                    if (isset($thanh_vien['yeu_cau_dac_biet']) && !empty($thanh_vien['yeu_cau_dac_biet'])) {
-                                        // Xử lý JSON nếu cần
-                                        if (is_string($thanh_vien['yeu_cau_dac_biet'])) {
-                                            $yeu_cau = json_decode($thanh_vien['yeu_cau_dac_biet'], true);
-                                            if (json_last_error() === JSON_ERROR_NONE && isset($yeu_cau['yeu_cau'])) {
-                                                echo $yeu_cau['yeu_cau'];
-                                            } else {
-                                                echo $thanh_vien['yeu_cau_dac_biet'];
-                                            }
-                                        } else {
-                                            echo $thanh_vien['yeu_cau_dac_biet'];
-                                        }
+                                    if (isset($khach['ghi_chu']) && !empty($khach['ghi_chu'])) {
+                                        echo htmlspecialchars($khach['ghi_chu']);
                                     } else {
                                         echo 'Không có';
                                     }
@@ -385,7 +385,7 @@
                                     <td><strong>Đã thanh toán:</strong></td>
                                     <td class="text-end text-green">
                                         <?php 
-                                        $da_thanh_toan = isset($hoa_don['da_thanh_toan']) ? $hoa_don['da_thanh_toan'] : 0;
+                                        $da_thanh_toan = $hoa_don['da_thanh_toan'] ?? 0;
                                         echo number_format($da_thanh_toan, 0, ',', '.') . '₫';
                                         ?>
                                     </td>
@@ -394,7 +394,7 @@
                                     <td><strong>Còn nợ:</strong></td>
                                     <td class="text-end text-red">
                                         <?php 
-                                        $con_no = isset($hoa_don['con_no']) ? $hoa_don['con_no'] : (isset($dat_tour['tong_tien']) ? $dat_tour['tong_tien'] : 0);
+                                        $con_no = $hoa_don['con_no'] ?? ($dat_tour['tong_tien'] ?? 0);
                                         echo number_format($con_no, 0, ',', '.') . '₫';
                                         ?>
                                     </td>
@@ -426,7 +426,7 @@
                     <p class="mb-2">
                         <strong>
                             <?php 
-                            $phuong_thuc = isset($hoa_don['phuong_thuc_thanh_toan']) ? $hoa_don['phuong_thuc_thanh_toan'] : 'tiền mặt';
+                            $phuong_thuc = $hoa_don['phuong_thuc_thanh_toan'] ?? 'tiền mặt';
                             echo getPaymentMethodText($phuong_thuc);
                             ?>
                         </strong>
@@ -434,10 +434,10 @@
                     <?php if ($phuong_thuc == 'chuyển khoản'): ?>
                     <p class="mb-1 small"><strong>Ngân hàng:</strong> Techcombank - Chi nhánh Hà Nội</p>
                     <p class="mb-1 small"><strong>Số tài khoản:</strong> 1903 6669 9990 01</p>
-                    <p class="mb-1 small"><strong>Chủ tài khoản:</strong> CÔNG TY TNHH DU LỊCH VIETTRAVEL</p>
+                    <p class="mb-1 small"><strong>Chủ tài khoản:</strong> CÔNG TY TNHH DU LỊCH LATA</p>
                     <p class="mb-0 small">
                         <strong>Nội dung chuyển khoản:</strong> 
-                        <?php echo $dat_tour['ma_dat_tour']; ?> - <?php echo isset($khach_hang['ho_ten']) ? $khach_hang['ho_ten'] : 'Khách hàng'; ?>
+                        <?php echo $dat_tour['ma_dat_tour']; ?> - <?php echo htmlspecialchars($dat_tour['ho_ten'] ?? 'Khách hàng'); ?>
                     </p>
                     <?php endif; ?>
                 </div>
@@ -448,7 +448,7 @@
                     <p class="fw-bold mb-1">NGƯỜI LẬP HÓA ĐƠN</p>
                     <p class="text-muted">(Ký và ghi rõ họ tên)</p>
                     <div style="margin-top: 60px;"></div>
-                    <p class="border-top pt-2"><?php echo isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'Quản trị viên'; ?></p>
+                    <p class="border-top pt-2"><?php echo htmlspecialchars($dat_tour['nguoi_tao_ten'] ?? 'Quản trị viên'); ?></p>
                 </div>
             </div>
         </div>
@@ -461,9 +461,21 @@
                 </h6>
                 <p class="mb-1">• Quý khách vui lòng thanh toán trước ngày <strong><?php echo date('d/m/Y', strtotime('+7 days')); ?></strong></p>
                 <p class="mb-1">• Hóa đơn này là chứng từ thanh toán có giá trị pháp lý</p>
-                <p class="mb-1">• Mọi thắc mắc xin liên hệ hotline: <strong>1900 1234</strong> hoặc email: <strong>info@viettravel.com</strong></p>
+                <p class="mb-1">• Mọi thắc mắc xin liên hệ hotline: <strong>1900 1008</strong> hoặc email: <strong>lata@viettravel.com</strong></p>
                 <p class="mb-0">• Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Nút điều khiển nổi -->
+    <div class="print-controls no-print">
+        <div class="btn-group-vertical shadow">
+            <button onclick="window.print()" class="btn btn-primary" title="In hóa đơn (Ctrl+P)">
+                <i class="fas fa-print"></i>
+            </button>
+            <button onclick="window.history.back()" class="btn btn-secondary" title="Quay lại (ESC)">
+                <i class="fas fa-arrow-left"></i>
+            </button>
         </div>
     </div>
 
@@ -471,10 +483,7 @@
     <script>
         // Debug: Hiển thị tất cả dữ liệu trong console
         console.log('dat_tour:', <?php echo json_encode($dat_tour); ?>);
-        console.log('khach_hang:', <?php echo json_encode($khach_hang); ?>);
-        console.log('tour:', <?php echo json_encode($tour); ?>);
-        console.log('lich_khoi_hanh:', <?php echo json_encode($lich_khoi_hanh); ?>);
-        console.log('thanh_vien_list:', <?php echo json_encode($thanh_vien_list); ?>);
+        console.log('khach_hang_list:', <?php echo json_encode($khach_hang_list); ?>);
         console.log('hoa_don:', <?php echo json_encode($hoa_don); ?>);
 
         // Xử lý phím tắt
@@ -489,6 +498,16 @@
                 window.history.back();
             }
         });
+
+        // Tự động focus vào nút in khi trang load
+        window.addEventListener('load', function() {
+            console.log('Hóa đơn đã tải xong. Sẵn sàng in.');
+        });
+
+        // Xử lý sau khi in
+        window.onafterprint = function() {
+            console.log('Đã in xong hóa đơn');
+        };
     </script>
 </body>
 </html>
