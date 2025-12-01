@@ -98,5 +98,8 @@ class Database {
             return false;
         }
     }
+     public function lastInsertId() {
+        return $this->dbh->lastInsertId();
+    }
 }
 ?>

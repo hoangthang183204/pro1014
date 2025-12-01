@@ -11,7 +11,8 @@ $is_home = !isset($_GET['act']);
         </li>
 
         <li class="nav-item">
-            <a href="<?= BASE_URL_GUIDE . '?act=nhat_ky' ?>" class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && $_GET['act'] == 'nhat_ky') ? 'active' : '' ?>">
+            <a href="<?= BASE_URL_GUIDE . '?act=nhat_ky' ?>"
+                class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && $_GET['act'] == 'nhat_ky') ? 'active' : '' ?>">
                 <i class="nav-icon fas fa-book"></i>
                 <p class="m-0 pl-2">Nhật Ký Tour</p>
             </a>
@@ -30,14 +31,17 @@ $is_home = !isset($_GET['act']);
                 <p class="m-0 pl-2">Danh Sách Khách</p>
             </a>
         </li>
-         <li>
-            <a href="<?= BASE_URL_GUIDE ?>?act=my-profile"><i class="fas fa-user-circle"></i> Thông tin tài khoản</a>
+        <li>
+            <a href="<?= BASE_URL_GUIDE ?>?act=profile-settings">
+                <i class="fas fa-user-circle"></i> Thông tin tài khoản
+            </a>
         </li>
         <li data-page="settings">
             <a href="#"><i class="fas fa-cog"></i> Cài Đặt</a>
         </li>
         <li class="nav-item">
-            <a href="index.php?act=logout" class="nav-link d-flex align-items-center" onclick="return confirm('Bạn có chắc chắn muốn đăng xuất không?');">
+            <a href="index.php?act=logout" class="nav-link d-flex align-items-center"
+                onclick="return confirm('Bạn có chắc chắn muốn đăng xuất không?');">
                 <i class="nav-icon fas fa-sign-out-alt"></i>
                 <p class="m-0 pl-2">Đăng Xuất</p>
             </a>
