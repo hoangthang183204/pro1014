@@ -11,22 +11,24 @@ class AdminPhanPhong {
         try {
             $query = "SELECT 
                 pp.*,
-                tvd.ho_ten,
-                tvd.cccd,
-                tvd.gioi_tinh,
+                kh.ho_ten,
+                kh.cccd,
+                kh.gioi_tinh,
                 pdt.ma_dat_tour,
                 kh.so_dien_thoai,
-                kh.email
+                kh.email,
+                kh.ngay_sinh
             FROM phan_phong_khach_san pp
-            JOIN thanh_vien_dat_tour tvd ON pp.thanh_vien_dat_tour_id = tvd.id
-            JOIN phieu_dat_tour pdt ON tvd.phieu_dat_tour_id = pdt.id
-            JOIN khach_hang kh ON pdt.khach_hang_id = kh.id
+            JOIN khach_hang kh ON pp.khach_hang_id = kh.id
+            JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id
             WHERE pp.lich_khoi_hanh_id = :lich_khoi_hanh_id
-            ORDER BY pp.ten_khach_san, pp.so_phong, pp.loai_phong";
+            ORDER BY pp.ten_khach_san, pp.so_phong";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return $result ?: [];
         } catch (PDOException $e) {
             error_log("Lỗi getDanhSachPhanPhong: " . $e->getMessage());
             return [];
@@ -38,18 +40,17 @@ class AdminPhanPhong {
         try {
             $query = "SELECT 
                 pp.*,
-                tvd.ho_ten,
-                tvd.cccd,
-                tvd.gioi_tinh,
-                pdt.ma_dat_tour,
+                kh.ho_ten,
+                kh.cccd,
+                kh.gioi_tinh,
+                kh.ngay_sinh,
                 kh.so_dien_thoai,
                 lkh.ngay_bat_dau,
                 lkh.ngay_ket_thuc,
-                t.ten_tour
+                t.ten_tour,
+                t.ma_tour
             FROM phan_phong_khach_san pp
-            JOIN thanh_vien_dat_tour tvd ON pp.thanh_vien_dat_tour_id = tvd.id
-            JOIN phieu_dat_tour pdt ON tvd.phieu_dat_tour_id = pdt.id
-            JOIN khach_hang kh ON pdt.khach_hang_id = kh.id
+            JOIN khach_hang kh ON pp.khach_hang_id = kh.id
             JOIN lich_khoi_hanh lkh ON pp.lich_khoi_hanh_id = lkh.id
             JOIN tour t ON lkh.tour_id = t.id
             WHERE pp.id = :id";
@@ -67,27 +68,32 @@ class AdminPhanPhong {
     public function getKhachChuaPhanPhong($lich_khoi_hanh_id) {
         try {
             $query = "SELECT 
-                tvd.id,
-                tvd.ho_ten,
-                tvd.gioi_tinh,
-                tvd.cccd,
+                kh.id,
+                kh.ho_ten,
+                kh.gioi_tinh,
+                kh.cccd,
+                kh.ngay_sinh,
                 pdt.ma_dat_tour,
                 kh.so_dien_thoai,
-                kh.email
-            FROM thanh_vien_dat_tour tvd
-            JOIN phieu_dat_tour pdt ON tvd.phieu_dat_tour_id = pdt.id
-            JOIN khach_hang kh ON pdt.khach_hang_id = kh.id
+                kh.email,
+                pdt.trang_thai as trang_thai_dat
+            FROM khach_hang kh
+            JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id
             WHERE pdt.lich_khoi_hanh_id = :lich_khoi_hanh_id
-            AND tvd.id NOT IN (
-                SELECT thanh_vien_dat_tour_id 
+            AND pdt.trang_thai IN ('đã cọc', 'hoàn tất')
+            AND kh.id NOT IN (
+                SELECT khach_hang_id 
                 FROM phan_phong_khach_san 
                 WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id
+                AND khach_hang_id IS NOT NULL
             )
-            ORDER BY tvd.ho_ten";
+            ORDER BY kh.ho_ten";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return $result ?: [];
         } catch (PDOException $e) {
             error_log("Lỗi getKhachChuaPhanPhong: " . $e->getMessage());
             return [];
@@ -97,22 +103,37 @@ class AdminPhanPhong {
     // Thêm phân phòng mới
     public function themPhanPhong($data) {
         try {
+            // Kiểm tra khách hàng đã có phòng chưa
+            $checkQuery = "SELECT COUNT(*) as count FROM phan_phong_khach_san 
+                          WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                          AND khach_hang_id = :khach_hang_id";
+            $checkStmt = $this->conn->prepare($checkQuery);
+            $checkStmt->execute([
+                ':lich_khoi_hanh_id' => $data['lich_khoi_hanh_id'],
+                ':khach_hang_id' => $data['khach_hang_id']
+            ]);
+            $checkResult = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($checkResult['count'] > 0) {
+                return ['success' => false, 'message' => 'Khách hàng đã được phân phòng trước đó'];
+            }
+
             $query = "INSERT INTO phan_phong_khach_san 
-                     (lich_khoi_hanh_id, thanh_vien_dat_tour_id, ten_khach_san, 
-                      so_phong, loai_phong, ngay_nhan_phong, ngay_tra_phong, ghi_chu, nguoi_tao)
-                     VALUES (:lich_khoi_hanh_id, :thanh_vien_dat_tour_id, :ten_khach_san,
-                             :so_phong, :loai_phong, :ngay_nhan_phong, :ngay_tra_phong, :ghi_chu, :nguoi_tao)";
+                     (lich_khoi_hanh_id, khach_hang_id, ten_khach_san, 
+                      so_phong, loai_phong, ngay_nhan_phong, ngay_tra_phong, ghi_chu, nguoi_tao, created_at)
+                     VALUES (:lich_khoi_hanh_id, :khach_hang_id, :ten_khach_san,
+                             :so_phong, :loai_phong, :ngay_nhan_phong, :ngay_tra_phong, :ghi_chu, :nguoi_tao, NOW())";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 ':lich_khoi_hanh_id' => $data['lich_khoi_hanh_id'],
-                ':thanh_vien_dat_tour_id' => $data['thanh_vien_dat_tour_id'],
+                ':khach_hang_id' => $data['khach_hang_id'],
                 ':ten_khach_san' => $data['ten_khach_san'],
                 ':so_phong' => $data['so_phong'],
                 ':loai_phong' => $data['loai_phong'],
                 ':ngay_nhan_phong' => $data['ngay_nhan_phong'],
                 ':ngay_tra_phong' => $data['ngay_tra_phong'],
-                ':ghi_chu' => $data['ghi_chu'],
+                ':ghi_chu' => $data['ghi_chu'] ?? '',
                 ':nguoi_tao' => $data['nguoi_tao']
             ]);
 
@@ -143,7 +164,7 @@ class AdminPhanPhong {
                 ':loai_phong' => $data['loai_phong'],
                 ':ngay_nhan_phong' => $data['ngay_nhan_phong'],
                 ':ngay_tra_phong' => $data['ngay_tra_phong'],
-                ':ghi_chu' => $data['ghi_chu'],
+                ':ghi_chu' => $data['ghi_chu'] ?? '',
                 ':id' => $data['id']
             ]);
 
@@ -174,22 +195,37 @@ class AdminPhanPhong {
             $this->conn->beginTransaction();
 
             foreach ($data['danh_sach_khach'] as $khach_id) {
+                // Kiểm tra khách đã có phòng chưa
+                $checkQuery = "SELECT COUNT(*) as count FROM phan_phong_khach_san 
+                              WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                              AND khach_hang_id = :khach_hang_id";
+                $checkStmt = $this->conn->prepare($checkQuery);
+                $checkStmt->execute([
+                    ':lich_khoi_hanh_id' => $data['lich_khoi_hanh_id'],
+                    ':khach_hang_id' => $khach_id
+                ]);
+                $checkResult = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($checkResult['count'] > 0) {
+                    continue; // Bỏ qua khách đã có phòng
+                }
+
                 $query = "INSERT INTO phan_phong_khach_san 
-                         (lich_khoi_hanh_id, thanh_vien_dat_tour_id, ten_khach_san, 
-                          so_phong, loai_phong, ngay_nhan_phong, ngay_tra_phong, ghi_chu, nguoi_tao)
-                         VALUES (:lich_khoi_hanh_id, :thanh_vien_dat_tour_id, :ten_khach_san,
-                                 :so_phong, :loai_phong, :ngay_nhan_phong, :ngay_tra_phong, :ghi_chu, :nguoi_tao)";
+                         (lich_khoi_hanh_id, khach_hang_id, ten_khach_san, 
+                          so_phong, loai_phong, ngay_nhan_phong, ngay_tra_phong, ghi_chu, nguoi_tao, created_at)
+                         VALUES (:lich_khoi_hanh_id, :khach_hang_id, :ten_khach_san,
+                                 :so_phong, :loai_phong, :ngay_nhan_phong, :ngay_tra_phong, :ghi_chu, :nguoi_tao, NOW())";
 
                 $stmt = $this->conn->prepare($query);
                 $stmt->execute([
                     ':lich_khoi_hanh_id' => $data['lich_khoi_hanh_id'],
-                    ':thanh_vien_dat_tour_id' => $khach_id,
+                    ':khach_hang_id' => $khach_id,
                     ':ten_khach_san' => $data['ten_khach_san'],
                     ':so_phong' => $data['so_phong'],
                     ':loai_phong' => $data['loai_phong'],
                     ':ngay_nhan_phong' => $data['ngay_nhan_phong'],
                     ':ngay_tra_phong' => $data['ngay_tra_phong'],
-                    ':ghi_chu' => $data['ghi_chu'],
+                    ':ghi_chu' => $data['ghi_chu'] ?? '',
                     ':nguoi_tao' => $data['nguoi_tao']
                 ]);
             }
@@ -219,7 +255,9 @@ class AdminPhanPhong {
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return $result ?: [];
         } catch (PDOException $e) {
             error_log("Lỗi getThongKePhanPhong: " . $e->getMessage());
             return [];
@@ -256,6 +294,72 @@ class AdminPhanPhong {
         } catch (PDOException $e) {
             error_log("Lỗi kiemTraPhongTrung: " . $e->getMessage());
             return false;
+        }
+    }
+
+    // Lấy danh sách khách hàng theo lịch khởi hành
+    public function getKhachHangByLichKhoiHanh($lich_khoi_hanh_id) {
+        try {
+            $query = "SELECT 
+                kh.*,
+                pdt.ma_dat_tour,
+                pdt.trang_thai as trang_thai_dat_tour
+            FROM khach_hang kh
+            JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id
+            WHERE pdt.lich_khoi_hanh_id = :lich_khoi_hanh_id
+            AND pdt.trang_thai IN ('đã cọc', 'hoàn tất')
+            ORDER BY kh.ho_ten";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return $result ?: [];
+        } catch (PDOException $e) {
+            error_log("Lỗi getKhachHangByLichKhoiHanh: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Lấy danh sách khách sạn đã sử dụng
+    public function getDanhSachKhachSan($lich_khoi_hanh_id) {
+        try {
+            $query = "SELECT DISTINCT ten_khach_san 
+                     FROM phan_phong_khach_san 
+                     WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id
+                     ORDER BY ten_khach_san";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return $result ?: [];
+        } catch (PDOException $e) {
+            error_log("Lỗi getDanhSachKhachSan: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Lấy danh sách phòng đã sử dụng trong khách sạn
+    public function getDanhSachPhong($lich_khoi_hanh_id, $ten_khach_san) {
+        try {
+            $query = "SELECT DISTINCT so_phong, loai_phong 
+                     FROM phan_phong_khach_san 
+                     WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id
+                     AND ten_khach_san = :ten_khach_san
+                     ORDER BY so_phong";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':ten_khach_san' => $ten_khach_san
+            ]);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return $result ?: [];
+        } catch (PDOException $e) {
+            error_log("Lỗi getDanhSachPhong: " . $e->getMessage());
+            return [];
         }
     }
 }
