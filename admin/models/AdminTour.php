@@ -53,24 +53,6 @@ class AdminTour
         }
     }
 
-    // Lấy tour theo ID
-    public function getTourById($id)
-    {
-        try {
-            // XÓA JOIN VÀO chinh_sach_tour
-            $query = "SELECT t.*, dm.ten_danh_muc
-                      FROM tour t 
-                      LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id 
-                      WHERE t.id = :id";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getTourById: " . $e->getMessage());
-            return null;
-        }
-    }
 
     // Tạo tour mới
     public function createTour($data)
@@ -180,6 +162,136 @@ class AdminTour
         }
     }
 
+    // Thêm các phương thức sau vào TourModel.php
+
+    // Lấy lịch trình theo phiên bản (nếu có lưu riêng)
+    public function getLichTrinhByPhienBan($phien_ban_id)
+    {
+        try {
+            // Nếu bạn có bảng lưu lịch trình riêng cho phiên bản
+            // Nếu không, lấy từ lịch trình tour hiện tại
+            $query = "SELECT ltt.* FROM lich_trinh_tour ltt
+                  JOIN phien_ban_tour pbt ON ltt.tour_id = pbt.tour_id
+                  WHERE pbt.id = :phien_ban_id
+                  ORDER BY ltt.thu_tu_sap_xep, ltt.so_ngay";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':phien_ban_id' => $phien_ban_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichTrinhByPhienBan: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Xóa tất cả phiên bản theo tour (dùng khi xóa tour)
+    public function deleteAllPhienBanByTour($tour_id)
+    {
+        try {
+            $query = "DELETE FROM phien_ban_tour WHERE tour_id = :tour_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            return true;
+        } catch (PDOException $e) {
+            error_log("Lỗi deleteAllPhienBanByTour: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Lấy phiên bản đang áp dụng cho một lịch khởi hành cụ thể
+    public function getPhienBanChoNgay($tour_id, $ngay)
+    {
+        try {
+            $query = "SELECT * FROM phien_ban_tour 
+                  WHERE tour_id = :tour_id 
+                  AND :ngay BETWEEN thoi_gian_bat_dau AND thoi_gian_ket_thuc
+                  AND loai_phien_ban IN ('khuyen_mai', 'dac_biet')
+                  ORDER BY 
+                    CASE loai_phien_ban 
+                        WHEN 'dac_biet' THEN 1
+                        WHEN 'khuyen_mai' THEN 2
+                        ELSE 3
+                    END
+                  LIMIT 1";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id, ':ngay' => $ngay]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getPhienBanChoNgay: " . $e->getMessage());
+            return null;
+        }
+    }
+    // Lấy lịch trình theo tour
+    public function getLichTrinhByTour($tour_id)
+    {
+        try {
+            $query = "SELECT * FROM lich_trinh_tour 
+                  WHERE tour_id = :tour_id 
+                  ORDER BY thu_tu_sap_xep, so_ngay";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichTrinhByTour: " . $e->getMessage());
+            return [];
+        }
+    }
+
+
+
+    // Sao chép lịch trình vào phiên bản (nếu bạn muốn lưu riêng)
+    public function copyLichTrinhToPhienBan($phien_ban_id, $tour_id)
+    {
+        try {
+            // Tạo bảng lưu lịch trình phiên bản nếu chưa có
+            // Giả sử có bảng lich_trinh_phien_ban với cấu trúc tương tự lich_trinh_tour
+            $check_table = "SHOW TABLES LIKE 'lich_trinh_phien_ban'";
+            $stmt = $this->conn->query($check_table);
+
+            if (!$stmt->fetch()) {
+                // Tạo bảng mới
+                $create_table = "CREATE TABLE lich_trinh_phien_ban (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                phien_ban_id INT NOT NULL,
+                so_ngay INT NOT NULL,
+                tieu_de VARCHAR(255),
+                mo_ta_hoat_dong TEXT,
+                cho_o TEXT,
+                bua_an TEXT,
+                phuong_tien TEXT,
+                ghi_chu_hdv TEXT,
+                thu_tu_sap_xep INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (phien_ban_id) REFERENCES phien_ban_tour(id) ON DELETE CASCADE
+            )";
+
+                $this->conn->exec($create_table);
+            }
+
+            // Sao chép dữ liệu từ lich_trinh_tour
+            $copy_query = "INSERT INTO lich_trinh_phien_ban 
+                       (phien_ban_id, so_ngay, tieu_de, mo_ta_hoat_dong, 
+                        cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep)
+                       SELECT :phien_ban_id, so_ngay, tieu_de, mo_ta_hoat_dong,
+                              cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep
+                       FROM lich_trinh_tour 
+                       WHERE tour_id = :tour_id
+                       ORDER BY thu_tu_sap_xep, so_ngay";
+
+            $stmt = $this->conn->prepare($copy_query);
+            $stmt->execute([
+                ':phien_ban_id' => $phien_ban_id,
+                ':tour_id' => $tour_id
+            ]);
+
+            return true;
+        } catch (PDOException $e) {
+            error_log("Lỗi copyLichTrinhToPhienBan: " . $e->getMessage());
+            return false;
+        }
+    }
+
     // ==================== UTILITY METHODS ====================
 
     // Lấy tất cả danh mục
@@ -211,22 +323,6 @@ class AdminTour
     }
 
     // ==================== LỊCH TRÌNH METHODS ====================
-
-    // Lấy lịch trình tour
-    public function getLichTrinhByTour($tour_id)
-    {
-        try {
-            $query = "SELECT * FROM lich_trinh_tour 
-                      WHERE tour_id = :tour_id 
-                      ORDER BY so_ngay, thu_tu_sap_xep";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':tour_id' => $tour_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getLichTrinhByTour: " . $e->getMessage());
-            return [];
-        }
-    }
 
     // Lấy lịch trình theo ID
     public function getLichTrinhById($id)
@@ -332,13 +428,40 @@ class AdminTour
 
     // ==================== PHIÊN BẢN METHODS ====================
 
+    // Lấy giá tour hiện tại (phương thức riêng)
+    public function getGiaTourHienTai($tour_id)
+    {
+        try {
+            $query = "SELECT gia_tour FROM tour WHERE id = :tour_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ? ($result['gia_tour'] ?? 0) : 0;
+        } catch (PDOException $e) {
+            error_log("Lỗi getGiaTourHienTai: " . $e->getMessage());
+            return 0;
+        }
+    }
     // Lấy phiên bản theo tour
     public function getPhienBanByTour($tour_id)
     {
         try {
-            $query = "SELECT * FROM phien_ban_tour 
-                      WHERE tour_id = :tour_id 
-                      ORDER BY created_at DESC";
+            $query = "SELECT pb.*, 
+                  (SELECT COUNT(*) FROM phieu_dat_tour pdt 
+                   JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id 
+                   WHERE lkh.tour_id = pb.tour_id 
+                   AND lkh.ngay_bat_dau BETWEEN pb.thoi_gian_bat_dau AND pb.thoi_gian_ket_thuc) as so_dat_tour
+                  FROM phien_ban_tour pb 
+                  WHERE pb.tour_id = :tour_id 
+                  ORDER BY 
+                    CASE pb.loai_phien_ban 
+                        WHEN 'dac_biet' THEN 1
+                        WHEN 'khuyen_mai' THEN 2
+                        WHEN 'mua' THEN 3
+                        ELSE 4
+                    END,
+                    pb.thoi_gian_bat_dau DESC";
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':tour_id' => $tour_id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -348,20 +471,199 @@ class AdminTour
         }
     }
 
-    // Lấy phiên bản theo ID
-    public function getPhienBanById($id)
+    // Lấy tour theo ID (đảm bảo có giá trị mặc định)
+    public function getTourById($tour_id)
     {
         try {
-            $query = "SELECT pb.*, t.ten_tour, t.ma_tour 
-                      FROM phien_ban_tour pb
-                      JOIN tour t ON pb.tour_id = t.id
-                      WHERE pb.id = :id";
+            $query = "SELECT t.*, 
+                  dm.ten_danh_muc,
+                  cs.ten_chinh_sach,
+                  cs.quy_dinh_huy_doi,
+                  cs.luu_y_suc_khoe,
+                  cs.luu_y_hanh_ly,
+                  (SELECT COUNT(*) FROM lich_khoi_hanh WHERE tour_id = t.id AND trang_thai NOT IN ('đã hủy')) as so_lich_khoi_hanh
+                  FROM tour t
+                  LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id
+                  LEFT JOIN chinh_sach_tour cs ON t.chinh_sach_id = cs.id
+                  WHERE t.id = :tour_id";
             $stmt = $this->conn->prepare($query);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([':tour_id' => $tour_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Đảm bảo giá trị mặc định
+            if ($result) {
+                $result['gia_tour'] = $result['gia_tour'] ?? 0;
+                $result['mo_ta'] = $result['mo_ta'] ?? '';
+                $result['hinh_anh'] = $result['hinh_anh'] ?? '';
+                $result['ten_danh_muc'] = $result['ten_danh_muc'] ?? 'Chưa phân loại';
+                $result['so_lich_khoi_hanh'] = $result['so_lich_khoi_hanh'] ?? 0;
+            }
+
+            return $result;
         } catch (PDOException $e) {
-            error_log("Lỗi getPhienBanById: " . $e->getMessage());
+            error_log("Lỗi getTourById: " . $e->getMessage());
             return null;
+        }
+    }
+
+    // Lấy lịch khởi hành trong thời gian phiên bản
+    public function getLichKhoiHanhTrongPhienBan($tour_id, $bat_dau, $ket_thuc)
+    {
+        try {
+            $query = "SELECT lkh.*, 
+                  COUNT(pdt.id) as so_dat_tour,
+                  GROUP_CONCAT(DISTINCT CONCAT(kh.ho_ten, ' (', pdt.so_luong_khach, ' khách)') SEPARATOR '; ') as khach_hang_dat
+                  FROM lich_khoi_hanh lkh
+                  LEFT JOIN phieu_dat_tour pdt ON lkh.id = pdt.lich_khoi_hanh_id AND pdt.trang_thai IN ('đã cọc', 'hoàn tất')
+                  LEFT JOIN khach_hang kh ON pdt.khach_hang_id = kh.id
+                  WHERE lkh.tour_id = :tour_id 
+                  AND lkh.ngay_bat_dau BETWEEN :bat_dau AND :ket_thuc
+                  GROUP BY lkh.id
+                  ORDER BY lkh.ngay_bat_dau";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':tour_id' => $tour_id,
+                ':bat_dau' => $bat_dau,
+                ':ket_thuc' => $ket_thuc
+            ]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichKhoiHanhTrongPhienBan: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Lấy duyệt toán của tour
+    public function getDuToanByTour($tour_id)
+    {
+        try {
+            $query = "SELECT * FROM du_toan_tour 
+                  WHERE tour_id = :tour_id 
+                  ORDER BY created_at DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getDuToanByTour: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Cập nhật giá tour
+    public function updateGiaTour($tour_id, $gia_moi)
+    {
+        try {
+            $query = "UPDATE tour 
+                  SET gia_tour = :gia_tour, 
+                      updated_at = NOW()
+                  WHERE id = :tour_id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':gia_tour' => $gia_moi,
+                ':tour_id' => $tour_id
+            ]);
+
+            return true;
+        } catch (PDOException $e) {
+            error_log("Lỗi updateGiaTour: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Xóa phiên bản
+    public function deletePhienBan($id)
+    {
+        try {
+            // Kiểm tra xem phiên bản có đang được áp dụng không
+            $phien_ban = $this->getPhienBanById($id);
+            if (!$phien_ban) {
+                throw new Exception("Phiên bản không tồn tại!");
+            }
+
+            // Kiểm tra có lịch khởi hành nào đang sử dụng phiên bản này không
+            $check_query = "SELECT COUNT(*) as count FROM lich_khoi_hanh 
+                       WHERE tour_id = :tour_id 
+                       AND ngay_bat_dau BETWEEN :bat_dau AND :ket_thuc";
+
+            $stmt = $this->conn->prepare($check_query);
+            $stmt->execute([
+                ':tour_id' => $phien_ban['tour_id'],
+                ':bat_dau' => $phien_ban['thoi_gian_bat_dau'],
+                ':ket_thuc' => $phien_ban['thoi_gian_ket_thuc']
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($result['count'] > 0) {
+                throw new Exception("Không thể xóa phiên bản vì có lịch khởi hành đang sử dụng trong thời gian này!");
+            }
+
+            // Xóa phiên bản
+            $delete_query = "DELETE FROM phien_ban_tour WHERE id = :id";
+            $stmt = $this->conn->prepare($delete_query);
+            $stmt->execute([':id' => $id]);
+
+            return true;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    // Lấy thống kê chi tiết
+    public function getThongKePhienBan($phien_ban_id)
+    {
+        try {
+            $phien_ban = $this->getPhienBanById($phien_ban_id);
+            if (!$phien_ban) {
+                return [];
+            }
+
+            $query = "SELECT 
+                    COUNT(pdt.id) as tong_dat,
+                    SUM(pdt.so_luong_khach) as tong_khach,
+                    SUM(pdt.tong_tien) as doanh_thu,
+                    SUM(CASE WHEN pdt.trang_thai = 'hoàn tất' THEN pdt.tong_tien ELSE 0 END) as da_thanh_toan,
+                    SUM(CASE WHEN pdt.trang_thai = 'đã cọc' THEN pdt.tong_tien * 0.3 ELSE 0 END) as coc,
+                    COUNT(DISTINCT pdt.khach_hang_id) as so_khach_hang,
+                    AVG(dtg.diem_so) as diem_danh_gia_tb
+                  FROM phieu_dat_tour pdt
+                  JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
+                  LEFT JOIN danh_gia_tour dtg ON pdt.id = dtg.phieu_dat_tour_id
+                  WHERE lkh.tour_id = :tour_id
+                  AND lkh.ngay_bat_dau BETWEEN :bat_dau AND :ket_thuc
+                  AND pdt.trang_thai IN ('hoàn tất', 'đã cọc')";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':tour_id' => $phien_ban['tour_id'],
+                ':bat_dau' => $phien_ban['thoi_gian_bat_dau'],
+                ':ket_thuc' => $phien_ban['thoi_gian_ket_thuc']
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Lấy thêm số lượng lịch khởi hành
+            $lich_query = "SELECT COUNT(*) as so_lich_khoi_hanh 
+                      FROM lich_khoi_hanh 
+                      WHERE tour_id = :tour_id 
+                      AND ngay_bat_dau BETWEEN :bat_dau AND :ket_thuc";
+
+            $stmt = $this->conn->prepare($lich_query);
+            $stmt->execute([
+                ':tour_id' => $phien_ban['tour_id'],
+                ':bat_dau' => $phien_ban['thoi_gian_bat_dau'],
+                ':ket_thuc' => $phien_ban['thoi_gian_ket_thuc']
+            ]);
+
+            $lich_result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return array_merge($result ?: [], $lich_result ?: []);
+        } catch (PDOException $e) {
+            error_log("Lỗi getThongKePhienBan: " . $e->getMessage());
+            return [];
         }
     }
 
@@ -369,25 +671,61 @@ class AdminTour
     public function createPhienBan($data)
     {
         try {
-            $query = "INSERT INTO phien_ban_tour (tour_id, ten_phien_ban, loai_phien_ban, 
-                      gia_tour, thoi_gian_bat_dau, thoi_gian_ket_thuc, mo_ta) 
-                      VALUES (:tour_id, :ten_phien_ban, :loai_phien_ban, 
-                      :gia_tour, :thoi_gian_bat_dau, :thoi_gian_ket_thuc, :mo_ta)";
+            error_log("createPhienBan called with data: " . print_r($data, true));
+
+            // Kiểm tra kết nối
+            if (!$this->conn) {
+                throw new Exception("Không thể kết nối đến database!");
+            }
+
+            $query = "INSERT INTO phien_ban_tour 
+                  (tour_id, ten_phien_ban, loai_phien_ban, gia_tour, 
+                   gia_goc, khuyen_mai, thoi_gian_bat_dau, thoi_gian_ket_thuc, 
+                   mo_ta, dich_vu_dac_biet, dieu_kien_ap_dung) 
+                  VALUES 
+                  (:tour_id, :ten_phien_ban, :loai_phien_ban, :gia_tour, 
+                   :gia_goc, :khuyen_mai, :thoi_gian_bat_dau, :thoi_gian_ket_thuc, 
+                   :mo_ta, :dich_vu_dac_biet, :dieu_kien_ap_dung)";
+
+            error_log("SQL Query: " . $query);
 
             $stmt = $this->conn->prepare($query);
-            $stmt->execute([
+
+            $params = [
                 ':tour_id' => $data['tour_id'],
                 ':ten_phien_ban' => $data['ten_phien_ban'],
                 ':loai_phien_ban' => $data['loai_phien_ban'],
                 ':gia_tour' => $data['gia_tour'],
+                ':gia_goc' => $data['gia_goc'],
+                ':khuyen_mai' => $data['khuyen_mai'],
                 ':thoi_gian_bat_dau' => $data['thoi_gian_bat_dau'],
                 ':thoi_gian_ket_thuc' => $data['thoi_gian_ket_thuc'],
-                ':mo_ta' => $data['mo_ta']
-            ]);
+                ':mo_ta' => $data['mo_ta'],
+                ':dich_vu_dac_biet' => $data['dich_vu_dac_biet'],
+                ':dieu_kien_ap_dung' => $data['dieu_kien_ap_dung']
+            ];
 
-            return $this->conn->lastInsertId();
+            error_log("Params: " . print_r($params, true));
+
+            $result = $stmt->execute($params);
+
+            if (!$result) {
+                $error_info = $stmt->errorInfo();
+                error_log("SQL Error: " . print_r($error_info, true));
+                throw new Exception("Lỗi SQL: " . $error_info[2]);
+            }
+
+            $last_id = $this->conn->lastInsertId();
+            error_log("Insert successful, last ID: " . $last_id);
+
+            return $last_id;
         } catch (PDOException $e) {
-            error_log("Lỗi createPhienBan: " . $e->getMessage());
+            error_log("PDO Exception in createPhienBan: " . $e->getMessage());
+            error_log("Error Code: " . $e->getCode());
+            error_log("SQL State: " . $e->errorInfo[0] ?? 'N/A');
+            return false;
+        } catch (Exception $e) {
+            error_log("General Exception in createPhienBan: " . $e->getMessage());
             return false;
         }
     }
@@ -397,20 +735,31 @@ class AdminTour
     {
         try {
             $query = "UPDATE phien_ban_tour 
-                      SET ten_phien_ban = :ten_phien_ban, loai_phien_ban = :loai_phien_ban,
-                          gia_tour = :gia_tour, thoi_gian_bat_dau = :thoi_gian_bat_dau,
-                          thoi_gian_ket_thuc = :thoi_gian_ket_thuc, mo_ta = :mo_ta,
-                          updated_at = NOW()
-                      WHERE id = :id";
+                  SET ten_phien_ban = :ten_phien_ban, 
+                      loai_phien_ban = :loai_phien_ban,
+                      gia_tour = :gia_tour,
+                      gia_goc = :gia_goc,
+                      khuyen_mai = :khuyen_mai,
+                      thoi_gian_bat_dau = :thoi_gian_bat_dau,
+                      thoi_gian_ket_thuc = :thoi_gian_ket_thuc,
+                      mo_ta = :mo_ta,
+                      dich_vu_dac_biet = :dich_vu_dac_biet,
+                      dieu_kien_ap_dung = :dieu_kien_ap_dung,
+                      updated_at = NOW()
+                  WHERE id = :id";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
                 ':ten_phien_ban' => $data['ten_phien_ban'],
                 ':loai_phien_ban' => $data['loai_phien_ban'],
                 ':gia_tour' => $data['gia_tour'],
+                ':gia_goc' => $data['gia_goc'],
+                ':khuyen_mai' => $data['khuyen_mai'],
                 ':thoi_gian_bat_dau' => $data['thoi_gian_bat_dau'],
                 ':thoi_gian_ket_thuc' => $data['thoi_gian_ket_thuc'],
                 ':mo_ta' => $data['mo_ta'],
+                ':dich_vu_dac_biet' => $data['dich_vu_dac_biet'],
+                ':dieu_kien_ap_dung' => $data['dieu_kien_ap_dung'],
                 ':id' => $id
             ]);
 
@@ -421,22 +770,10 @@ class AdminTour
         }
     }
 
-    // Xóa phiên bản
-    public function deletePhienBan($id)
-    {
-        try {
-            $query = "DELETE FROM phien_ban_tour WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':id' => $id]);
-            return true;
-        } catch (PDOException $e) {
-            error_log("Lỗi deletePhienBan: " . $e->getMessage());
-            return false;
-        }
-    }
 
-    // Áp dụng phiên bản
-    public function apDungPhienBan($phien_ban_id, $tour_id)
+
+    // Kích hoạt phiên bản (đặt làm phiên bản hiện hành)
+    public function activatePhienBan($phien_ban_id, $tour_id)
     {
         try {
             // Lấy thông tin phiên bản
@@ -446,10 +783,10 @@ class AdminTour
                 return false;
             }
 
-            // Cập nhật tour với thông tin từ phiên bản
+            // Cập nhật giá tour từ phiên bản
             $query = "UPDATE tour 
-                      SET gia_tour = :gia_tour, updated_at = NOW()
-                      WHERE id = :tour_id";
+                  SET gia_tour = :gia_tour, updated_at = NOW()
+                  WHERE id = :tour_id";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([
@@ -459,22 +796,88 @@ class AdminTour
 
             return true;
         } catch (PDOException $e) {
-            error_log("Lỗi apDungPhienBan: " . $e->getMessage());
+            error_log("Lỗi activatePhienBan: " . $e->getMessage());
             return false;
         }
     }
 
-    // Xóa tất cả phiên bản của tour
-    private function deleteAllPhienBanByTour($tour_id)
+    // Lấy phiên bản đang hiệu lực
+    public function getPhienBanHienHanh($tour_id)
     {
         try {
-            $query = "DELETE FROM phien_ban_tour WHERE tour_id = :tour_id";
+            $now = date('Y-m-d');
+            $query = "SELECT * FROM phien_ban_tour 
+                  WHERE tour_id = :tour_id 
+                  AND :now BETWEEN thoi_gian_bat_dau AND thoi_gian_ket_thuc
+                  ORDER BY 
+                    CASE loai_phien_ban 
+                        WHEN 'dac_biet' THEN 1
+                        WHEN 'khuyen_mai' THEN 2
+                        WHEN 'mua' THEN 3
+                        ELSE 4
+                    END
+                  LIMIT 1";
+
             $stmt = $this->conn->prepare($query);
-            $stmt->execute([':tour_id' => $tour_id]);
-            return true;
+            $stmt->execute([':tour_id' => $tour_id, ':now' => $now]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Lỗi deleteAllPhienBanByTour: " . $e->getMessage());
-            return false;
+            error_log("Lỗi getPhienBanHienHanh: " . $e->getMessage());
+            return null;
+        }
+    }
+
+
+    // Lấy chi tiết phiên bản (Sửa với debug)
+    public function getPhienBanById($id)
+    {
+        try {
+            error_log("Getting phien ban by ID: " . $id);
+
+            $query = "SELECT pb.*, 
+                  t.ten_tour, 
+                  t.ma_tour, 
+                  t.gia_tour as gia_tour_hien_tai,
+                  t.mo_ta as mo_ta_tour,
+                  t.hinh_anh,
+                  t.trang_thai as trang_thai_tour,
+                  dm.ten_danh_muc,
+                  cs.ten_chinh_sach,
+                  u.ho_ten as nguoi_tao_ten,
+                  u.id as nguoi_tao_id
+                  FROM phien_ban_tour pb
+                  JOIN tour t ON pb.tour_id = t.id
+                  LEFT JOIN danh_muc_tour dm ON t.danh_muc_id = dm.id
+                  LEFT JOIN chinh_sach_tour cs ON t.chinh_sach_id = cs.id
+                  LEFT JOIN nguoi_dung u ON pb.nguoi_tao = u.id
+                  WHERE pb.id = :id";
+
+            error_log("SQL Query: " . $query);
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            error_log("Query result: " . print_r($result, true));
+
+            // Đảm bảo giá trị mặc định nếu NULL
+            if ($result) {
+                $result['gia_tour_hien_tai'] = $result['gia_tour_hien_tai'] ?? 0;
+                $result['gia_goc'] = $result['gia_goc'] ?? $result['gia_tour_hien_tai'] ?? $result['gia_tour'];
+                $result['khuyen_mai'] = $result['khuyen_mai'] ?? 0;
+                $result['mo_ta'] = $result['mo_ta'] ?? '';
+                $result['dich_vu_dac_biet'] = $result['dich_vu_dac_biet'] ?? '';
+                $result['dieu_kien_ap_dung'] = $result['dieu_kien_ap_dung'] ?? '';
+            } else {
+                error_log("No result found for phien ban ID: " . $id);
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Lỗi getPhienBanById: " . $e->getMessage());
+            error_log("Error Code: " . $e->getCode());
+            error_log("Error Info: " . print_r($stmt->errorInfo(), true));
+            return null;
         }
     }
 
@@ -585,7 +988,7 @@ class AdminTour
 
     // ==================== UTILITY METHODS ====================
 
-    
+
 
     // Lấy tất cả tag
     public function getAllTagTour()

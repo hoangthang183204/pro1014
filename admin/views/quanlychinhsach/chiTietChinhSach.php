@@ -1,5 +1,5 @@
 <?php
-// File: views/quanlychinhsach/view.php
+
 require './views/layout/header.php';
 include './views/layout/navbar.php';
 include './views/layout/sidebar.php';
