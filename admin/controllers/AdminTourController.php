@@ -283,8 +283,7 @@ class AdminTourController
     }
 
     // ==================== QUẢN LÝ PHIÊN BẢN TOUR ====================
-
-    // Hiển thị danh sách phiên bản tour
+    // Hiển thị danh sách phiên bản (Sửa lại)
     public function phienBan()
     {
         $tour_id = $_GET['tour_id'] ?? 0;
@@ -298,7 +297,97 @@ class AdminTourController
 
         $phien_ban_list = $this->tourModel->getPhienBanByTour($tour_id);
 
+        // Debug: In ra danh sách phiên bản tìm được
+        error_log("Tour ID: " . $tour_id);
+        error_log("Phien ban list: " . print_r($phien_ban_list, true));
+
+        // Thống kê theo loại
+        $stats = [
+            'mua' => 0,
+            'khuyen_mai' => 0,
+            'dac_biet' => 0,
+            'hien_hanh' => null,
+            'total' => count($phien_ban_list)
+        ];
+
+        $now = date('Y-m-d');
+        foreach ($phien_ban_list as $pb) {
+            error_log("Phien ban: " . print_r($pb, true));
+
+            switch ($pb['loai_phien_ban']) {
+                case 'mua':
+                    $stats['mua']++;
+                    break;
+                case 'khuyen_mai':
+                    $stats['khuyen_mai']++;
+                    break;
+                case 'dac_biet':
+                    $stats['dac_biet']++;
+                    break;
+            }
+
+            // Xác định phiên bản hiện hành
+            if ($pb['thoi_gian_bat_dau'] <= $now && $pb['thoi_gian_ket_thuc'] >= $now) {
+                $stats['hien_hanh'] = $pb['id'];
+            }
+        }
+
         require_once 'views/quanlytour/phienBanTour.php';
+    }
+
+    // Xem chi tiết phiên bản (Sửa lại với debug)
+    public function xemPhienBan()
+    {
+        $id = $_GET['id'] ?? 0;
+        $tour_id = $_GET['tour_id'] ?? 0;
+
+        error_log("Xem phien ban - ID: " . $id . ", Tour ID: " . $tour_id);
+
+        // Lấy thông tin phiên bản
+        $phien_ban = $this->tourModel->getPhienBanById($id);
+
+        error_log("Phien ban data: " . print_r($phien_ban, true));
+
+        if (!$phien_ban) {
+            $_SESSION['error'] = 'Phiên bản không tồn tại! ID: ' . $id;
+            header('Location: index.php?act=tour-phien-ban&tour_id=' . $tour_id);
+            exit();
+        }
+
+        // Lấy thông tin tour
+        $tour = $this->tourModel->getTourById($phien_ban['tour_id']);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại! Tour ID: ' . $phien_ban['tour_id'];
+            header('Location: index.php?act=tour');
+            exit();
+        }
+
+        // Đảm bảo tour có giá trị
+        $tour['gia_tour'] = $tour['gia_tour'] ?? 0;
+
+        // Lấy lịch trình của tour
+        $lich_trinh = $this->tourModel->getLichTrinhByTour($phien_ban['tour_id']);
+
+        // Lấy các lịch khởi hành trong thời gian phiên bản hiệu lực
+        $lich_khoi_hanh = $this->tourModel->getLichKhoiHanhTrongPhienBan(
+            $phien_ban['tour_id'],
+            $phien_ban['thoi_gian_bat_dau'],
+            $phien_ban['thoi_gian_ket_thuc']
+        );
+
+        // Lấy thống kê đặt tour
+        $thong_ke = $this->tourModel->getThongKePhienBan($id);
+
+        // Lấy chi phí duyệt toán nếu có
+        $du_toan = $this->tourModel->getDuToanByTour($phien_ban['tour_id']);
+
+        // Debug: In ra tất cả dữ liệu
+        error_log("Tour data: " . print_r($tour, true));
+        error_log("Lich trinh count: " . count($lich_trinh));
+        error_log("Lich khoi hanh count: " . count($lich_khoi_hanh));
+
+        require_once 'views/quanlytour/detailPhienBanTour.php';
     }
 
     // Hiển thị form thêm phiên bản
@@ -313,29 +402,68 @@ class AdminTourController
             exit();
         }
 
-        require_once 'views/quanlytour/addPhienBan.php';
+        require_once 'views/quanlytour/addPhienBanTour.php';
     }
 
-    // Xử lý thêm phiên bản
+    // Xử lý thêm phiên bản - Sửa lại với debug
     public function storePhienBan()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'tour_id' => $_POST['tour_id'],
-                'ten_phien_ban' => $_POST['ten_phien_ban'],
-                'loai_phien_ban' => $_POST['loai_phien_ban'],
-                'gia_tour' => $_POST['gia_tour'],
-                'thoi_gian_bat_dau' => $_POST['thoi_gian_bat_dau'],
-                'thoi_gian_ket_thuc' => $_POST['thoi_gian_ket_thuc'],
-                'mo_ta' => $_POST['mo_ta']
-            ];
+            // Debug: In ra dữ liệu POST
+            error_log("POST data: " . print_r($_POST, true));
 
-            $result = $this->tourModel->createPhienBan($data);
+            try {
+                $data = [
+                    'tour_id' => $_POST['tour_id'] ?? 0,
+                    'ten_phien_ban' => $_POST['ten_phien_ban'] ?? '',
+                    'loai_phien_ban' => $_POST['loai_phien_ban'] ?? '',
+                    'gia_tour' => $_POST['gia_tour'] ?? 0,
+                    'gia_goc' => $_POST['gia_goc'] ?? $_POST['gia_tour'] ?? 0,
+                    'khuyen_mai' => $_POST['khuyen_mai'] ?? 0,
+                    'thoi_gian_bat_dau' => $_POST['thoi_gian_bat_dau'] ?? '',
+                    'thoi_gian_ket_thuc' => $_POST['thoi_gian_ket_thuc'] ?? '',
+                    'mo_ta' => $_POST['mo_ta'] ?? '',
+                    'dich_vu_dac_biet' => $_POST['dich_vu_dac_biet'] ?? '',
+                    'dieu_kien_ap_dung' => $_POST['dieu_kien_ap_dung'] ?? ''
+                ];
 
-            if ($result) {
-                $_SESSION['success'] = 'Thêm phiên bản thành công!';
-            } else {
-                $_SESSION['error'] = 'Có lỗi xảy ra khi thêm phiên bản!';
+                // Kiểm tra dữ liệu bắt buộc
+                if (
+                    empty($data['ten_phien_ban']) || empty($data['loai_phien_ban']) ||
+                    empty($data['gia_tour']) || empty($data['thoi_gian_bat_dau']) ||
+                    empty($data['thoi_gian_ket_thuc'])
+                ) {
+                    throw new Exception("Vui lòng điền đầy đủ thông tin bắt buộc!");
+                }
+
+                // Chuyển đổi giá trị số
+                $data['gia_tour'] = floatval(str_replace(',', '', $data['gia_tour']));
+                $data['gia_goc'] = floatval(str_replace(',', '', $data['gia_goc']));
+                $data['khuyen_mai'] = floatval($data['khuyen_mai']);
+
+                // Tính % giảm giá nếu là khuyến mãi và có giá gốc
+                if ($data['loai_phien_ban'] == 'khuyen_mai' && $data['gia_goc'] > 0 && $data['gia_tour'] > 0) {
+                    $giam_gia = (($data['gia_goc'] - $data['gia_tour']) / $data['gia_goc']) * 100;
+                    $data['khuyen_mai'] = round($giam_gia, 2);
+                }
+
+                error_log("Data to insert: " . print_r($data, true));
+
+                $result = $this->tourModel->createPhienBan($data);
+
+                if ($result) {
+                    $_SESSION['success'] = 'Thêm phiên bản thành công!';
+                } else {
+                    $_SESSION['error'] = 'Có lỗi xảy ra khi thêm phiên bản!';
+                }
+            } catch (Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
+                error_log("Lỗi storePhienBan: " . $e->getMessage());
+
+                // Quay lại form với dữ liệu cũ
+                $_SESSION['old_data'] = $_POST;
+                header('Location: index.php?act=phien-ban-create&tour_id=' . ($_POST['tour_id'] ?? 0));
+                exit();
             }
 
             header('Location: index.php?act=tour-phien-ban&tour_id=' . $data['tour_id']);
@@ -370,10 +498,20 @@ class AdminTourController
                 'ten_phien_ban' => $_POST['ten_phien_ban'],
                 'loai_phien_ban' => $_POST['loai_phien_ban'],
                 'gia_tour' => $_POST['gia_tour'],
+                'gia_goc' => $_POST['gia_goc'] ?? $_POST['gia_tour'],
+                'khuyen_mai' => $_POST['khuyen_mai'] ?? 0,
                 'thoi_gian_bat_dau' => $_POST['thoi_gian_bat_dau'],
                 'thoi_gian_ket_thuc' => $_POST['thoi_gian_ket_thuc'],
-                'mo_ta' => $_POST['mo_ta']
+                'mo_ta' => $_POST['mo_ta'],
+                'dich_vu_dac_biet' => $_POST['dich_vu_dac_biet'] ?? '',
+                'dieu_kien_ap_dung' => $_POST['dieu_kien_ap_dung'] ?? ''
             ];
+
+            // Tính lại % giảm giá nếu là khuyến mãi
+            if ($data['loai_phien_ban'] == 'khuyen_mai' && $data['gia_goc'] > 0) {
+                $giam_gia = (($data['gia_goc'] - $data['gia_tour']) / $data['gia_goc']) * 100;
+                $data['khuyen_mai'] = round($giam_gia, 2);
+            }
 
             $result = $this->tourModel->updatePhienBan($id, $data);
 
@@ -388,57 +526,55 @@ class AdminTourController
         }
     }
 
+    // Kích hoạt phiên bản
+    public function activatePhienBan()
+    {
+        $id = $_GET['id'] ?? 0;
+        $tour_id = $_GET['tour_id'] ?? 0;
+
+        try {
+            $phien_ban = $this->tourModel->getPhienBanById($id);
+
+            if (!$phien_ban) {
+                throw new Exception("Phiên bản không tồn tại!");
+            }
+
+            // Cập nhật giá tour từ phiên bản
+            $result = $this->tourModel->updateGiaTour($tour_id, $phien_ban['gia_tour']);
+
+            if ($result) {
+                $_SESSION['success'] = 'Kích hoạt phiên bản thành công! Giá tour đã được cập nhật.';
+            } else {
+                $_SESSION['error'] = 'Không thể cập nhật giá tour!';
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        header('Location: index.php?act=tour-phien-ban&tour_id=' . $tour_id);
+        exit();
+    }
+
     // Xóa phiên bản
     public function deletePhienBan()
     {
         $id = $_GET['id'] ?? 0;
         $tour_id = $_GET['tour_id'] ?? 0;
 
-        $result = $this->tourModel->deletePhienBan($id);
+        try {
+            $result = $this->tourModel->deletePhienBan($id);
 
-        if ($result) {
-            $_SESSION['success'] = 'Xóa phiên bản thành công!';
-        } else {
-            $_SESSION['error'] = 'Có lỗi xảy ra khi xóa phiên bản!';
+            if ($result) {
+                $_SESSION['success'] = 'Xóa phiên bản thành công!';
+            } else {
+                $_SESSION['error'] = 'Không thể xóa phiên bản!';
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
         }
 
         header('Location: index.php?act=tour-phien-ban&tour_id=' . $tour_id);
         exit();
-    }
-
-    // Áp dụng phiên bản
-    public function apDungPhienBan()
-    {
-        $id = $_GET['id'] ?? 0;
-        $tour_id = $_GET['tour_id'] ?? 0;
-
-        $result = $this->tourModel->apDungPhienBan($id, $tour_id);
-
-        if ($result) {
-            $_SESSION['success'] = 'Áp dụng phiên bản thành công!';
-        } else {
-            $_SESSION['error'] = 'Có lỗi xảy ra khi áp dụng phiên bản!';
-        }
-
-        header('Location: index.php?act=tour-phien-ban&tour_id=' . $tour_id);
-        exit();
-    }
-
-    // Xem chi tiết phiên bản
-    public function xemPhienBan()
-    {
-        $id = $_GET['id'] ?? 0;
-        $phien_ban = $this->tourModel->getPhienBanById($id);
-
-        if (!$phien_ban) {
-            $_SESSION['error'] = 'Phiên bản không tồn tại!';
-            header('Location: index.php?act=tour');
-            exit();
-        }
-
-        $tour = $this->tourModel->getTourById($phien_ban['tour_id']);
-
-        require_once 'views/quanlytour/chiTietPhienBan.php';
     }
 
     // ==================== QUẢN LÝ MEDIA TOUR ====================
@@ -846,5 +982,3 @@ class AdminTourController
         exit();
     }
 }
-
-

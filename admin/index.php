@@ -37,6 +37,7 @@ require_once './models/AdminPhanPhong.php';
 require_once './models/AdminThanhToan.php';
 require_once './models/AdminChinhSach.php';
 
+
 require_once './middleware/check-login.php';
 // Route
 $act = $_GET['act'] ?? '/';
@@ -105,7 +106,7 @@ match ($act) {
     'phien-ban-edit' => (new AdminTourController())->editPhienBan(),
     'phien-ban-update' => (new AdminTourController())->updatePhienBan(),
     'phien-ban-delete' => (new AdminTourController())->deletePhienBan(),
-    'phien-ban-ap-dung' => (new AdminTourController())->apDungPhienBan(),
+    'phien-ban-activate' => (new AdminTourController())->activatePhienBan(),
     'phien-ban-xem' => (new AdminTourController())->xemPhienBan(),
 
     // Media Tour

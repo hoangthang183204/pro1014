@@ -138,18 +138,23 @@
                                                             <i class="fas fa-route"></i>
                                                         </a>
 
+                                                        <!-- Nút Phiên bản - Luôn hiển thị -->
+                                                        <a href="?act=tour-phien-ban&tour_id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-secondary" title="Quản lý phiên bản">
+                                                            <i class="fas fa-code-branch"></i>
+                                                        </a>
 
+                                                        <!-- Nút Nhà cung cấp - Luôn hiển thị -->
                                                         <a href="index.php?act=tour-nha-cung-cap&tour_id=<?php echo $tour['id']; ?>"
-                                                            class="btn btn-info" title="Nhà cung cấp">
+                                                            class="btn btn-success" title="Nhà cung cấp">
                                                             <i class="fas fa-handshake"></i>
                                                         </a>
 
-
-                                                        <!-- Nút Hình ảnh - Luôn hiển thị -->
+                                                        <!-- Nút Hình ảnh - Luôn hiển thị
                                                         <a href="?act=tour-media&tour_id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-warning" title="Hình ảnh">
                                                             <i class="fas fa-images"></i>
-                                                        </a>
+                                                        </a> -->
 
                                                         <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "tạm dừng" -->
                                                         <?php if ($cho_phep_xoa): ?>
@@ -160,7 +165,7 @@
                                                                 <i class="fas fa-trash"></i>
                                                             </a>
                                                         <?php else: ?>
-                                                            <button class="btn btn-secondary" disabled
+                                                            <button class="btn btn-outline-secondary" disabled
                                                                 title="Chỉ được xoá khi tour ở trạng thái tạm dừng">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
