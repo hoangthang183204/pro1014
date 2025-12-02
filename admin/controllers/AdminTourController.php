@@ -8,9 +8,6 @@ class AdminTourController
         $this->tourModel = new AdminTour();
     }
 
-    // ==================== QUẢN LÝ TOUR CHÍNH ====================
-
-    // Danh sách tour với tìm kiếm và filter
     public function index()
     {
         $search = $_GET['search'] ?? '';
@@ -27,8 +24,7 @@ class AdminTourController
     public function create()
     {
         $danh_muc_list = $this->tourModel->getAllDanhMuc();
-        $tag_list = $this->tourModel->getAllTagTour();
-        $chinh_sach_list = $this->tourModel->getAllChinhSach();
+        // XÓA: $chinh_sach_list = $this->tourModel->getAllChinhSach();
         $diem_den_list = $this->tourModel->getAllDiemDen();
 
         require_once 'views/quanlytour/addTour.php';
@@ -44,9 +40,8 @@ class AdminTourController
                 'danh_muc_id' => $_POST['danh_muc_id'],
                 'mo_ta' => $_POST['mo_ta'],
                 'gia_tour' => $_POST['gia_tour'],
-                'chinh_sach_id' => $_POST['chinh_sach_id'],
+                // XÓA: 'chinh_sach_id' => $_POST['chinh_sach_id'],
                 'duong_dan_online' => $_POST['duong_dan_online'] ?? '',
-                'tag_ids' => $_POST['tag_ids'] ?? []
             ];
 
             // Xử lý upload hình ảnh
@@ -85,10 +80,8 @@ class AdminTourController
         }
 
         $danh_muc_list = $this->tourModel->getAllDanhMuc();
-        $tag_list = $this->tourModel->getAllTagTour();
-        $chinh_sach_list = $this->tourModel->getAllChinhSach();
+        // XÓA: $chinh_sach_list = $this->tourModel->getAllChinhSach();
         $diem_den_list = $this->tourModel->getAllDiemDen();
-        $tour_tags = $this->tourModel->getTourTags($id);
 
         require_once 'views/quanlytour/editTour.php';
     }
@@ -105,10 +98,9 @@ class AdminTourController
                 'danh_muc_id' => $_POST['danh_muc_id'],
                 'mo_ta' => $_POST['mo_ta'],
                 'gia_tour' => $_POST['gia_tour'],
-                'chinh_sach_id' => $_POST['chinh_sach_id'],
+                // XÓA: 'chinh_sach_id' => $_POST['chinh_sach_id'],
                 'trang_thai' => $_POST['trang_thai'],
                 'duong_dan_online' => $_POST['duong_dan_online'] ?? '',
-                'tag_ids' => $_POST['tag_ids'] ?? []
             ];
 
             // Xử lý upload hình ảnh mới
@@ -652,4 +644,207 @@ class AdminTourController
             }
         }
     }
+
+    // Thêm vào class AdminTourController, sau phương thức media()
+
+    // ==================== QUẢN LÝ NHÀ CUNG CẤP TOUR ====================
+
+    // Hiển thị nhà cung cấp của tour
+    public function nhaCungCap()
+    {
+        $tour_id = $_GET['tour_id'] ?? 0;
+        $tour = $this->tourModel->getTourById($tour_id);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại!';
+            header('Location: index.php?act=tour');
+            exit();
+        }
+
+        $nha_cung_cap_list = $this->tourModel->getNhaCungCapByTour($tour_id);
+        $all_nha_cung_cap = $this->tourModel->getAllNhaCungCap();
+        $lich_khoi_hanh_list = $this->tourModel->getLichKhoiHanhByTour($tour_id);
+
+        require_once 'views/quanlytour/nhaCungCap.php';
+    }
+
+    // Thêm nhà cung cấp vào tour
+    public function addNhaCungCapToTour()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'lich_khoi_hanh_id' => $_POST['lich_khoi_hanh_id'],
+                'nha_cung_cap_id' => $_POST['nha_cung_cap_id'],
+                'loai_phan_cong' => $_POST['loai_phan_cong'],
+                'ten_dich_vu' => $_POST['ten_dich_vu'] ?? '',
+                'ghi_chu' => $_POST['ghi_chu'] ?? ''
+            ];
+
+            $result = $this->tourModel->addNhaCungCapToTour($data);
+
+            if ($result) {
+                $_SESSION['success'] = 'Thêm nhà cung cấp thành công!';
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi thêm nhà cung cấp!';
+            }
+
+            header('Location: index.php?act=tour-nha-cung-cap&tour_id=' . $_POST['tour_id']);
+            exit();
+        }
+    }
+
+    // Cập nhật trạng thái nhà cung cấp tour
+    public function updateNhaCungCapTour()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'];
+            $tour_id = $_POST['tour_id'];
+
+            $data = [
+                'loai_phan_cong' => $_POST['loai_phan_cong'],
+                'ten_dich_vu' => $_POST['ten_dich_vu'] ?? '',
+                'trang_thai_xac_nhan' => $_POST['trang_thai_xac_nhan'],
+                'ghi_chu' => $_POST['ghi_chu'] ?? ''
+            ];
+
+            $result = $this->tourModel->updateNhaCungCapTour($id, $data);
+
+            if ($result) {
+                $_SESSION['success'] = 'Cập nhật nhà cung cấp thành công!';
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật!';
+            }
+
+            header('Location: index.php?act=tour-nha-cung-cap&tour_id=' . $tour_id);
+            exit();
+        }
+    }
+
+    // Xóa nhà cung cấp khỏi tour
+    public function removeNhaCungCapFromTour()
+    {
+        $id = $_GET['id'] ?? 0;
+        $tour_id = $_GET['tour_id'] ?? 0;
+
+        $result = $this->tourModel->removeNhaCungCapFromTour($id);
+
+        if ($result) {
+            $_SESSION['success'] = 'Xóa nhà cung cấp thành công!';
+        } else {
+            $_SESSION['error'] = 'Có lỗi xảy ra khi xóa nhà cung cấp!';
+        }
+
+        header('Location: index.php?act=tour-nha-cung-cap&tour_id=' . $tour_id);
+        exit();
+    }
+    // ==================== QUẢN LÝ NHÀ CUNG CẤP (DANH SÁCH) ====================
+
+    // Danh sách nhà cung cấp
+    public function listNhaCungCap()
+    {
+        $search = $_GET['search'] ?? '';
+        $loai_dich_vu = $_GET['loai_dich_vu'] ?? '';
+
+        // Tạo phương thức mới trong model
+        $nha_cung_cap_list = $this->tourModel->getAllNhaCungCapAdmin($search, $loai_dich_vu);
+
+        require_once 'views/quanlytour/listNhaCungCap.php';
+    }
+
+    // Thêm mới nhà cung cấp
+    public function createNhaCungCap()
+    {
+        require_once 'views/quanlytour/addNhaCungCap.php';
+    }
+
+    public function storeNhaCungCap()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'ten_nha_cung_cap' => $_POST['ten_nha_cung_cap'],
+                'loai_dich_vu' => $_POST['loai_dich_vu'],
+                'dia_chi' => $_POST['dia_chi'] ?? '',
+                'so_dien_thoai' => $_POST['so_dien_thoai'] ?? '',
+                'email' => $_POST['email'] ?? '',
+                'mo_ta' => $_POST['mo_ta'] ?? ''
+            ];
+
+            $result = $this->tourModel->createNhaCungCap($data);
+
+            if ($result) {
+                $_SESSION['success'] = 'Thêm nhà cung cấp thành công!';
+                header('Location: index.php?act=tour-nha-cung-cap-list');
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi thêm nhà cung cấp!';
+                header('Location: index.php?act=tour-nha-cung-cap-create');
+            }
+            exit();
+        }
+    }
+
+    // Thêm vào class AdminTourController, sau phương thức storeNhaCungCap()
+
+    // Sửa nhà cung cấp
+    public function editNhaCungCap()
+    {
+        $id = $_GET['id'] ?? 0;
+        $nha_cung_cap = $this->tourModel->getNhaCungCapById($id);
+
+        if (!$nha_cung_cap) {
+            $_SESSION['error'] = 'Nhà cung cấp không tồn tại!';
+            header('Location: index.php?act=tour-nha-cung-cap-list');
+            exit();
+        }
+
+        require_once 'views/quanlytour/editNhaCungCap.php';
+    }
+
+    public function updateNhaCungCap()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'];
+
+            $data = [
+                'ten_nha_cung_cap' => $_POST['ten_nha_cung_cap'],
+                'loai_dich_vu' => $_POST['loai_dich_vu'],
+                'dia_chi' => $_POST['dia_chi'] ?? '',
+                'so_dien_thoai' => $_POST['so_dien_thoai'] ?? '',
+                'email' => $_POST['email'] ?? '',
+                'mo_ta' => $_POST['mo_ta'] ?? '',
+                'danh_gia' => $_POST['danh_gia'] ?? 0
+            ];
+
+            $result = $this->tourModel->updateNhaCungCap($id, $data);
+
+            if ($result) {
+                $_SESSION['success'] = 'Cập nhật nhà cung cấp thành công!';
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật!';
+            }
+
+            header('Location: index.php?act=tour-nha-cung-cap-list');
+            exit();
+        }
+    }
+
+    // Xóa nhà cung cấp
+    public function deleteNhaCungCap()
+    {
+        $id = $_GET['id'] ?? 0;
+
+        $result = $this->tourModel->deleteNhaCungCap($id);
+
+        if ($result === false) {
+            $_SESSION['error'] = 'Không thể xóa nhà cung cấp này vì đang được sử dụng trong tour!';
+        } elseif ($result) {
+            $_SESSION['success'] = 'Xóa nhà cung cấp thành công!';
+        } else {
+            $_SESSION['error'] = 'Có lỗi xảy ra khi xóa!';
+        }
+
+        header('Location: index.php?act=tour-nha-cung-cap-list');
+        exit();
+    }
 }
+
+

@@ -138,6 +138,13 @@
                                                             <i class="fas fa-route"></i>
                                                         </a>
 
+
+                                                        <a href="index.php?act=tour-nha-cung-cap&tour_id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-info" title="Nhà cung cấp">
+                                                            <i class="fas fa-handshake"></i>
+                                                        </a>
+
+
                                                         <!-- Nút Hình ảnh - Luôn hiển thị -->
                                                         <a href="?act=tour-media&tour_id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-warning" title="Hình ảnh">

@@ -73,6 +73,19 @@ match ($act) {
     'tour-update' => (new AdminTourController())->update(),
     'tour-delete' => (new AdminTourController())->delete(),
 
+    // Nhà cung cấp
+    'tour-nha-cung-cap' => (new AdminTourController())->nhaCungCap(),
+    'tour-add-nha-cung-cap' => (new AdminTourController())->addNhaCungCapToTour(),
+    'tour-update-nha-cung-cap' => (new AdminTourController())->updateNhaCungCapTour(),
+    'tour-remove-nha-cung-cap' => (new AdminTourController())->removeNhaCungCapFromTour(),
+
+    // Thêm các route mới
+    'tour-nha-cung-cap-list' => (new AdminTourController())->listNhaCungCap(),
+    'tour-nha-cung-cap-create' => (new AdminTourController())->createNhaCungCap(),
+    'tour-nha-cung-cap-store' => (new AdminTourController())->storeNhaCungCap(),
+    'tour-nha-cung-cap-edit' => (new AdminTourController())->editNhaCungCap(),
+    'tour-nha-cung-cap-update' => (new AdminTourController())->updateNhaCungCap(),
+    'tour-nha-cung-cap-delete' => (new AdminTourController())->deleteNhaCungCap(),
 
 
     // Quản lý Lịch trình Tour
