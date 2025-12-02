@@ -82,26 +82,50 @@
               </li>
             </ul>
           </li>
-          <!-- Trong sidebar.php -->
-          <li class="nav-item">
-            <a href="index.php?act=tour-nha-cung-cap-list" class="nav-link">
-              <i class="nav-icon fas fa-building"></i>
-              <p>Nhà Cung Cấp</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href=" <?= BASE_URL_ADMIN . '?act=danh-muc-doi-tac' ?> " class="nav-link">
-              <i class="nav-icon fas fa-handshake"></i>
+
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class=" nav-icon  fas fa-cogs"></i>
               <p>
-                Đối tác
+                Hệ Thống Dịch Vụ
+                <i class="right fas fa-angle-left"></i>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="index.php?act=tour-nha-cung-cap-list" class="nav-link">
+                  <i class="nav-icon fas fa-building"></i>
+                  <p>Nhà Cung Cấp</p>
+                </a>
+              </li>
+            </ul>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href=" <?= BASE_URL_ADMIN . '?act=danh-muc-doi-tac' ?> " class="nav-link">
+                  <i class="nav-icon fas fa-handshake"></i>
+                  <p>
+                    Đối tác
+                  </p>
+                </a>
+              </li>
+            </ul>
           </li>
+          <!-- Trong sidebar.php -->
+
+
           <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=lich-lam-viec-hdv' ?> " class="nav-link">
               <i class="nav-icon fas fa-user-clock"></i>
               <p>
                 Lịch Làm Việc HDV
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href=" <?= BASE_URL_ADMIN . '?act=chinh-sach' ?> " class="nav-link">
+              <i class="nav-icon fas fa-file-contract"></i>
+              <p>
+                Chính Sách
               </p>
             </a>
           </li>
