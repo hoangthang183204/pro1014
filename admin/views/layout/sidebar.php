@@ -33,43 +33,14 @@
               </p>
             </a>
           </li>
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-folder me-2"></i>
-              <p>
-                Danh Mục Tour
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="<?= BASE_URL_ADMIN . '?act=danh-muc-tour' ?>" class="nav-link">
-                  <i class="fas fa-layer-group nav-icon"></i>
-                  <p>Loại Tour</p>
-                </a>
-              </li>
-              <!-- <li class="nav-item">
-                <a href="<?= BASE_URL_ADMIN . '?act=danh-muc-diem-den' ?>" class="nav-link">
-                  <i class="fas fa-map-marker-alt nav-icon"></i>
-                  <p>Điểm Đến</p>
-                </a>
-              </li> -->
-              <li class="nav-item">
-                <a href="<?= BASE_URL_ADMIN . '?act=danh-muc-tag-tour' ?>" class="nav-link">
-                  <i class="fas fa-tags nav-icon"></i>
-                  <p>Tag Tour</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- <li class="nav-item">
+          <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=danh-muc' ?> " class="nav-link">
               <i class="nav-icon fas fa-folder me-2"></i>
               <p>
                 Danh Mục Tour
               </p>
             </a>
-          </li> -->
+          </li>
           <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=tour' ?> " class="nav-link">
               <i class="nav-icon fas fa-suitcase-rolling"></i>
@@ -110,6 +81,14 @@
                 </a>
               </li>
             </ul>
+          </li>
+          <li class="nav-item">
+            <a href=" <?= BASE_URL_ADMIN . '?act=danh-muc-doi-tac' ?> " class="nav-link">
+              <i class="nav-icon fas fa-handshake"></i>
+              <p>
+                Đối tác
+              </p>
+            </a>
           </li>
           <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=lich-lam-viec-hdv' ?> " class="nav-link">

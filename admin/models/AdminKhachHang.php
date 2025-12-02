@@ -178,32 +178,27 @@ class AdminKhachHang
         }
     }
 
-    // Lấy lịch sử đặt tour của khách hàng
+    // Lấy lịch sử đặt tour của khách hàng - PHIÊN BẢN ĐƠN GIẢN
     public function getLichSuDatTour($khach_hang_id)
     {
         try {
             $query = "SELECT 
-                        pdt.id,
-                        pdt.ma_dat_tour,
-                        t.ten_tour,
-                        t.ma_tour,
-                        lkh.ngay_bat_dau,
-                        lkh.ngay_ket_thuc,
-                        pdt.tong_tien,
-                        pdt.so_luong_khach,
-                        pdt.trang_thai,
-                        pdt.created_at as ngay_dat,
-                        (SELECT COUNT(*) FROM khach_hang WHERE phieu_dat_tour_id = pdt.id) as tong_thanh_vien,
-                        hdv.ho_ten as huong_dan_vien
-                    FROM phieu_dat_tour pdt
-                    INNER JOIN khach_hang kh ON pdt.id = kh.phieu_dat_tour_id
-                    LEFT JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
-                    LEFT JOIN tour t ON lkh.tour_id = t.id
-                    LEFT JOIN phan_cong pc ON lkh.id = pc.lich_khoi_hanh_id AND pc.loai_phan_cong = 'hướng dẫn viên'
-                    LEFT JOIN huong_dan_vien hdv ON pc.huong_dan_vien_id = hdv.id
-                    WHERE kh.id = :khach_hang_id
-                    GROUP BY pdt.id
-                    ORDER BY pdt.created_at DESC";
+                    pdt.id,
+                    pdt.ma_dat_tour,
+                    pdt.khach_hang_id,
+                    t.ten_tour,
+                    t.ma_tour,
+                    lkh.ngay_bat_dau,
+                    lkh.ngay_ket_thuc,
+                    pdt.tong_tien,
+                    pdt.so_luong_khach,
+                    pdt.trang_thai,
+                    pdt.created_at as ngay_dat
+                FROM phieu_dat_tour pdt
+                LEFT JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
+                LEFT JOIN tour t ON lkh.tour_id = t.id
+                WHERE pdt.khach_hang_id = :khach_hang_id
+                ORDER BY pdt.created_at DESC";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':khach_hang_id' => $khach_hang_id]);
