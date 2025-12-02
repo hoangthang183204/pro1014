@@ -22,6 +22,7 @@ require_once './controllers/AdminKhachHangController.php';
 require_once './controllers/AdminLichLamViecHDVController.php';
 require_once './controllers/AdminPhanPhongController.php';
 require_once './controllers/AdminThanhToanController.php';
+require_once './controllers/AdminChinhSachController.php';
 
 // Require Models
 require_once './models/AdminDashboard.php';
@@ -34,6 +35,7 @@ require_once './models/AdminKhachHang.php';
 require_once './models/AdminLichLamViecHDV.php';
 require_once './models/AdminPhanPhong.php';
 require_once './models/AdminThanhToan.php';
+require_once './models/AdminChinhSach.php';
 
 require_once './middleware/check-login.php';
 // Route
@@ -156,6 +158,10 @@ match ($act) {
     // 'sua-huong-dan-vien' => (new AdminDanhMucTourController())->suaHuongDanVien(),
     // 'update-huong-dan-vien' => (new AdminDanhMucTourController())->updateHuongDanVien(),
     // 'xoa-huong-dan-vien' => (new AdminDanhMucTourController())->xoaHuongDanVien(),
+
+
+    'chinh-sach' => (new AdminChinhSachController())->index(),   
+    'chinh-sach-view' => (new AdminChinhSachController())->show(),  
 
     // Quản lý Lịch Khởi Hành
     'lich-khoi-hanh' => (new AdminLichKhoiHanhController())->index(),
