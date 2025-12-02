@@ -160,9 +160,14 @@ match ($act) {
     // 'update-huong-dan-vien' => (new AdminDanhMucTourController())->updateHuongDanVien(),
     // 'xoa-huong-dan-vien' => (new AdminDanhMucTourController())->xoaHuongDanVien(),
 
+    'tour-clone' => (new AdminTourController())->clone(),
+    'tour-store-clone' => (new AdminTourController())->storeClone(),
+    'tour-clone-success' => (new AdminTourController())->cloneSuccess(),
+    'tour-clone-history' => (new AdminTourController())->cloneHistory(),
+    'tour-quick-clone' => (new AdminTourController())->quickClone(),
 
-    'chinh-sach' => (new AdminChinhSachController())->index(),   
-    'chinh-sach-view' => (new AdminChinhSachController())->show(),  
+    'chinh-sach' => (new AdminChinhSachController())->index(),
+    'chinh-sach-view' => (new AdminChinhSachController())->show(),
 
     // Quản lý Lịch Khởi Hành
     'lich-khoi-hanh' => (new AdminLichKhoiHanhController())->index(),

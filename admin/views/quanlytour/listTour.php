@@ -125,38 +125,49 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <!-- Nút Sửa - Luôn hiển thị -->
+
+                                                    <!-- Hàng 1 -->
+                                                    <div class="btn-group btn-group-sm mb-1">
+                                                        <!-- Nút Sửa -->
                                                         <a href="?act=tour-edit&id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-primary" title="Sửa tour">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
 
-                                                        <!-- Nút Lịch trình - Luôn hiển thị -->
+                                                        <!-- Nút Lịch trình -->
                                                         <a href="?act=tour-lich-trinh&tour_id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-info" title="Lịch trình">
                                                             <i class="fas fa-route"></i>
                                                         </a>
 
-                                                        <!-- Nút Phiên bản - Luôn hiển thị -->
+                                                        <!-- Nút Phiên bản -->
                                                         <a href="?act=tour-phien-ban&tour_id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-secondary" title="Quản lý phiên bản">
                                                             <i class="fas fa-code-branch"></i>
                                                         </a>
 
-                                                        <!-- Nút Nhà cung cấp - Luôn hiển thị -->
+                                                        <!-- Nút Nhà cung cấp -->
                                                         <a href="index.php?act=tour-nha-cung-cap&tour_id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-success" title="Nhà cung cấp">
                                                             <i class="fas fa-handshake"></i>
                                                         </a>
+                                                    </div>
 
-                                                        <!-- Nút Hình ảnh - Luôn hiển thị
-                                                        <a href="?act=tour-media&tour_id=<?php echo $tour['id']; ?>"
-                                                            class="btn btn-warning" title="Hình ảnh">
-                                                            <i class="fas fa-images"></i>
-                                                        </a> -->
+                                                    <!-- Hàng 2 -->
+                                                    <div class="btn-group btn-group-sm">
+                                                        <!-- Nút Clone -->
+                                                        <a href="index.php?act=tour-clone&id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-outline-success" title="Clone tour">
+                                                            <i class="fas fa-copy"></i>
+                                                        </a>
 
-                                                        <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "tạm dừng" -->
+                                                        <!-- Nút Lịch sử Clone -->
+                                                        <a href="index.php?act=tour-clone-history&id=<?php echo $tour['id']; ?>"
+                                                            class="btn btn-outline-info" title="Lịch sử clone">
+                                                            <i class="fas fa-history"></i>
+                                                        </a>
+
+                                                        <!-- Nút Xoá -->
                                                         <?php if ($cho_phep_xoa): ?>
                                                             <a href="?act=tour-delete&id=<?php echo $tour['id']; ?>"
                                                                 class="btn btn-danger"
@@ -171,7 +182,9 @@
                                                             </button>
                                                         <?php endif; ?>
                                                     </div>
+
                                                 </td>
+
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
