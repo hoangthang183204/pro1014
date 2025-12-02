@@ -82,6 +82,13 @@
               </li>
             </ul>
           </li>
+          <!-- Trong sidebar.php -->
+          <li class="nav-item">
+            <a href="index.php?act=tour-nha-cung-cap-list" class="nav-link">
+              <i class="nav-icon fas fa-building"></i>
+              <p>Nhà Cung Cấp</p>
+            </a>
+          </li>
           <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=danh-muc-doi-tac' ?> " class="nav-link">
               <i class="nav-icon fas fa-handshake"></i>

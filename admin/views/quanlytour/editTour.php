@@ -54,31 +54,7 @@
                                             value="<?php echo htmlspecialchars($tour['ten_tour'] ?? ''); ?>">
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Danh Mục <span class="text-danger">*</span></label>
-                                        <select name="danh_muc_id" class="form-select" required>
-                                            <option value="">-- Chọn danh mục --</option>
-                                            <?php foreach ($danh_muc_list as $danh_muc): ?>
-                                                <option value="<?php echo $danh_muc['id']; ?>"
-                                                    <?php echo ($tour['danh_muc_id'] ?? '') == $danh_muc['id'] ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?>
-                                                    (<?php echo htmlspecialchars($danh_muc['loai_tour']); ?>)
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Giá Tour (VNĐ) <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <input type="number" name="gia_tour" class="form-control" required
-                                                placeholder="Nhập giá tour"
-                                                min="0" step="1000"
-                                                value="<?php echo htmlspecialchars($tour['gia_tour'] ?? ''); ?>">
-                                            <span class="input-group-text">VNĐ</span>
-                                        </div>
-                                        <small class="text-muted">Để 0 nếu là tour theo yêu cầu</small>
-                                    </div>
 
                                     <div class="mb-3">
                                         <label class="form-label">Hình ảnh đại diện</label>
@@ -108,40 +84,38 @@
 
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label">Chính Sách Tour <span class="text-danger">*</span></label>
-                                        <select name="chinh_sach_id" class="form-select" required>
-                                            <option value="">-- Chọn chính sách --</option>
-                                            <?php foreach ($chinh_sach_list as $chinh_sach): ?>
-                                                <option value="<?php echo $chinh_sach['id']; ?>"
-                                                    <?php echo ($tour['chinh_sach_id'] ?? '') == $chinh_sach['id'] ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($chinh_sach['ten_chinh_sach']); ?>
+                                        <label class="form-label">Danh Mục <span class="text-danger">*</span></label>
+                                        <select name="danh_muc_id" class="form-select" required>
+                                            <option value="">-- Chọn danh mục --</option>
+                                            <?php foreach ($danh_muc_list as $danh_muc): ?>
+                                                <option value="<?php echo $danh_muc['id']; ?>"
+                                                    <?php echo ($tour['danh_muc_id'] ?? '') == $danh_muc['id'] ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($danh_muc['ten_danh_muc']); ?>
+                                                    (<?php echo htmlspecialchars($danh_muc['loai_tour']); ?>)
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <small class="text-muted">Chính sách hủy tour, hoàn tiền, điều khoản</small>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label">Tags</label>
-                                        <select name="tag_ids[]" class="form-control select2" multiple="multiple"
-                                            data-placeholder="Chọn tags" style="width: 100%;">
-                                            <?php foreach ($tag_list as $tag): ?>
-                                                <option value="<?php echo $tag['id']; ?>"
-                                                    <?php echo in_array($tag['id'], $tour_tags ?? []) ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($tag['ten_tag']); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <small class="text-muted">Có thể chọn nhiều tags để phân loại tour</small>
+                                        <label class="form-label">Giá Tour (VNĐ) <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="number" name="gia_tour" class="form-control" required
+                                                placeholder="Nhập giá tour"
+                                                min="0" step="1000"
+                                                value="<?php echo htmlspecialchars($tour['gia_tour'] ?? ''); ?>">
+                                            <span class="input-group-text">VNĐ</span>
+                                        </div>
+                                        <small class="text-muted">Để 0 nếu là tour theo yêu cầu</small>
                                     </div>
 
-                                    <div class="mb-3">
+                                    <!-- <div class="mb-3">
                                         <label class="form-label">Đường dẫn Online</label>
                                         <input type="url" name="duong_dan_online" class="form-control"
                                             placeholder="https://tour.com/duong-dan-tour"
                                             value="<?php echo htmlspecialchars($tour['duong_dan_online'] ?? ''); ?>">
                                         <small class="text-muted">Link trang đặt tour online (nếu có)</small>
-                                    </div>
+                                    </div> -->
 
                                     <div class="mb-3">
                                         <label class="form-label">Trạng thái</label>
