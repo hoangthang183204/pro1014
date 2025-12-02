@@ -1250,4 +1250,326 @@ class AdminTour
             return false;
         }
     }
+
+    // ==================== CLONE TOUR METHODS ====================
+
+    // Clone tour cơ bản
+    public function cloneTour($tour_id, $new_tour_data, $user_id)
+    {
+        try {
+            $this->conn->beginTransaction();
+
+            // 1. Lấy tour gốc
+            $original_tour = $this->getTourById($tour_id);
+            if (!$original_tour) {
+                throw new Exception("Tour gốc không tồn tại!");
+            }
+
+            // 2. Tạo mã tour mới
+            $new_tour_code = $this->generateNewTourCode($original_tour['ma_tour']);
+
+            // 3. Tạo tour mới từ dữ liệu gốc
+            $clone_data = [
+                'ma_tour' => $new_tour_code,
+                'ten_tour' => $new_tour_data['ten_tour'] ?? $original_tour['ten_tour'] . ' (Copy)',
+                'danh_muc_id' => $new_tour_data['danh_muc_id'] ?? $original_tour['danh_muc_id'],
+                'mo_ta' => $new_tour_data['mo_ta'] ?? $original_tour['mo_ta'],
+                'gia_tour' => $new_tour_data['gia_tour'] ?? $original_tour['gia_tour'],
+                'duong_dan_online' => $original_tour['duong_dan_online'] ?? '',
+                'trang_thai' => 'đang hoạt động'
+            ];
+
+            // 4. Sao chép hình ảnh nếu có
+            if (!empty($original_tour['hinh_anh'])) {
+                $clone_data['hinh_anh'] = $this->copyTourImage($original_tour['hinh_anh']);
+            }
+
+            // 5. Insert tour mới
+            $new_tour_id = $this->createClonedTour($clone_data, $user_id);
+            if (!$new_tour_id) {
+                throw new Exception("Không thể tạo tour mới!");
+            }
+
+            // 6. Clone lịch trình
+            $lich_trinh_cloned = $this->cloneLichTrinh($tour_id, $new_tour_id, $user_id);
+
+            // 7. Clone phiên bản
+            $phien_ban_cloned = $this->clonePhienBan($tour_id, $new_tour_id, $user_id);
+
+            // 8. Clone media
+            $media_cloned = $this->cloneMediaItems($tour_id, $new_tour_id, $user_id);
+
+            // 9. Ghi log clone
+            $this->logCloneHistory($tour_id, $new_tour_id, $user_id, [
+                'lich_trinh_cloned' => $lich_trinh_cloned,
+                'phien_ban_cloned' => $phien_ban_cloned,
+                'media_cloned' => $media_cloned
+            ]);
+
+            $this->conn->commit();
+
+            return [
+                'success' => true,
+                'new_tour_id' => $new_tour_id,
+                'new_tour_code' => $new_tour_code,
+                'cloned_items' => [
+                    'lich_trinh' => $lich_trinh_cloned,
+                    'phien_ban' => $phien_ban_cloned,
+                    'media' => $media_cloned
+                ]
+            ];
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            error_log("Lỗi cloneTour: " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    // Tạo tour clone
+    private function createClonedTour($data, $user_id)
+    {
+        try {
+            $query = "INSERT INTO tour 
+                  (ma_tour, ten_tour, danh_muc_id, mo_ta, gia_tour, 
+                   hinh_anh, duong_dan_online, trang_thai, nguoi_tao, created_at) 
+                  VALUES (:ma_tour, :ten_tour, :danh_muc_id, :mo_ta, :gia_tour, 
+                          :hinh_anh, :duong_dan_online, :trang_thai, :nguoi_tao, NOW())";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':ma_tour' => $data['ma_tour'],
+                ':ten_tour' => $data['ten_tour'],
+                ':danh_muc_id' => $data['danh_muc_id'],
+                ':mo_ta' => $data['mo_ta'],
+                ':gia_tour' => $data['gia_tour'],
+                ':hinh_anh' => $data['hinh_anh'] ?? null,
+                ':duong_dan_online' => $data['duong_dan_online'],
+                ':trang_thai' => $data['trang_thai'],
+                ':nguoi_tao' => $user_id
+            ]);
+
+            return $this->conn->lastInsertId();
+        } catch (PDOException $e) {
+            throw new Exception("Lỗi tạo tour mới: " . $e->getMessage());
+        }
+    }
+
+    // Clone lịch trình
+    private function cloneLichTrinh($original_tour_id, $new_tour_id, $user_id)
+    {
+        try {
+            $query = "INSERT INTO lich_trinh_tour 
+                  (tour_id, so_ngay, tieu_de, mo_ta_hoat_dong, cho_o, 
+                   bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep, nguoi_tao, created_at) 
+                  SELECT :new_tour_id, so_ngay, tieu_de, mo_ta_hoat_dong, cho_o, 
+                         bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep, :nguoi_tao, NOW()
+                  FROM lich_trinh_tour 
+                  WHERE tour_id = :original_tour_id
+                  ORDER BY thu_tu_sap_xep";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':new_tour_id' => $new_tour_id,
+                ':original_tour_id' => $original_tour_id,
+                ':nguoi_tao' => $user_id
+            ]);
+
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            error_log("Lỗi cloneLichTrinh: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Clone phiên bản
+    private function clonePhienBan($original_tour_id, $new_tour_id, $user_id)
+    {
+        try {
+            $query = "INSERT INTO phien_ban_tour 
+                  (tour_id, ten_phien_ban, loai_phien_ban, gia_tour, gia_goc, 
+                   khuyen_mai, thoi_gian_bat_dau, thoi_gian_ket_thuc, mo_ta, 
+                   dich_vu_dac_biet, dieu_kien_ap_dung, nguoi_tao, created_at) 
+                  SELECT :new_tour_id, 
+                         CONCAT(ten_phien_ban, ' - Copy'), 
+                         loai_phien_ban, 
+                         gia_tour, 
+                         gia_goc, 
+                         khuyen_mai, 
+                         DATE_ADD(thoi_gian_bat_dau, INTERVAL 1 YEAR),
+                         DATE_ADD(thoi_gian_ket_thuc, INTERVAL 1 YEAR),
+                         mo_ta, 
+                         dich_vu_dac_biet, 
+                         dieu_kien_ap_dung, 
+                         :nguoi_tao, 
+                         NOW()
+                  FROM phien_ban_tour 
+                  WHERE tour_id = :original_tour_id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':new_tour_id' => $new_tour_id,
+                ':original_tour_id' => $original_tour_id,
+                ':nguoi_tao' => $user_id
+            ]);
+
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            error_log("Lỗi clonePhienBan: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Clone media
+    private function cloneMediaItems($original_tour_id, $new_tour_id, $user_id)
+    {
+        try {
+            // Lấy danh sách media gốc
+            $media_items = $this->getMediaByTour($original_tour_id);
+            $cloned_count = 0;
+
+            foreach ($media_items as $media) {
+                $query = "INSERT INTO media_tour 
+                      (tour_id, loai_media, url, chu_thich, thu_tu_sap_xep, nguoi_tao, created_at) 
+                      VALUES (:tour_id, :loai_media, :url, :chu_thich, :thu_tu_sap_xep, :nguoi_tao, NOW())";
+
+                $stmt = $this->conn->prepare($query);
+                $stmt->execute([
+                    ':tour_id' => $new_tour_id,
+                    ':loai_media' => $media['loai_media'],
+                    ':url' => $media['url'], // Giữ nguyên URL (dùng chung file)
+                    ':chu_thich' => $media['chu_thich'],
+                    ':thu_tu_sap_xep' => $media['thu_tu_sap_xep'],
+                    ':nguoi_tao' => $user_id
+                ]);
+
+                $cloned_count++;
+            }
+
+            return $cloned_count;
+        } catch (PDOException $e) {
+            error_log("Lỗi cloneMediaItems: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // Tạo mã tour mới
+    private function generateNewTourCode($original_code)
+    {
+        try {
+            // Phân tích mã cũ: QT-001
+            if (preg_match('/^([A-Z]+-)(\d+)$/', $original_code, $matches)) {
+                $prefix = $matches[1]; // QT-
+                $number = intval($matches[2]); // 001 -> 1
+
+                // Tìm số tiếp theo chưa dùng
+                $sql = "SELECT MAX(CAST(SUBSTRING_INDEX(ma_tour, '-', -1) AS UNSIGNED)) as max_num 
+                    FROM tour 
+                    WHERE ma_tour LIKE :pattern";
+
+                $stmt = $this->conn->prepare($sql);
+                $pattern = $prefix . '%';
+                $stmt->execute([':pattern' => $pattern]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $next_num = ($result['max_num'] ?: 0) + 1;
+                return $prefix . str_pad($next_num, 3, '0', STR_PAD_LEFT);
+            }
+
+            // Nếu không match pattern, thêm hậu tố
+            return $original_code . '-COPY-' . date('Ymd');
+        } catch (PDOException $e) {
+            error_log("Lỗi generateNewTourCode: " . $e->getMessage());
+            return $original_code . '-COPY';
+        }
+    }
+
+    // Sao chép hình ảnh tour
+    private function copyTourImage($original_filename)
+    {
+        if (empty($original_filename)) {
+            return null;
+        }
+
+        $original_path = 'uploads/tours/' . $original_filename;
+        if (!file_exists($original_path)) {
+            return $original_filename; // Giữ nguyên tên nếu file không tồn tại
+        }
+
+        // Tạo tên file mới
+        $file_info = pathinfo($original_filename);
+        $new_filename = 'tour_' . time() . '_' . uniqid() . '.' . ($file_info['extension'] ?? 'jpg');
+        $new_path = 'uploads/tours/' . $new_filename;
+
+        // Sao chép file
+        if (copy($original_path, $new_path)) {
+            return $new_filename;
+        }
+
+        return $original_filename; // Giữ nguyên nếu không copy được
+    }
+
+    // Ghi log clone
+    private function logCloneHistory($original_id, $new_id, $user_id, $details = [])
+    {
+        try {
+            $query = "INSERT INTO tour_clone_history 
+                  (original_tour_id, new_tour_id, cloned_by, cloned_at, clone_details) 
+                  VALUES (:original_id, :new_id, :user_id, NOW(), :details)";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':original_id' => $original_id,
+                ':new_id' => $new_id,
+                ':user_id' => $user_id,
+                ':details' => json_encode($details, JSON_UNESCAPED_UNICODE)
+            ]);
+
+            return $this->conn->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Lỗi logCloneHistory: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Lấy lịch sử clone của một tour
+    public function getCloneHistory($tour_id)
+    {
+        try {
+            $query = "SELECT tch.*, 
+                         t.ma_tour as new_tour_code, 
+                         t.ten_tour as new_tour_name,
+                         u.ho_ten as cloned_by_name
+                  FROM tour_clone_history tch
+                  JOIN tour t ON tch.new_tour_id = t.id
+                  LEFT JOIN nguoi_dung u ON tch.cloned_by = u.id
+                  WHERE tch.original_tour_id = :tour_id
+                  ORDER BY tch.cloned_at DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getCloneHistory: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Kiểm tra xem một tour có phải là clone không
+    public function getOriginalTour($clone_tour_id)
+    {
+        try {
+            $query = "SELECT original_tour_id, t.* 
+                  FROM tour_clone_history tch
+                  JOIN tour t ON tch.original_tour_id = t.id
+                  WHERE tch.new_tour_id = :tour_id
+                  LIMIT 1";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $clone_tour_id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getOriginalTour: " . $e->getMessage());
+            return null;
+        }
+    }
 }

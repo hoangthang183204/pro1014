@@ -981,4 +981,143 @@ class AdminTourController
         header('Location: index.php?act=tour-nha-cung-cap-list');
         exit();
     }
+
+    // ==================== CLONE TOUR FUNCTIONS ====================
+
+    // Hiển thị form clone tour
+    public function clone()
+    {
+        $id = $_GET['id'] ?? 0;
+        $tour = $this->tourModel->getTourById($id);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại!';
+            header('Location: index.php?act=tour');
+            exit();
+        }
+
+        $danh_muc_list = $this->tourModel->getAllDanhMuc();
+
+        // Lấy lịch sử clone nếu có
+        $clone_history = $this->tourModel->getCloneHistory($id);
+
+        require_once 'views/quanlytour/cloneTour.php';
+    }
+
+    // Xử lý clone tour
+    public function storeClone()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $original_tour_id = $_POST['original_tour_id'];
+                $user_id = $_SESSION['user_id'] ?? 1; // Lấy từ session
+
+                $new_tour_data = [
+                    'ten_tour' => $_POST['ten_tour'],
+                    'danh_muc_id' => $_POST['danh_muc_id'] ?? null,
+                    'mo_ta' => $_POST['mo_ta'] ?? '',
+                    'gia_tour' => $_POST['gia_tour'] ?? null
+                ];
+
+                $result = $this->tourModel->cloneTour($original_tour_id, $new_tour_data, $user_id);
+
+                if ($result['success']) {
+                    $_SESSION['success'] = 'Clone tour thành công!';
+
+                    // Lưu thông tin tour mới để hiển thị
+                    $_SESSION['cloned_tour_info'] = [
+                        'id' => $result['new_tour_id'],
+                        'code' => $result['new_tour_code'],
+                        'items_cloned' => $result['cloned_items']
+                    ];
+
+                    header('Location: index.php?act=tour-clone-success&id=' . $result['new_tour_id']);
+                } else {
+                    $_SESSION['error'] = 'Lỗi: ' . ($result['error'] ?? 'Không rõ nguyên nhân');
+                    header('Location: index.php?act=tour-clone&id=' . $original_tour_id);
+                }
+                exit();
+            } catch (Exception $e) {
+                $_SESSION['error'] = 'Lỗi hệ thống: ' . $e->getMessage();
+                header('Location: index.php?act=tour-clone&id=' . ($_POST['original_tour_id'] ?? 0));
+                exit();
+            }
+        }
+    }
+
+    // Hiển thị kết quả clone
+    public function cloneSuccess()
+    {
+        $new_tour_id = $_GET['id'] ?? 0;
+        $tour = $this->tourModel->getTourById($new_tour_id);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại!';
+            header('Location: index.php?act=tour');
+            exit();
+        }
+
+        // Lấy thông tin clone từ session hoặc database
+        $clone_info = $_SESSION['cloned_tour_info'] ?? null;
+        if ($clone_info) {
+            unset($_SESSION['cloned_tour_info']); // Xóa sau khi dùng
+        }
+
+        // Lấy tour gốc
+        $original_tour = $this->tourModel->getOriginalTour($new_tour_id);
+
+        require_once 'views/quanlytour/cloneSuccses.php';
+    }
+
+    // Xem lịch sử clone của tour
+    public function cloneHistory()
+    {
+        $tour_id = $_GET['id'] ?? 0;
+        $tour = $this->tourModel->getTourById($tour_id);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại!';
+            header('Location: index.php?act=tour');
+            exit();
+        }
+
+        $clone_history = $this->tourModel->getCloneHistory($tour_id);
+
+        require_once 'views/quanlytour/cloneHistory.php';
+    }
+
+    // Clone nhanh (ajax)
+    public function quickClone()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+
+            try {
+                $original_tour_id = $_POST['tour_id'] ?? 0;
+                $user_id = $_SESSION['user_id'] ?? 1;
+
+                $tour = $this->tourModel->getTourById($original_tour_id);
+                if (!$tour) {
+                    echo json_encode(['success' => false, 'error' => 'Tour không tồn tại']);
+                    exit();
+                }
+
+                // Clone với thông tin mặc định
+                $new_tour_data = [
+                    'ten_tour' => $tour['ten_tour'] . ' (Copy)',
+                    'danh_muc_id' => $tour['danh_muc_id'],
+                    'mo_ta' => $tour['mo_ta'],
+                    'gia_tour' => $tour['gia_tour']
+                ];
+
+                $result = $this->tourModel->cloneTour($original_tour_id, $new_tour_data, $user_id);
+
+                echo json_encode($result);
+                exit();
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                exit();
+            }
+        }
+    }
 }
