@@ -6,7 +6,7 @@ class KhachDoanModel {
         $this->conn = connectDB();
     }
 
-    // Tự động tạo trạm mẫu nếu tour chưa có (để HDV luôn có trạm để chọn)
+    // Tự động tạo trạm mẫu nếu tour chưa có
     public function checkAndCreateTramMau($id_lich) {
         $sqlCheck = "SELECT COUNT(*) FROM tram_dung_chan WHERE lich_khoi_hanh_id = :id";
         $stmtCheck = $this->conn->prepare($sqlCheck);
@@ -24,7 +24,7 @@ class KhachDoanModel {
         return false;
     }
 
-    // Lấy danh sách các trạm của 1 tour
+    // Lấy danh sách các trạm
     public function getTramByLich($id_lich) {
         $sql = "SELECT * FROM tram_dung_chan WHERE lich_khoi_hanh_id = :id ORDER BY thu_tu ASC";
         $stmt = $this->conn->prepare($sql);
@@ -32,7 +32,7 @@ class KhachDoanModel {
         return $stmt->fetchAll();
     }
 
-    // Lấy danh sách khách và trạng thái check-in TẠI TRẠM ĐANG CHỌN
+    // Lấy danh sách khách và trạng thái check-in
     public function getKhachDoanByLich($id_lich_khoi_hanh, $tram_id = null) {
         try {
             $sql = "SELECT 
@@ -44,7 +44,7 @@ class KhachDoanModel {
                         kh.so_dien_thoai AS sdt_lien_he,
                         pdt.ma_dat_tour,
                         
-                        -- Lấy trạng thái check-in chỉ của trạm này
+                        -- Lấy trạng thái check-in
                         COALESCE(ck.trang_thai, 'chưa đến') as trang_thai_checkin,
 
                         booker.ho_ten AS nguoi_dat,
@@ -57,9 +57,9 @@ class KhachDoanModel {
                     JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
                     JOIN tour t ON lkh.tour_id = t.id
                     
-                    -- JOIN bảng checkin với điều kiện tram_id
+                    -- [ĐÃ SỬA] Dùng khach_hang_id thay cho thanh_vien_dat_tour_id
                     LEFT JOIN checkin_khach_hang ck 
-                        ON kh.id = ck.thanh_vien_dat_tour_id 
+                        ON kh.id = ck.khach_hang_id 
                         AND ck.tram_id = :tram_id
                     
                     WHERE pdt.lich_khoi_hanh_id = :id 
@@ -68,7 +68,6 @@ class KhachDoanModel {
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':id', $id_lich_khoi_hanh);
             
-            // Nếu không có trạm nào được chọn, coi như tram_id = 0
             $tram_val = $tram_id ? $tram_id : 0;
             $stmt->bindParam(':tram_id', $tram_val);
             
@@ -80,39 +79,39 @@ class KhachDoanModel {
         }
     }
 
-    // Cập nhật check-in (Lưu cả tram_id)
-    public function updateCheckIn($id_thanh_vien, $status, $tram_id) {
+    // Cập nhật check-in
+    public function updateCheckIn($id_khach_hang, $status, $tram_id) {
         try {
-            // Lấy ID lịch từ khách hàng
+            // Lấy ID lịch từ khách hàng (để lưu vào checkin nếu là insert mới)
             $sqlInfo = "SELECT pdt.lich_khoi_hanh_id FROM khach_hang kh 
                         JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id 
                         WHERE kh.id = :id";
             $stmtInfo = $this->conn->prepare($sqlInfo);
-            $stmtInfo->execute([':id' => $id_thanh_vien]);
+            $stmtInfo->execute([':id' => $id_khach_hang]);
             $info = $stmtInfo->fetch();
             if (!$info) return false;
             $id_lich = $info['lich_khoi_hanh_id'];
 
-            // Kiểm tra đã có bản ghi cho khách này tại trạm này chưa
-            $sqlCheck = "SELECT id FROM checkin_khach_hang WHERE thanh_vien_dat_tour_id = :id AND tram_id = :tram_id";
+            // [ĐÃ SỬA] Kiểm tra tồn tại bằng khach_hang_id
+            $sqlCheck = "SELECT id FROM checkin_khach_hang WHERE khach_hang_id = :id AND tram_id = :tram_id";
             $stmtCheck = $this->conn->prepare($sqlCheck);
-            $stmtCheck->execute([':id' => $id_thanh_vien, ':tram_id' => $tram_id]);
+            $stmtCheck->execute([':id' => $id_khach_hang, ':tram_id' => $tram_id]);
             $existing = $stmtCheck->fetch();
 
             if ($existing) {
                 // UPDATE
                 $sql = "UPDATE checkin_khach_hang SET trang_thai = :status, thoi_gian_checkin = NOW() 
-                        WHERE thanh_vien_dat_tour_id = :id AND tram_id = :tram_id";
+                        WHERE khach_hang_id = :id AND tram_id = :tram_id";
             } else {
-                // INSERT
+                // INSERT: [ĐÃ SỬA] Insert vào cột khach_hang_id
                 $sql = "INSERT INTO checkin_khach_hang 
-                        (lich_khoi_hanh_id, tram_id, thanh_vien_dat_tour_id, trang_thai, thoi_gian_checkin, dia_diem_checkin) 
+                        (lich_khoi_hanh_id, tram_id, khach_hang_id, trang_thai, thoi_gian_checkin, dia_diem_checkin) 
                         VALUES (:lich_id, :tram_id, :id, :status, NOW(), 'Check-in tại trạm')";
             }
 
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':status', $status);
-            $stmt->bindParam(':id', $id_thanh_vien);
+            $stmt->bindParam(':id', $id_khach_hang);
             $stmt->bindParam(':tram_id', $tram_id);
             if (!$existing) $stmt->bindParam(':lich_id', $id_lich);
             
@@ -122,7 +121,6 @@ class KhachDoanModel {
         }
     }
 
-    // Các hàm cũ giữ nguyên
     public function getToursByGuide($guide_id) {
         try {
             $sql = "SELECT lkh.id, t.ten_tour, lkh.ngay_bat_dau, lkh.trang_thai
