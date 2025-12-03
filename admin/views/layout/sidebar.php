@@ -111,15 +111,34 @@
             </ul>
           </li>
           <!-- Trong sidebar.php -->
-
-
-          <li class="nav-item">
-            <a href=" <?= BASE_URL_ADMIN . '?act=lich-lam-viec-hdv' ?> " class="nav-link">
-              <i class="nav-icon fas fa-user-clock"></i>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-users-cog"></i>
               <p>
-                Lịch Làm Việc HDV
+                Quản Lý Nhân Sự
+                <i class="right fas fa-angle-left"></i>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href=" <?= BASE_URL_ADMIN . '?act=huong-dan-vien' ?> " class="nav-link">
+                  <i class="nav-icon fas fa-user-tie"></i>
+                  <p>
+                    Quản Lý HDV
+                  </p>
+                </a>
+              </li>
+            </ul>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href=" <?= BASE_URL_ADMIN . '?act=lich-lam-viec-hdv' ?> " class="nav-link">
+                  <i class="nav-icon fas fa-user-clock"></i>
+                  <p>
+                    Lịch Làm Việc HDV
+                  </p>
+                </a>
+              </li>
+            </ul>
           </li>
           <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=chinh-sach' ?> " class="nav-link">

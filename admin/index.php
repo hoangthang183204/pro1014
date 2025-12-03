@@ -23,6 +23,7 @@ require_once './controllers/AdminLichLamViecHDVController.php';
 require_once './controllers/AdminPhanPhongController.php';
 require_once './controllers/AdminThanhToanController.php';
 require_once './controllers/AdminChinhSachController.php';
+require_once './controllers/AdminHuongDanVienController.php';
 
 // Require Models
 require_once './models/AdminDashboard.php';
@@ -36,6 +37,7 @@ require_once './models/AdminLichLamViecHDV.php';
 require_once './models/AdminPhanPhong.php';
 require_once './models/AdminThanhToan.php';
 require_once './models/AdminChinhSach.php';
+require_once './models/AdminHuongDanVien.php';
 
 
 require_once './middleware/check-login.php';
@@ -82,7 +84,6 @@ match ($act) {
     'tour-update-nha-cung-cap' => (new AdminTourController())->updateNhaCungCapTour(),
     'tour-remove-nha-cung-cap' => (new AdminTourController())->removeNhaCungCapFromTour(),
 
-    // Thêm các route mới
     'tour-nha-cung-cap-list' => (new AdminTourController())->listNhaCungCap(),
     'tour-nha-cung-cap-create' => (new AdminTourController())->createNhaCungCap(),
     'tour-nha-cung-cap-store' => (new AdminTourController())->storeNhaCungCap(),
@@ -132,20 +133,6 @@ match ($act) {
     // 'danh-muc-tour-update' => (new AdminDanhMucTourController())->updateDanhMucTour(),
     // 'danh-muc-tour-delete' => (new AdminDanhMucTourController())->deleteDanhMucTour(),
 
-    // 'danh-muc-tag-tour' => (new AdminDanhMucTourController())->tagTour(),
-    // 'danh-muc-tag-tour-create' => (new AdminDanhMucTourController())->createTagTour(),
-    // 'danh-muc-tag-tour-store' => (new AdminDanhMucTourController())->storeTagTour(),
-    // 'danh-muc-tag-tour-edit' => (new AdminDanhMucTourController())->editTagTour(),
-    // 'danh-muc-tag-tour-update' => (new AdminDanhMucTourController())->updateTagTour(),
-    // 'danh-muc-tag-tour-delete' => (new AdminDanhMucTourController())->deleteTagTour(),
-
-    // 'danh-muc-chinh-sach' => (new AdminDanhMucTourController())->chinhSach(),
-    // 'danh-muc-chinh-sach-create' => (new AdminDanhMucTourController())->createChinhSach(),
-    // 'danh-muc-chinh-sach-store' => (new AdminDanhMucTourController())->storeChinhSach(),
-    // 'danh-muc-chinh-sach-edit' => (new AdminDanhMucTourController())->editChinhSach(),
-    // 'danh-muc-chinh-sach-update' => (new AdminDanhMucTourController())->updateChinhSach(),
-    // 'danh-muc-chinh-sach-delete' => (new AdminDanhMucTourController())->deleteChinhSach(),
-
     // 'danh-muc-doi-tac' => (new AdminDanhMucTourController())->doiTac(),
     // 'danh-muc-doi-tac-create' => (new AdminDanhMucTourController())->createDoiTac(),
     // 'danh-muc-doi-tac-store' => (new AdminDanhMucTourController())->storeDoiTac(),
@@ -153,12 +140,6 @@ match ($act) {
     // 'danh-muc-doi-tac-update' => (new AdminDanhMucTourController())->updateDoiTac(),
     // 'danh-muc-doi-tac-delete' => (new AdminDanhMucTourController())->deleteDoiTac(),
 
-    // // HƯỚNG DẪN VIÊN
-    // 'huong-dan-vien' => (new AdminDanhMucTourController())->huongDanVien(),
-    // 'chi-tiet-huong-dan-vien' => (new AdminDanhMucTourController())->chiTietHuongDanVien(),
-    // 'sua-huong-dan-vien' => (new AdminDanhMucTourController())->suaHuongDanVien(),
-    // 'update-huong-dan-vien' => (new AdminDanhMucTourController())->updateHuongDanVien(),
-    // 'xoa-huong-dan-vien' => (new AdminDanhMucTourController())->xoaHuongDanVien(),
 
     'tour-clone' => (new AdminTourController())->clone(),
     'tour-store-clone' => (new AdminTourController())->storeClone(),
@@ -201,8 +182,6 @@ match ($act) {
     'dat-tour-delete' => (new AdminDatTourController())->delete(),
     'dat-tour-print' => (new AdminDatTourController())->print(),
     'dat-tour-get-lich-khoi-hanh' => (new AdminDatTourController())->getLichKhoiHanhInfo(),
-    // 'dat-tour-search-khach-hang' => (new AdminDatTourController())->searchKhachHang(),
-    // 'dat-tour-get-khach-hang' => (new AdminDatTourController())->getKhachHangById(),
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
 
     // Quản lý Lịch Làm Việc HDV
@@ -211,6 +190,10 @@ match ($act) {
     'lich-lam-viec-hdv-cap-nhat' => (new AdminLichLamViecHDVController())->update(),
     'lich-lam-viec-hdv-xoa' => (new AdminLichLamViecHDVController())->delete(),
     'lich-lam-viec-hdv-loc' => (new AdminLichLamViecHDVController())->filter(),
+
+    'huong-dan-vien' => (new AdminHuongDanVienController())->index(),
+    'huong-dan-vien-chi-tiet' => (new AdminHuongDanVienController())->detail($_GET['id'] ?? 0),
+
 
     // Quản lý phân phòng khách sạn
     'phan-phong' => (new AdminPhanPhongController())->index(),
