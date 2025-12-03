@@ -15,11 +15,6 @@
                         <a href="?act=khach-hang" class="btn btn-outline-light">
                             <i class="fas fa-arrow-left me-1"></i> Quay lại
                         </a>
-                        <?php if ($thong_tin_khach_hang): ?>
-                            <a href="?act=khach-hang-edit&id=<?php echo $thong_tin_khach_hang['id']; ?>" class="btn btn-warning">
-                                <i class="fas fa-edit me-1"></i> Sửa
-                            </a>
-                        <?php endif; ?>
                     </div>
                 </div>
             </nav>
@@ -212,9 +207,9 @@
                                                 <td>
                                                     <?php
                                                     $trang_thai_class = [
-                                                        'chờ xác nhận' => 'warning',
-                                                        'đã cọc' => 'info',
-                                                        'hoàn tất' => 'success',
+                                                        'chưa thanh toán' => 'warning',
+                                                        'giữ chỗ' => 'info',
+                                                        'đã thanh toán' => 'success',
                                                         'hủy' => 'danger'
                                                     ];
                                                     $class = $trang_thai_class[$thong_tin_khach_hang['trang_thai_dat_tour']] ?? 'secondary';
@@ -309,104 +304,6 @@
                             </div>
                         </div>
                     <?php endif; ?>
-
-                    <!-- Lịch sử đặt tour -->
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-history me-2"></i>
-                                Lịch Sử Đặt Tour
-                                <?php if (!empty($lich_su_dat_tour)): ?>
-                                    <span class="badge bg-light text-dark"><?php echo count($lich_su_dat_tour); ?> tour</span>
-                                <?php endif; ?>
-                            </h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <?php if (!empty($lich_su_dat_tour)): ?>
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered mb-0">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th width="150">Mã booking</th>
-                                                <th>Tour</th>
-                                                <th width="120" class="text-center">Ngày đặt</th>
-                                                <th width="150" class="text-center">Thời gian tour</th>
-                                                <th width="100" class="text-center">Số khách</th>
-                                                <th width="120" class="text-center">Tổng tiền</th>
-                                                <th width="100" class="text-center">Trạng thái</th>
-                                                <th width="120" class="text-center">Vai trò</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($lich_su_dat_tour as $tour): ?>
-                                                <tr>
-                                                    <td>
-                                                        <strong class="text-dark"><?php echo $tour['ma_dat_tour']; ?></strong>
-                                                    </td>
-                                                    <td>
-                                                        <div class="fw-bold"><?php echo htmlspecialchars($tour['ten_tour'] ?? 'Chưa có tên tour'); ?></div>
-                                                        <small class="text-muted"><?php echo $tour['ma_tour'] ?? ''; ?></small>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <?php echo date('d/m/Y', strtotime($tour['ngay_dat'])); ?>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="small">
-                                                            <?php echo date('d/m/Y', strtotime($tour['ngay_bat_dau'])); ?>
-                                                        </div>
-                                                        <div class="small text-muted">
-                                                            đến <?php echo date('d/m/Y', strtotime($tour['ngay_ket_thuc'])); ?>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-primary"><?php echo $tour['so_luong_khach'] ?? '1'; ?> người</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <strong class="text-success"><?php echo number_format($tour['tong_tien'], 0, ',', '.'); ?> VNĐ</strong>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <?php
-                                                        $trang_thai_class = [
-                                                            'chờ xác nhận' => 'warning',
-                                                            'đã cọc' => 'info',
-                                                            'hoàn tất' => 'success',
-                                                            'hủy' => 'danger'
-                                                        ];
-                                                        $class = $trang_thai_class[$tour['trang_thai']] ?? 'secondary';
-                                                        ?>
-                                                        <span class="badge bg-<?php echo $class; ?>">
-                                                            <?php echo $tour['trang_thai']; ?>
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <?php if (isset($tour['vai_tro']) && $tour['vai_tro'] == 'Người đặt'): ?>
-                                                            <span class="badge bg-success">Người đặt</span>
-                                                        <?php else: ?>
-                                                            <span class="badge bg-info">Thành viên</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <?php else: ?>
-                                <div class="text-center py-4">
-                                    <i class="fas fa-history fa-2x text-muted mb-3"></i>
-                                    <h6 class="text-muted">Không có lịch sử đặt tour</h6>
-                                    <p class="text-muted small">
-                                        <?php
-                                        if ($thong_tin_khach_hang && $thong_tin_khach_hang['phieu_dat_tour_id']):
-                                            echo "Khách hàng có phieu_dat_tour_id = " . $thong_tin_khach_hang['phieu_dat_tour_id'] . " nhưng không tìm thấy booking tương ứng";
-                                        else:
-                                            echo "Khách hàng chưa tham gia tour nào";
-                                        endif;
-                                        ?>
-                                    </p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
                 <?php else: ?>
                     <div class="alert alert-danger text-center">
                         <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>

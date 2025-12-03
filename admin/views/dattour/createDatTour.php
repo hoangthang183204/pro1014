@@ -64,15 +64,34 @@
 
                             <!-- Danh sách khách hàng -->
                             <div class="card mb-4">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-users me-2"></i>
-                                        Danh Sách Khách Hàng
-                                        <span class="badge bg-primary ms-2" id="so_khach_badge">0</span>
-                                    </h5>
-                                    <button type="button" id="btnThemKhach" class="btn btn-success btn-sm">
-                                        <i class="fas fa-plus me-1"></i> Thêm Khách
-                                    </button>
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-users me-2"></i>
+                                            Danh Sách Khách Hàng
+                                            <span class="badge bg-primary ms-2" id="so_khach_badge">0</span>
+                                        </h5>
+                                        <div>
+                                            <!-- Thêm nhanh nhiều khách -->
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="number" id="so_luong_khach_nhanh" class="form-control" 
+                                                    placeholder="Số lượng" min="1" max="20" value="1">
+                                                <button type="button" id="btnThemNhanh" class="btn btn-success">
+                                                    <i class="fas fa-bolt me-1"></i> Thêm Nhanh
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex gap-2">
+                                            <button type="button" id="btnThemKhach" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-plus me-1"></i> Thêm Từng Khách
+                                            </button>
+                                            <button type="button" id="btnXoaHet" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i> Xóa Hết
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div id="danh_sach_khach">
@@ -85,7 +104,7 @@
                                 </div>
                             </div>
 
-                            <!-- Ghi chú
+                            <!-- Ghi chú -->
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
@@ -96,7 +115,7 @@
                                 <div class="card-body">
                                     <textarea name="ghi_chu" class="form-control" rows="3" placeholder="Ghi chú thêm..."></textarea>
                                 </div>
-                            </div> -->
+                            </div>
                         </div>
 
                         <div class="col-lg-4">
@@ -242,6 +261,9 @@
         const emptyState = document.getElementById('empty_state');
         const templateKhach = document.getElementById('template_khach');
         const btnThemKhach = document.getElementById('btnThemKhach');
+        const btnThemNhanh = document.getElementById('btnThemNhanh');
+        const btnXoaHet = document.getElementById('btnXoaHet');
+        const soLuongKhachNhanh = document.getElementById('so_luong_khach_nhanh');
 
         let soKhach = 0;
         let giaTour = 0;
@@ -255,18 +277,89 @@
                 giaTour = parseFloat(selectedOption.dataset.gia);
                 soChoConLai = parseInt(selectedOption.dataset.soCho);
 
+                // Cập nhật max cho input thêm nhanh
+                soLuongKhachNhanh.max = soChoConLai;
+                
+                // Nếu đã chọn số lượng lớn hơn số chỗ còn lại, reset về max
+                if (parseInt(soLuongKhachNhanh.value) > soChoConLai) {
+                    soLuongKhachNhanh.value = soChoConLai;
+                }
+
                 document.getElementById('gia_tour_don').textContent = formatCurrency(giaTour);
                 updateTongTien();
                 updateThongBaoCho();
             }
         });
 
-        // Thêm khách hàng
+        // Thêm từng khách
         btnThemKhach.addEventListener('click', function() {
             if (soChoConLai > 0 && soKhach < soChoConLai) {
                 themKhach();
             } else {
                 alert('Không thể thêm khách. Số chỗ còn lại: ' + soChoConLai);
+            }
+        });
+
+        // Thêm nhanh nhiều khách
+        btnThemNhanh.addEventListener('click', function() {
+            if (!lichKhoiHanhSelect.value) {
+                alert('Vui lòng chọn lịch khởi hành trước!');
+                lichKhoiHanhSelect.focus();
+                return;
+            }
+
+            const soLuong = parseInt(soLuongKhachNhanh.value);
+            
+            if (!soLuong || soLuong < 1) {
+                alert('Vui lòng nhập số lượng hợp lệ!');
+                soLuongKhachNhanh.focus();
+                return;
+            }
+
+            if (soLuong > soChoConLai) {
+                alert(`Số lượng (${soLuong}) vượt quá số chỗ còn lại (${soChoConLai})!`);
+                return;
+            }
+
+            if (soKhach + soLuong > soChoConLai) {
+                const coTheThem = soChoConLai - soKhach;
+                alert(`Chỉ có thể thêm tối đa ${coTheThem} khách nữa!`);
+                return;
+            }
+
+            // Thêm nhanh nhiều khách
+            for (let i = 0; i < soLuong; i++) {
+                themKhach();
+            }
+
+            // Focus vào ô họ tên của khách đầu tiên vừa thêm
+            const hoTenInputs = document.querySelectorAll('input[name="khach_hang_ho_ten[]"]');
+            if (hoTenInputs.length > 0) {
+                const lastIndex = hoTenInputs.length - soLuong;
+                hoTenInputs[lastIndex > 0 ? lastIndex : 0].focus();
+            }
+        });
+
+        // Xóa hết khách
+        btnXoaHet.addEventListener('click', function() {
+            if (soKhach > 0) {
+                if (confirm(`Bạn có chắc muốn xóa tất cả ${soKhach} khách hàng?`)) {
+                    danhSachKhach.innerHTML = '';
+                    soKhach = 0;
+                    updateEmptyState();
+                    updateTongTien();
+                    updateSoKhachBadge();
+                }
+            } else {
+                alert('Chưa có khách hàng nào để xóa!');
+            }
+        });
+
+        // Enter để thêm nhanh
+        soLuongKhachNhanh.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                btnThemNhanh.click();
             }
         });
 
@@ -285,6 +378,7 @@
                     updateTongTien();
                     updateEmptyState();
                     updateSoKhachBadge();
+                    updateThongBaoCho();
                 }
             });
 
@@ -296,6 +390,7 @@
             updateEmptyState();
             updateTongTien();
             updateSoKhachBadge();
+            updateThongBaoCho();
         }
 
         function updateEmptyState() {
@@ -330,7 +425,11 @@
 
             if (soChoConLai > 0) {
                 if (soKhachHopLe <= soChoConLai) {
-                    thongBao.innerHTML = `<span class="text-success">Có thể đặt: ${soKhachHopLe}/${soChoConLai} khách</span>`;
+                    const coTheThem = soChoConLai - soKhachHopLe;
+                    thongBao.innerHTML = `<span class="text-success">
+                        Đã đặt: ${soKhachHopLe}/${soChoConLai} khách | 
+                        Có thể thêm: ${coTheThem} khách
+                    </span>`;
                 } else {
                     thongBao.innerHTML = `<span class="text-danger">Vượt quá số chỗ! Tối đa: ${soChoConLai} khách</span>`;
                 }
@@ -383,5 +482,41 @@
                 }
             }
         });
+
+        // Auto-focus vào ô số lượng khi thêm nhanh
+        soLuongKhachNhanh.addEventListener('focus', function() {
+            this.select();
+        });
     });
 </script>
+
+<style>
+.input-group {
+    max-width: 250px;
+}
+
+.khach-item {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+</style>
