@@ -1,126 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký</title>
     <style>
+        :root {
+            --primary: #977ac7ff;
+            --primary-dark: #2543ecff;
+            --secondary: #4c2bf1ff;
+            --light: #020202ff;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --error: #f72585;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #394d71ff 0%, #05337dff 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            padding: 30px 30px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
             position: relative;
             overflow: hidden;
         }
 
-        /* Background animation */
-        body::before {
+        .card-header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
-            animation: float 6s ease-in-out infinite;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(1deg); }
-        }
-
-        .form-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 
-                0 15px 35px rgba(0, 0, 0, 0.1),
-                0 3px 10px rgba(0, 0, 0, 0.05);
-            width: 100%;
-            max-width: 450px;
-            position: relative;
-            z-index: 1;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transform: translateY(0);
-            transition: all 0.3s ease;
-        }
-
-        .form-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.15),
-                0 5px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        .form-container h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #2d3748;
+        .card-header h1 {
             font-size: 28px;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
 
-        .input-group {
+        .card-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        /* Layout 2 cột */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+
+        .form-column {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 15px;
+        }
+
+        .form-group {
             margin-bottom: 20px;
+            position: relative;
         }
 
-        .input-group label {
+        .form-label {
             display: block;
             margin-bottom: 8px;
-            color: #4a5568;
             font-weight: 600;
             font-size: 14px;
+            color: var(--dark);
         }
 
-        .input-group input,
-        .input-group select {
+        .form-control {
             width: 100%;
-            padding: 12px 2px;
-            border: 3px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 14px;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-light);
+            border-radius: 12px;
+            font-size: 15px;
             transition: all 0.3s ease;
-            background: #fff;
+            background: white;
+            font-family: inherit;
         }
 
-        .input-group input:focus,
-        .input-group select:focus {
+        .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
 
-        .btn-register {
+        .form-control.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.1);
+        }
+
+        .form-control.success {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.1);
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .form-actions {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 0 15px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            display: block;
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
+            padding: 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: inherit;
             position: relative;
             overflow: hidden;
         }
 
-        .btn-register::before {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: var(--gray);
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .btn-primary::before {
             content: '';
             position: absolute;
             top: 0;
@@ -131,40 +212,23 @@
             transition: left 0.5s;
         }
 
-        .btn-register:hover::before {
+        .btn-primary:hover::before {
             left: 100%;
         }
 
-        .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-register:active {
-            transform: translateY(0);
-        }
-
-        .btn-register:disabled {
-            background: #a0aec0;
-            transform: none;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .form-footer {
+        .card-footer {
             text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            padding: 20px 30px 30px;
+            border-top: 1px solid var(--gray-light);
         }
 
-        .form-footer p {
-            color: #718096;
+        .card-footer p {
+            color: var(--gray);
             margin-bottom: 10px;
         }
 
-        .form-footer a {
-            color: #667eea;
+        .card-footer a {
+            color: var(--primary);
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -172,30 +236,26 @@
             border-radius: 5px;
         }
 
-        .form-footer a:hover {
-            color: #764ba2;
-            background: rgba(102, 126, 234, 0.1);
-            text-decoration: none;
+        .card-footer a:hover {
+            color: var(--secondary);
+            background: rgba(67, 97, 238, 0.1);
         }
 
-        .error-message {
-            color: #e53e3e;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-            font-weight: 500;
+        /* Loading animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .input-group.error input,
-        .input-group.error select {
-            border-color: #e53e3e;
-            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
-        }
-
-        .input-group.success input,
-        .input-group.success select {
-            border-color: #38a169;
-            box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.1);
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
         }
 
         /* Floating elements */
@@ -203,7 +263,7 @@
             position: absolute;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            animation: float 3s ease-in-out infinite;
+            animation: float 6s ease-in-out infinite;
         }
 
         .floating:nth-child(1) {
@@ -219,7 +279,7 @@
             height: 60px;
             top: 70%;
             left: 80%;
-            animation-delay: 1s;
+            animation-delay: 2s;
         }
 
         .floating:nth-child(3) {
@@ -227,138 +287,131 @@
             height: 40px;
             top: 40%;
             left: 85%;
-            animation-delay: 2s;
+            animation-delay: 4s;
         }
 
-        /* Loading animation */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
         }
 
         /* Responsive */
+        @media (max-width: 768px) {
+            .form-column {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .container {
+                max-width: 480px;
+            }
+        }
+
         @media (max-width: 480px) {
-            .form-container {
-                margin: 20px;
-                padding: 25px 20px;
+            .card-header, .card-body, .card-footer {
+                padding: 20px;
             }
             
-            body {
-                padding: 10px;
-                height: auto;
-                min-height: 100vh;
-            }
-            
-            .form-container h2 {
+            .card-header h1 {
                 font-size: 24px;
             }
-        }
-
-        /* Scrollbar styling */
-        .form-container {
-            max-height: 90vh;
-            overflow-y: auto;
-             
-        }
-
-        .form-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .form-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .form-container::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
             
+            .form-row {
+                margin: 0 -10px;
+            }
+            
+            .form-column {
+                padding: 0 10px;
+            }
         }
     </style>
 </head>
-
 <body>
     <!-- Floating background elements -->
     <div class="floating"></div>
     <div class="floating"></div>
     <div class="floating"></div>
     
-    <div class="form-container">
-        <h2>Đăng ký</h2>
-
-        <form id="registerForm" action="?act=register-process" method="post">
-            <div class="input-group">
-                <label for="ten_dang_nhap">Tên đăng nhập</label>
-                <input type="text" name="ten_dang_nhap" id="ten_dang_nhap" placeholder="Tên đăng nhập..." required>
-                <div class="error-message" id="ten_dang_nhap_error"></div>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1>Tạo tài khoản</h1>
+                <p>Điền thông tin để đăng ký tài khoản mới</p>
             </div>
+            
+            <div class="card-body">
+                <form id="registerForm" action="?act=register-process" method="post">
+                    <div class="form-row">
+                        <!-- Cột 1 -->
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="ten_dang_nhap" class="form-label">Tên đăng nhập</label>
+                                <input type="text" name="ten_dang_nhap" id="ten_dang_nhap" class="form-control" placeholder="Nhập tên đăng nhập" required>
+                                <div class="error-message" id="ten_dang_nhap_error"></div>
+                            </div>
 
-            <div class="input-group">
-                <label for="ho_ten">Họ tên</label>
-                <input type="text" name="ho_ten" id="ho_ten" placeholder="Họ tên..." required>
-                <div class="error-message" id="ho_ten_error"></div>
+                            <div class="form-group">
+                                <label for="ho_ten" class="form-label">Họ tên</label>
+                                <input type="text" name="ho_ten" id="ho_ten" class="form-control" placeholder="Nhập họ tên" required>
+                                <div class="error-message" id="ho_ten_error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" name="email" id="email" class="form-control" placeholder="Nhập địa chỉ email" required>
+                                <div class="error-message" id="email_error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="so_dien_thoai" class="form-label">Số điện thoại</label>
+                                <input type="text" name="so_dien_thoai" id="so_dien_thoai" class="form-control" placeholder="Nhập số điện thoại">
+                                <div class="error-message" id="so_dien_thoai_error"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cột 2 -->
+                        <div class="form-column">
+                            <div class="form-group">
+                                <label for="vai_tro" class="form-label">Vai trò</label>
+                                <select name="vai_tro" id="vai_tro" class="form-control" required >
+                                    <option value="huong_dan_vien" >Hướng dẫn viên</option>
+                                </select>
+                                <div class="error-message" id="vai_tro_error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="trang_thai" class="form-label">Trạng thái hoạt động</label>
+                                <select name="trang_thai" id="trang_thai" class="form-control" required>
+                                    <option value="hoạt động">Hoạt động</option>
+                                    <option value="khóa">Khóa</option>
+                                </select>
+                                <div class="error-message" id="trang_thai_error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password" class="form-label">Mật khẩu</label>
+                                <input type="password" name="mat_khau" id="password" class="form-control" placeholder="Nhập mật khẩu" required>
+                                <div class="error-message" id="mat_khau_error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm" class="form-label">Nhập lại mật khẩu</label>
+                                <input type="password" name="confirm" id="confirm" class="form-control" placeholder="Nhập lại mật khẩu" required>
+                                <div class="error-message" id="confirm_error"></div>
+                            </div>
+                        </div>
+
+                        <!-- Nút đăng ký - chiếm full width -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">Đăng ký</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-
-            <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" placeholder="Email..." required>
-                <div class="error-message" id="email_error"></div>
+            
+            <div class="card-footer">
+                <p>Đã có tài khoản? <a href="?act=login">Đăng nhập ngay</a></p>
             </div>
-
-            <div class="input-group">
-                <label for="so_dien_thoai">Số điện thoại</label>
-                <input type="text" name="so_dien_thoai" id="so_dien_thoai" placeholder="Số điện thoại...">
-                <div class="error-message" id="so_dien_thoai_error"></div>
-            </div>
-
-            <div class="input-group">
-                <label for="vai_tro">Vai trò</label>
-                <select name="vai_tro" id="vai_tro" required>
-                    <option value="nhan_vien">Nhân viên</option>
-                    <option value="admin">Admin</option>
-                    <option value="huong_dan_vien">Hướng dẫn viên</option>
-                </select>
-                <div class="error-message" id="vai_tro_error"></div>
-            </div>
-
-            <div class="input-group">
-                <label for="trang_thai">Trạng thái hoạt động</label>
-                <select name="trang_thai" id="trang_thai" required>
-                    <option value="hoạt động">Hoạt động</option>
-                    <option value="khóa">Khóa</option>
-                </select>
-                <div class="error-message" id="trang_thai_error"></div>
-            </div>
-
-            <div class="input-group">
-                <label for="password">Mật khẩu</label>
-                <input type="password" name="mat_khau" id="password" placeholder="Mật khẩu..." required>
-                <div class="error-message" id="mat_khau_error"></div>
-            </div>
-
-            <div class="input-group">
-                <label for="confirm">Nhập lại mật khẩu</label>
-                <input type="password" name="confirm" id="confirm" placeholder="Nhập lại mật khẩu..." required>
-                <div class="error-message" id="confirm_error"></div>
-            </div>
-
-            <button type="submit" class="btn-register" id="submitBtn">Đăng ký</button>
-        </form>
-
-        <div class="form-footer">
-            <p>Đã có tài khoản? <a href="?act=login">Đăng nhập</a></p>
         </div>
     </div>
 
@@ -523,7 +576,7 @@
 
             setFieldValidation(field, isValid, errorMessage) {
                 const errorElement = document.getElementById(field.name + '_error');
-                const inputGroup = field.closest('.input-group');
+                const inputGroup = field.closest('.form-group');
 
                 if (!errorElement) {
                     console.error(`❌ Error element not found for: ${field.name}_error`);
@@ -531,13 +584,13 @@
                 }
 
                 if (isValid) {
-                    inputGroup.classList.remove('error');
-                    inputGroup.classList.add('success');
+                    field.classList.remove('error');
+                    field.classList.add('success');
                     errorElement.style.display = 'none';
                     console.log(`✅ ${field.name}: Validation passed`);
                 } else {
-                    inputGroup.classList.remove('success');
-                    inputGroup.classList.add('error');
+                    field.classList.remove('success');
+                    field.classList.add('error');
                     errorElement.textContent = errorMessage;
                     errorElement.style.display = 'block';
                     console.log(`❌ ${field.name}: ${errorMessage}`);
@@ -546,24 +599,24 @@
 
             clearError(field) {
                 const errorElement = document.getElementById(field.name + '_error');
-                const inputGroup = field.closest('.input-group');
+                const inputGroup = field.closest('.form-group');
 
                 if (errorElement && inputGroup) {
-                    inputGroup.classList.remove('error', 'success');
+                    field.classList.remove('error', 'success');
                     errorElement.style.display = 'none';
                 }
             }
 
             clearAllErrors() {
                 const errorElements = this.form.querySelectorAll('.error-message');
-                const inputGroups = this.form.querySelectorAll('.input-group');
+                const inputs = this.form.querySelectorAll('.form-control');
 
                 errorElements.forEach(element => {
                     element.style.display = 'none';
                 });
 
-                inputGroups.forEach(group => {
-                    group.classList.remove('error', 'success');
+                inputs.forEach(input => {
+                    input.classList.remove('error', 'success');
                 });
             }
         }
@@ -575,5 +628,4 @@
         });
     </script>
 </body>
-
 </html>
