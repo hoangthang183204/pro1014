@@ -105,7 +105,7 @@
                                     </div>
                                     <div class="flex-grow-1">
                                         <h6 class="text-muted mb-1 small fw-semibold">đã thanh toán</h6>
-                                        <h4 class="mb-0 fw-bold text-success"><?php echo $thong_ke['hoan_tat'] ?? 0; ?></h4>
+                                        <h4 class="mb-0 fw-bold text-success"><?php echo $thong_ke['da_thanh_toan'] ?? 0; ?></h4>
                                     </div>
                                 </div>
                             </div>

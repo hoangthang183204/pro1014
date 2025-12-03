@@ -89,8 +89,8 @@
                                 <div class="icon bg-info mx-auto mb-2">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
-                                <h4 class="card-title mb-1 fw-bold text-info"><?= $thong_ke['tour_hoan_tat'] ?? 0 ?></h4>
-                                <p class="card-text small mb-0 text-muted">Tour hoàn tất</p>
+                                <h4 class="card-title mb-1 fw-bold text-info"><?= $thong_ke['tour_da_thanh_toan'] ?? 0 ?></h4>
+                                <p class="card-text small mb-0 text-muted">Tour đã thanh toán</p>
                             </div>
                         </div>
                     </div>
@@ -100,8 +100,8 @@
                                 <div class="icon bg-secondary mx-auto mb-2">
                                     <i class="fas fa-clock"></i>
                                 </div>
-                                <h4 class="card-title mb-1 fw-bold text-secondary"><?= $thong_ke['tour_cho_xac_nhan'] ?? 0 ?></h4>
-                                <p class="card-text small mb-0 text-muted">Chờ xác nhận</p>
+                                <h4 class="card-title mb-1 fw-bold text-secondary"><?= $thong_ke['tour_chua_thanh_toan'] ?? 0 ?></h4>
+                                <p class="card-text small mb-0 text-muted">chưa thanh toán</p>
                             </div>
                         </div>
                     </div>
@@ -111,8 +111,8 @@
                                 <div class="icon bg-dark mx-auto mb-2">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </div>
-                                <h4 class="card-title mb-1 fw-bold text-dark"><?= $thong_ke['tour_da_coc'] ?? 0 ?></h4>
-                                <p class="card-text small mb-0 text-muted">Đã cọc</p>
+                                <h4 class="card-title mb-1 fw-bold text-dark"><?= $thong_ke['tour_giu_cho'] ?? 0 ?></h4>
+                                <p class="card-text small mb-0 text-muted">giữ chỗ</p>
                             </div>
                         </div>
                     </div>
@@ -139,9 +139,9 @@
                                 <label class="form-label fw-bold">Trạng thái tour</label>
                                 <select name="trang_thai" class="form-select">
                                     <option value="">Tất cả trạng thái</option>
-                                    <option value="chờ xác nhận" <?php echo ($_GET['trang_thai'] ?? '') === 'chờ xác nhận' ? 'selected' : ''; ?>>Chờ xác nhận</option>
-                                    <option value="đã cọc" <?php echo ($_GET['trang_thai'] ?? '') === 'đã cọc' ? 'selected' : ''; ?>>Đã cọc</option>
-                                    <option value="hoàn tất" <?php echo ($_GET['trang_thai'] ?? '') === 'hoàn tất' ? 'selected' : ''; ?>>Hoàn tất</option>
+                                    <option value="chưa thanh toán" <?php echo ($_GET['trang_thai'] ?? '') === 'chưa thanh toán' ? 'selected' : ''; ?>>chưa thanh toán</option>
+                                    <option value="giữ chỗ" <?php echo ($_GET['trang_thai'] ?? '') === 'giữ chỗ' ? 'selected' : ''; ?>>giữ chỗ</option>
+                                    <option value="đã thanh toán" <?php echo ($_GET['trang_thai'] ?? '') === 'đã thanh toán' ? 'selected' : ''; ?>>đã thanh toán</option>
                                     <option value="hủy" <?php echo ($_GET['trang_thai'] ?? '') === 'hủy' ? 'selected' : ''; ?>>Đã hủy</option>
                                     <option value="khong_co_tour" <?php echo ($_GET['trang_thai'] ?? '') === 'khong_co_tour' ? 'selected' : ''; ?>>Không có tour</option>
                                 </select>
@@ -248,9 +248,9 @@
                                                 <td class="text-center">
                                                     <?php
                                                     $trang_thai_class = [
-                                                        'chờ xác nhận' => 'bg-warning',
-                                                        'đã cọc' => 'bg-info',
-                                                        'hoàn tất' => 'bg-success',
+                                                        'chưa thanh toán' => 'bg-warning',
+                                                        'giữ chỗ' => 'bg-info',
+                                                        'đã thanh toán' => 'bg-success',
                                                         'hủy' => 'bg-danger'
                                                     ];
                                                     $trang_thai = $khach['trang_thai_dat_tour'] ?? 'Không có tour';
@@ -259,9 +259,9 @@
                                                     <span class="badge <?php echo $class; ?>">
                                                         <i class="fas fa-<?php 
                                                             switch($khach['trang_thai_dat_tour'] ?? '') {
-                                                                case 'chờ xác nhận': echo 'clock'; break;
-                                                                case 'đã cọc': echo 'money-bill-wave'; break;
-                                                                case 'hoàn tất': echo 'check-circle'; break;
+                                                                case 'chưa thanh toán': echo 'clock'; break;
+                                                                case 'giữ chỗ': echo 'money-bill-wave'; break;
+                                                                case 'đã thanh toán': echo 'check-circle'; break;
                                                                 case 'hủy': echo 'times-circle'; break;
                                                                 default: echo 'question';
                                                             }

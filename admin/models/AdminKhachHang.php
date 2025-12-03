@@ -19,9 +19,9 @@ class AdminKhachHang
                          INNER JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id 
                          WHERE pdt.trang_thai != 'hủy') as khach_co_tour,
                         (SELECT COUNT(*) FROM khach_hang WHERE DATE(created_at) = CURDATE()) as khach_moi_hom_nay,
-                        (SELECT COUNT(*) FROM phieu_dat_tour WHERE trang_thai = 'hoàn tất') as tour_hoan_tat,
-                        (SELECT COUNT(*) FROM phieu_dat_tour WHERE trang_thai = 'đã cọc') as tour_da_coc,
-                        (SELECT COUNT(*) FROM phieu_dat_tour WHERE trang_thai = 'chờ xác nhận') as tour_cho_xac_nhan";
+                        (SELECT COUNT(*) FROM phieu_dat_tour WHERE trang_thai = 'đã thanh toán') as tour_da_thanh_toan,
+                        (SELECT COUNT(*) FROM phieu_dat_tour WHERE trang_thai = 'giữ chỗ') as tour_giu_cho,
+                        (SELECT COUNT(*) FROM phieu_dat_tour WHERE trang_thai = 'chưa thanh toán') as tour_chua_thanh_toan";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute();

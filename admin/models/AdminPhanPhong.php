@@ -80,7 +80,7 @@ class AdminPhanPhong {
             FROM khach_hang kh
             JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id
             WHERE pdt.lich_khoi_hanh_id = :lich_khoi_hanh_id
-            AND pdt.trang_thai IN ('đã cọc', 'hoàn tất')
+            AND pdt.trang_thai IN ('giữ chỗ', 'đã thanh toán')
             AND kh.id NOT IN (
                 SELECT khach_hang_id 
                 FROM phan_phong_khach_san 

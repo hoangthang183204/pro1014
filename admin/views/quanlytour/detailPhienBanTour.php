@@ -27,9 +27,6 @@
                             onclick="return confirm('Kích hoạt phiên bản này? Giá tour sẽ được cập nhật thành <?php echo number_format($phien_ban['gia_tour'], 0, ',', '.'); ?> đ')">
                             <i class="fas fa-play me-1"></i> Kích hoạt
                         </a>
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            <i class="fas fa-trash me-1"></i> Xóa
-                        </button>
                     </div>
                 </div>
             </nav>
@@ -142,7 +139,7 @@
                                                         </span>
                                                     <?php else: ?>
                                                         <span class="text-muted">
-                                                            <?php echo number_format($tour['gia_hien_tai'], 0, ',', '.'); ?> đ
+                                                            <?php echo number_format($tour['gia_tour'], 0, ',', '.'); ?> đ
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
