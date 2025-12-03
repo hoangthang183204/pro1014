@@ -160,7 +160,7 @@
                                             </tr>
                                             <tr>
                                                 <th class="border-0">Chuyên môn:</th>
-                                                <td class="border-0"><?php echo isset($hdv['chuyên_mon']) && !empty($hdv['chuyên_mon']) ? htmlspecialchars($hdv['chuyên_mon']) : 'Chưa cập nhật'; ?></td>
+                                                <td class="border-0"><?php echo isset($hdv['chuyen_mon']) && !empty($hdv['chuyen_mon']) ? htmlspecialchars($hdv['chuyen_mon']) : 'Chưa cập nhật'; ?></td>
                                             </tr>
                                             <tr>
                                                 <th class="border-0">Sức khỏe:</th>

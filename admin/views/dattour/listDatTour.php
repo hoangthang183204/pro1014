@@ -206,14 +206,14 @@
                                                             title="Xem chi tiết">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <?php if ($dat_tour['trang_thai'] == 'chờ xác nhận' || $dat_tour['trang_thai'] == 'đã cọc'): ?>
+                                                        <!-- <?php if ($dat_tour['trang_thai'] == 'chờ xác nhận' || $dat_tour['trang_thai'] == 'đã cọc'): ?>
                                                             <a href="?act=dat-tour-edit&id=<?php echo $dat_tour['id']; ?>"
                                                                 class="btn btn-warning btn-sm"
                                                                 data-bs-toggle="tooltip"
                                                                 title="Sửa">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                        <?php endif; ?>
+                                                        <?php endif; ?> -->
                                                         <?php if ($dat_tour['trang_thai'] == 'hủy'): ?>
                                                             <a href="?act=dat-tour-delete&id=<?php echo $dat_tour['id']; ?>"
                                                                 class="btn btn-danger btn-sm"

@@ -106,9 +106,9 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="d-grid gap-2">
-                                        <a href="?act=dat-tour-edit&id=<?php echo $dat_tour['id']; ?>" class="btn btn-warning">
+                                        <!-- <a href="?act=dat-tour-edit&id=<?php echo $dat_tour['id']; ?>" class="btn btn-warning">
                                             <i class="fas fa-edit me-1"></i> Sửa
-                                        </a>
+                                        </a> -->
                                         <a href="?act=dat-tour-print&id=<?php echo $dat_tour['id']; ?>" class="btn btn-info">
                                             <i class="fas fa-print me-1"></i> In Hóa Đơn
                                         </a>
