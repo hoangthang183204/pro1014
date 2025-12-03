@@ -48,7 +48,7 @@
                                         style="border-radius: 0.5rem !important;">
                                         <option value="">Tất cả trạng thái</option>
                                         <option value="đã lên lịch" <?php echo ($_GET['trang_thai'] ?? '') === 'đã lên lịch' ? 'selected' : ''; ?>>Đã lên lịch</option>
-                                        <option value="đang diễn ra" <?php echo ($_GET['trang_thai'] ?? '') === 'đang diễn ra' ? 'selected' : ''; ?>>Đang diễn ra</option>
+                                        <option value="đang đi" <?php echo ($_GET['trang_thai'] ?? '') === 'đang đi' ? 'selected' : ''; ?>>Đang đi</option>
                                         <option value="đã hoàn thành" <?php echo ($_GET['trang_thai'] ?? '') === 'đã hoàn thành' ? 'selected' : ''; ?>>Đã hoàn thành</option>
                                         <option value="đã hủy" <?php echo ($_GET['trang_thai'] ?? '') === 'đã hủy' ? 'selected' : ''; ?>>Đã hủy</option>
                                     </select>
@@ -157,7 +157,7 @@
                                                     <span class="badge bg-<?php
                                                                             echo match ($trang_thai_hien_tai) {
                                                                                 'đã lên lịch' => 'success',
-                                                                                'đang diễn ra' => 'warning',
+                                                                                'đang đi' => 'warning',
                                                                                 'đã hoàn thành' => 'primary',
                                                                                 'đã hủy' => 'danger',
                                                                                 default => 'secondary'
@@ -180,13 +180,12 @@
                                                         } elseif ($ngay_con_lai == 0) {
                                                             echo '<br><small class="text-success"><strong>Khởi hành hôm nay</strong></small>';
                                                         } elseif ($ngay_con_lai < 0) {
-                                                            // Trường hợp đáng lý phải là "đang diễn ra" nhưng chưa được cập nhật
                                                             echo '<br><small class="text-danger"><i class="fas fa-exclamation-circle"></i> Đáng lý đã khởi hành</small>';
                                                         }
                                                         ?>
-                                                    <?php elseif ($trang_thai_hien_tai === 'đang diễn ra'): ?>
+                                                    <?php elseif ($trang_thai_hien_tai === 'đang đi'): ?>
                                                         <?php
-                                                        // Tính ngày đang diễn ra CHÍNH XÁC
+                            
                                                         $ngay_bat_dau = strtotime($lich['ngay_bat_dau']);
                                                         $ngay_ket_thuc = strtotime($lich['ngay_ket_thuc']);
                                                         $hom_nay = strtotime(date('Y-m-d'));

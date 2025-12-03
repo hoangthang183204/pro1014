@@ -66,9 +66,9 @@
                                 <div class="col-md-2">
                                     <select name="trang_thai" class="form-select">
                                         <option value="">Tất cả trạng thái</option>
-                                        <option value="chờ xác nhận" <?php echo ($trang_thai ?? '') === 'chờ xác nhận' ? 'selected' : ''; ?>>Chờ xác nhận</option>
-                                        <option value="đã cọc" <?php echo ($trang_thai ?? '') === 'đã cọc' ? 'selected' : ''; ?>>Đã cọc</option>
-                                        <option value="hoàn tất" <?php echo ($trang_thai ?? '') === 'hoàn tất' ? 'selected' : ''; ?>>Hoàn tất</option>
+                                        <option value="chưa thanh toán" <?php echo ($trang_thai ?? '') === 'chưa thanh toán' ? 'selected' : ''; ?>>Chưa thanh toán</option>
+                                        <option value="giữ chỗ" <?php echo ($trang_thai ?? '') === 'giữ chỗ' ? 'selected' : ''; ?>>Giữ chỗ</option>
+                                        <option value="đã thanh toán" <?php echo ($trang_thai ?? '') === 'đã thanh toán' ? 'selected' : ''; ?>>Đã thanh toán</option>
                                         <option value="hủy" <?php echo ($trang_thai ?? '') === 'hủy' ? 'selected' : ''; ?>>Đã hủy</option>
                                     </select>
                                 </div>
@@ -186,9 +186,9 @@
                                                 <td class="text-center">
                                                     <?php
                                                     $status_config = [
-                                                        'chờ xác nhận' => ['class' => 'bg-warning', 'icon' => 'clock'],
-                                                        'đã cọc' => ['class' => 'bg-info', 'icon' => 'money-bill-wave'],
-                                                        'hoàn tất' => ['class' => 'bg-success', 'icon' => 'check-circle'],
+                                                        'chưa thanh toán' => ['class' => 'bg-warning', 'icon' => 'clock'],
+                                                        'giữ chỗ' => ['class' => 'bg-info', 'icon' => 'money-bill-wave'],
+                                                        'đã thanh toán' => ['class' => 'bg-success', 'icon' => 'check-circle'],
                                                         'hủy' => ['class' => 'bg-danger', 'icon' => 'times-circle']
                                                     ];
                                                     $config = $status_config[$dat_tour['trang_thai']] ?? ['class' => 'bg-secondary', 'icon' => 'question'];
@@ -206,7 +206,7 @@
                                                             title="Xem chi tiết">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <!-- <?php if ($dat_tour['trang_thai'] == 'chờ xác nhận' || $dat_tour['trang_thai'] == 'đã cọc'): ?>
+                                                        <!-- <?php if ($dat_tour['trang_thai'] == 'chưa thanh toán' || $dat_tour['trang_thai'] == 'giữ chỗ'): ?>
                                                             <a href="?act=dat-tour-edit&id=<?php echo $dat_tour['id']; ?>"
                                                                 class="btn btn-warning btn-sm"
                                                                 data-bs-toggle="tooltip"
