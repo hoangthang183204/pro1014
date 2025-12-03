@@ -20,7 +20,6 @@ require_once './controllers/AdminTaiKhoanController.php';
 require_once './controllers/AdminKhachHangController.php';
 require_once './controllers/AdminLichLamViecHDVController.php';
 require_once './controllers/AdminPhanPhongController.php';
-require_once './controllers/AdminThanhToanController.php';
 require_once './controllers/AdminChinhSachController.php';
 require_once './controllers/AdminHuongDanVienController.php';
 
@@ -34,7 +33,6 @@ require_once './models/AdminTaiKhoan.php';
 require_once './models/AdminKhachHang.php';
 require_once './models/AdminLichLamViecHDV.php';
 require_once './models/AdminPhanPhong.php';
-require_once './models/AdminThanhToan.php';
 require_once './models/AdminChinhSach.php';
 require_once './models/AdminHuongDanVien.php';
 
@@ -195,10 +193,6 @@ match ($act) {
     'phan-phong-hang-loat' => (new AdminPhanPhongController())->phanPhongHangLoat(),
     'phan-phong-api' => (new AdminPhanPhongController())->apiGetPhanPhong(),
     'phan-phong-api-phong' => (new AdminPhanPhongController())->apiGetPhong(),
-
-    // Quản lý Thanh toán
-    'thanh-toan-nhanh-modal' => (new AdminThanhToanController())->modalThanhToanNhanh(),
-    'thanh-toan-nhanh-process' => (new AdminThanhToanController())->processThanhToanNhanh(),
 
     // Thống kê và tìm kiếm
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),

@@ -89,8 +89,8 @@
                                         <i class="fas fa-clock"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="text-muted mb-1 small fw-semibold">Chờ Xác Nhận</h6>
-                                        <h4 class="mb-0 fw-bold text-warning"><?php echo $thong_ke['cho_xac_nhan'] ?? 0; ?></h4>
+                                        <h6 class="text-muted mb-1 small fw-semibold">chưa thanh toán</h6>
+                                        <h4 class="mb-0 fw-bold text-warning"><?php echo $thong_ke['chua_thanh_toan'] ?? 0; ?></h4>
                                     </div>
                                 </div>
                             </div>
@@ -104,7 +104,7 @@
                                         <i class="fas fa-check-circle"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="text-muted mb-1 small fw-semibold">Hoàn Tất</h6>
+                                        <h6 class="text-muted mb-1 small fw-semibold">đã thanh toán</h6>
                                         <h4 class="mb-0 fw-bold text-success"><?php echo $thong_ke['hoan_tat'] ?? 0; ?></h4>
                                     </div>
                                 </div>
@@ -191,9 +191,9 @@
                                                         <td class="text-center">
                                                             <?php
                                                             $status_config = [
-                                                                'chờ xác nhận' => ['class' => 'bg-warning', 'icon' => 'clock'],
-                                                                'đã cọc' => ['class' => 'bg-info', 'icon' => 'money-bill-wave'],
-                                                                'hoàn tất' => ['class' => 'bg-success', 'icon' => 'check-circle'],
+                                                                'chưa thanh toán' => ['class' => 'bg-warning', 'icon' => 'clock'],
+                                                                'giữ chỗ' => ['class' => 'bg-info', 'icon' => 'money-bill-wave'],
+                                                                'đã thanh toán' => ['class' => 'bg-success', 'icon' => 'check-circle'],
                                                                 'hủy' => ['class' => 'bg-danger', 'icon' => 'times-circle']
                                                             ];
                                                             $config = $status_config[$booking['trang_thai']] ?? ['class' => 'bg-secondary', 'icon' => 'question'];
@@ -252,16 +252,16 @@
                                                     <?php
                                                     $tong_booking = $thong_ke['tong_booking'] ?? 1;
                                                     $status_stats = [
-                                                        'chờ xác nhận' => [
-                                                            'count' => $thong_ke['cho_xac_nhan'] ?? 0,
+                                                        'chưa thanh toán' => [
+                                                            'count' => $thong_ke['chua_thanh_toan'] ?? 0,
                                                             'doanh_thu' => 0
                                                         ],
-                                                        'đã cọc' => [
-                                                            'count' => $thong_ke['da_coc'] ?? 0,
+                                                        'giữ chỗ' => [
+                                                            'count' => $thong_ke['giu_cho'] ?? 0,
                                                             'doanh_thu' => 0
                                                         ],
-                                                        'hoàn tất' => [
-                                                            'count' => $thong_ke['hoan_tat'] ?? 0,
+                                                        'đã thanh toán' => [
+                                                            'count' => $thong_ke['da_thanh_toan'] ?? 0,
                                                             'doanh_thu' => $thong_ke['tong_doanh_thu'] ?? 0
                                                         ],
                                                         'hủy' => [
@@ -319,11 +319,11 @@
                                             </div>
                                             <div class="mb-4">
                                                 <div class="h5 text-info fw-bold"><?php echo $thong_ke['hoan_tat'] ?? 0; ?></div>
-                                                <small class="text-muted">Booking hoàn tất</small>
+                                                <small class="text-muted">Booking đã thanh toán</small>
                                             </div>
                                             <div class="mb-4">
-                                                <div class="h5 text-warning fw-bold"><?php echo $thong_ke['cho_xac_nhan'] ?? 0; ?></div>
-                                                <small class="text-muted">Đang chờ xác nhận</small>
+                                                <div class="h5 text-warning fw-bold"><?php echo $thong_ke['chua_thanh_toan'] ?? 0; ?></div>
+                                                <small class="text-muted">Đang chưa thanh toán</small>
                                             </div>
                                         </div>
                                     </div>
@@ -409,9 +409,9 @@
 function getStatusBadgeClass($status)
 {
     $classes = [
-        'chờ xác nhận' => 'bg-warning',
-        'đã cọc' => 'bg-info',
-        'hoàn tất' => 'bg-success',
+        'chưa thanh toán' => 'bg-warning',
+        'giữ chỗ' => 'bg-info',
+        'đã thanh toán' => 'bg-success',
         'hủy' => 'bg-danger'
     ];
     return $classes[$status] ?? 'bg-secondary';
@@ -420,9 +420,9 @@ function getStatusBadgeClass($status)
 function getStatusIcon($status)
 {
     $icons = [
-        'chờ xác nhận' => 'clock',
-        'đã cọc' => 'money-bill-wave',
-        'hoàn tất' => 'check-circle',
+        'chưa thanh toán' => 'clock',
+        'giữ chỗ' => 'money-bill-wave',
+        'đã thanh toán' => 'check-circle',
         'hủy' => 'times-circle'
     ];
     return $icons[$status] ?? 'question';
@@ -431,9 +431,9 @@ function getStatusIcon($status)
 function getStatusProgressClass($status)
 {
     $classes = [
-        'chờ xác nhận' => 'bg-warning',
-        'đã cọc' => 'bg-info',
-        'hoàn tất' => 'bg-success',
+        'chưa thanh toán' => 'bg-warning',
+        'giữ chỗ' => 'bg-info',
+        'đã thanh toán' => 'bg-success',
         'hủy' => 'bg-danger'
     ];
     return $classes[$status] ?? 'bg-secondary';

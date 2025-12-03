@@ -450,9 +450,8 @@ class AdminLichKhoiHanh
         try {
             $today = date('Y-m-d');
 
-            // Cập nhật tour đang diễn ra
             $query_dang_dien_ra = "UPDATE lich_khoi_hanh 
-                                  SET trang_thai = 'đang diễn ra' 
+                                  SET trang_thai = 'đang đi' 
                                   WHERE ngay_bat_dau <= ? 
                                   AND ngay_ket_thuc >= ? 
                                   AND trang_thai != 'đã hủy'";
@@ -494,7 +493,7 @@ class AdminLichKhoiHanh
         $today = date('Y-m-d');
 
         if ($ngay_bat_dau <= $today && $ngay_ket_thuc >= $today) {
-            return 'đang diễn ra';
+            return 'đang đi';
         } elseif ($ngay_ket_thuc < $today) {
             return 'đã hoàn thành';
         } elseif ($ngay_bat_dau > $today) {

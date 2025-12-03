@@ -97,7 +97,7 @@ class AdminDatTourController
         require_once 'views/dattour/createDatTour.php';
     }
 
-    // Chi tiết đặt tour
+    // Trong method show()
     public function show()
     {
         $id = $_GET['id'] ?? 0;
@@ -116,6 +116,9 @@ class AdminDatTourController
 
         // Lấy khách hàng chính
         $khach_hang_chinh = $this->datTourModel->getKhachHangChinh($id);
+
+        // Lấy lịch trình tour
+        $lich_trinh_tour = $this->datTourModel->getLichTrinhByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
 
         require_once 'views/dattour/detailDatTour.php';
     }
