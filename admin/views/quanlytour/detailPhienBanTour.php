@@ -18,10 +18,10 @@
                             class="btn btn-outline-light me-2">
                             <i class="fas fa-arrow-left me-1"></i> Quay lại
                         </a>
-                        <a href="?act=phien-ban-edit&id=<?php echo $phien_ban['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
+                        <!-- <a href="?act=phien-ban-edit&id=<?php echo $phien_ban['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
                             class="btn btn-warning me-2">
                             <i class="fas fa-edit me-1"></i> Chỉnh sửa
-                        </a>
+                        </a> -->
                         <a href="?act=phien-ban-activate&id=<?php echo $phien_ban['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
                             class="btn btn-success me-2"
                             onclick="return confirm('Kích hoạt phiên bản này? Giá tour sẽ được cập nhật thành <?php echo number_format($phien_ban['gia_tour'], 0, ',', '.'); ?> đ')">

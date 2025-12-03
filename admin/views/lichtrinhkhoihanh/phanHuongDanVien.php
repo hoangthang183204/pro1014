@@ -208,7 +208,7 @@
                                     </small>
                                 </div>
 
-                                <div class="alert alert-info">
+                                <!-- <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-2"></i>
                                     <strong>Thông tin phân công:</strong>
                                     <ul class="mb-0 mt-2">
@@ -218,7 +218,7 @@
                                         <li>Có thể thay đổi HDV bất kỳ lúc nào trước khi tour hoàn thành</li>
                                         <li>Hệ thống tự động kiểm tra trùng lịch khi phân công</li>
                                     </ul>
-                                </div>
+                                </div> -->
 
                                 <div class="d-flex justify-content-between">
                                     <a href="?act=lich-khoi-hanh" class="btn btn-secondary">

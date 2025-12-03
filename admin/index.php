@@ -1,5 +1,4 @@
 <?php
-
 session_name('ADMIN_SESSION');
 session_start();
 
@@ -67,7 +66,6 @@ match ($act) {
     'register-process' => (new AdminTaiKhoanController())->registerprocess(),
     'logout-admin' => (new AdminTaiKhoanController())->logout(),
 
-    // PROTECTED ROUTES - Cần đăng nhập và không phải HDV
     '/' => (new DashboardController())->home(),
 
     // Quản lý Tour
@@ -116,7 +114,6 @@ match ($act) {
     'delete-media' => (new AdminTourController())->deleteMedia(),
     'update-media-info' => (new AdminTourController())->updateMediaInfo(),
 
-    // Quản lý Danh Mục Tour - CHỈ BAO GỒM 3 LOẠI: trong nước, quốc tế, theo yêu cầu
     'danh-muc' => (new AdminDanhMucTourController())->index(),
     'danh-muc-tour-create' => (new AdminDanhMucTourController())->createDanhMucTour(),
     'danh-muc-tour-store' => (new AdminDanhMucTourController())->storeDanhMucTour(),
@@ -126,12 +123,7 @@ match ($act) {
     'danh-muc-tours' => (new AdminDanhMucTourController())->toursByDanhMuc(),
     'danh-muc-filter' => (new AdminDanhMucTourController())->filterTours(),
 
-    // 'danh-muc-tour' => (new AdminDanhMucTourController())->danhMucTour(),
-    // 'danh-muc-tour-create' => (new AdminDanhMucTourController())->createDanhMucTour(),
-    // 'danh-muc-tour-store' => (new AdminDanhMucTourController())->storeDanhMucTour(),
-    // 'danh-muc-tour-edit' => (new AdminDanhMucTourController())->editDanhMucTour(),
-    // 'danh-muc-tour-update' => (new AdminDanhMucTourController())->updateDanhMucTour(),
-    // 'danh-muc-tour-delete' => (new AdminDanhMucTourController())->deleteDanhMucTour(),
+   
 
     // 'danh-muc-doi-tac' => (new AdminDanhMucTourController())->doiTac(),
     // 'danh-muc-doi-tac-create' => (new AdminDanhMucTourController())->createDoiTac(),
@@ -211,6 +203,5 @@ match ($act) {
     // Thống kê và tìm kiếm
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
     'dat-tour-print' => (new AdminDatTourController())->print()
-    // 'dat-tour-tim-kiem' => (new AdminDatTourController())->timKiemBooking(),
 
 };

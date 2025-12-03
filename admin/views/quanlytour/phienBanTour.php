@@ -225,10 +225,10 @@
                                                     class="btn btn-sm btn-info" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="?act=phien-ban-edit&id=<?php echo $phien_ban['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
+                                                <!-- <a href="?act=phien-ban-edit&id=<?php echo $phien_ban['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
                                                     class="btn btn-sm btn-warning" title="Sửa">
                                                     <i class="fas fa-edit"></i>
-                                                </a>
+                                                </a> -->
                                                 <a href="?act=phien-ban-activate&id=<?php echo $phien_ban['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
                                                     class="btn btn-sm btn-success"
                                                     onclick="return confirm('Kích hoạt phiên bản này làm phiên bản hiện hành?')"
