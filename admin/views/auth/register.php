@@ -326,9 +326,7 @@
             <div class="input-group">
                 <label for="vai_tro">Vai trò</label>
                 <select name="vai_tro" id="vai_tro" required>
-                    <option value="nhan_vien">Nhân viên</option>
                     <option value="admin">Admin</option>
-                    <option value="huong_dan_vien">Hướng dẫn viên</option>
                 </select>
                 <div class="error-message" id="vai_tro_error"></div>
             </div>
