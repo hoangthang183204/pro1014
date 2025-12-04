@@ -13,6 +13,7 @@ require_once './controllers/DashBoardHDVController.php';
 require_once './controllers/PersonalGuideController.php';
 require_once './controllers/NhatKyController.php';
 require_once './controllers/KhachDoanController.php';
+require_once './controllers/LichTrinhController.php';
 
 // Require Models
 require_once './models/ProductModel.php';
@@ -22,6 +23,7 @@ require_once './models/Database.php';
 require_once './models/PersonalGuideModel.php';
 require_once './models/NhatKyModel.php';
 require_once './models/KhachDoanModel.php';
+require_once './models/LichTrinhModel.php';
 
 
 
@@ -87,6 +89,13 @@ match ($act) {
     // Khách đoàn routes
     'xem_danh_sach_khach' => (new KhachDoanController())->index(),
     'check_in_khach' => (new KhachDoanController())->update_checkin_status(),
+
+    // Lịch trình routes
+    'lich-trinh' => (new LichTrinhController())->index(),
+    'lich-trinh-detail' => (new LichTrinhController())->detail(),
+    'lich-trinh-update-checklist' => (new LichTrinhController())->updateChecklist(),
+    'lich-lam-viec' => (new LichTrinhController())->lichLamViec(),
+    'update-checklist-guide' => (new LichTrinhController())->updateChecklistForGuide(),
 
     default => (new DashboardHDVController())->home(),
 };
