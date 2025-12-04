@@ -32,52 +32,62 @@ class KhachDoanModel {
         return $stmt->fetchAll();
     }
 
-    // Lấy danh sách khách và trạng thái check-in
-    public function getKhachDoanByLich($id_lich_khoi_hanh, $tram_id = null) {
-        try {
-            $sql = "SELECT 
-                        kh.id AS id,
-                        kh.ho_ten AS ten_khach,
-                        kh.gioi_tinh,
-                        kh.ngay_sinh,
-                        kh.ghi_chu,
-                        kh.so_dien_thoai AS sdt_lien_he,
-                        pdt.ma_dat_tour,
-                        
-                        -- Lấy trạng thái check-in
-                        COALESCE(ck.trang_thai, 'chưa đến') as trang_thai_checkin,
+   // Lấy danh sách khách và trạng thái check-in (ĐÃ CẬP NHẬT LOGIC KIỂM TRA VẮNG)
+   public function getKhachDoanByLich($id_lich_khoi_hanh, $tram_id = null) {
+    try {
+        $tram_val = $tram_id ? $tram_id : 0;
 
-                        booker.ho_ten AS nguoi_dat,
-                        t.ten_tour,
-                        lkh.ngay_bat_dau
-
-                    FROM khach_hang kh
-                    JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id
-                    LEFT JOIN khach_hang booker ON pdt.khach_hang_id = booker.id
-                    JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
-                    JOIN tour t ON lkh.tour_id = t.id
+        $sql = "SELECT 
+                    kh.id AS id,
+                    kh.ho_ten AS ten_khach,
+                    kh.gioi_tinh,
+                    kh.ngay_sinh,
+                    kh.ghi_chu,
+                    kh.so_dien_thoai AS sdt_lien_he,
+                    pdt.ma_dat_tour,
                     
-                    -- [ĐÃ SỬA] Dùng khach_hang_id thay cho thanh_vien_dat_tour_id
-                    LEFT JOIN checkin_khach_hang ck 
-                        ON kh.id = ck.khach_hang_id 
-                        AND ck.tram_id = :tram_id
-                    
-                    WHERE pdt.lich_khoi_hanh_id = :id 
-                    ORDER BY pdt.ma_dat_tour ASC, kh.ho_ten ASC";
+                    -- Lấy trạng thái check-in tại trạm hiện tại
+                    COALESCE(ck.trang_thai, 'chưa đến') as trang_thai_checkin,
 
-            $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':id', $id_lich_khoi_hanh);
-            
-            $tram_val = $tram_id ? $tram_id : 0;
-            $stmt->bindParam(':tram_id', $tram_val);
-            
-            $stmt->execute();
-            return $stmt->fetchAll();
-        } catch (PDOException $e) {
-            echo "Lỗi: " . $e->getMessage();
-            return [];
-        }
+                    -- [MỚI] Kiểm tra xem khách đã vắng ở trạm trước chưa
+                    (
+                        SELECT COUNT(*)
+                        FROM checkin_khach_hang ck_cu
+                        JOIN tram_dung_chan tdc_cu ON ck_cu.tram_id = tdc_cu.id
+                        WHERE ck_cu.khach_hang_id = kh.id 
+                        AND ck_cu.trang_thai = 'vắng mặt'
+                        AND tdc_cu.thu_tu < (SELECT thu_tu FROM tram_dung_chan WHERE id = :tram_id_sub LIMIT 1)
+                    ) as da_huy_truoc_do,
+
+                    booker.ho_ten AS nguoi_dat,
+                    t.ten_tour,
+                    lkh.ngay_bat_dau
+
+                FROM khach_hang kh
+                JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id
+                LEFT JOIN khach_hang booker ON pdt.khach_hang_id = booker.id
+                JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
+                JOIN tour t ON lkh.tour_id = t.id
+                
+                LEFT JOIN checkin_khach_hang ck 
+                    ON kh.id = ck.khach_hang_id 
+                    AND ck.tram_id = :tram_id
+                
+                WHERE pdt.lich_khoi_hanh_id = :id 
+                ORDER BY pdt.ma_dat_tour ASC, kh.ho_ten ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $id_lich_khoi_hanh);
+        $stmt->bindParam(':tram_id', $tram_val);
+        $stmt->bindParam(':tram_id_sub', $tram_val); // Bind thêm tham số cho sub-query
+        
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (PDOException $e) {
+        echo "Lỗi: " . $e->getMessage();
+        return [];
     }
+}
 
     // Cập nhật check-in
     public function updateCheckIn($id_khach_hang, $status, $tram_id) {

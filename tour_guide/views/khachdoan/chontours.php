@@ -7,12 +7,7 @@
             <div class="col-sm-6">
                 <h2 class="m-0 text-dark"> Chọn Tour Cần Xem</h2>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end">
-                    <li class="breadcrumb-item"><a href="<?= BASE_URL_GUIDE ?>">Trang chủ</a></li>
-                    <li class="breadcrumb-item active">Chọn Tour</li>
-                </ol>
-            </div>
+            
         </div>
 
         <div class="card shadow-sm border-0">

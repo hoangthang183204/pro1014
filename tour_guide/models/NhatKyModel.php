@@ -76,6 +76,22 @@ class NhatKyModel
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$lich_id, $hdv_id, $tieu_de, $ngay, $mo_ta, $cach_xu_ly, $muc_do, $user_id]);
     }
+    // 1. Thêm hàm lấy danh sách ảnh theo nhật ký
+public function getMediaByNhatKy($nhat_ky_id) {
+    $sql = "SELECT * FROM media_nhat_ky WHERE nhat_ky_id = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$nhat_ky_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// 2. Thêm hàm cập nhật sự cố (để sửa khi lỡ ghi sai)
+public function updateSuCo($lich_id, $ngay, $tieu_de, $mo_ta, $cach_xu_ly, $muc_do) {
+    $sql = "UPDATE bao_cao_su_co 
+            SET tieu_de = ?, mo_ta_su_co = ?, cach_xu_ly = ?, muc_do_nghiem_trong = ? 
+            WHERE lich_khoi_hanh_id = ? AND ngay_su_co = ?";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$tieu_de, $mo_ta, $cach_xu_ly, $muc_do, $lich_id, $ngay]);
+}
 
     public function insertMedia($nhat_ky_id, $url, $user_id)
     {

@@ -1,6 +1,33 @@
 <?php require './views/layout/header.php'; ?>
 <?php include './views/layout/sidebar.php'; ?>
 
+<style>
+    .card-header {
+        background-color: white;
+        border-bottom: 2px solid #f4f6f9;
+    }
+    .table thead th {
+        background-color: #343a40; /* Màu tối sang trọng cho tiêu đề bảng */
+        color: #ffffff;
+        border-top: none;
+    }
+    .table tbody tr:hover {
+        background-color: #f1faff; /* Hiệu ứng hover màu xanh nhạt */
+    }
+    .btn-primary {
+        background: linear-gradient(to right, #2980b9, #6dd5fa, #ffffff); /* Nút thêm mới */
+        background-size: 200%;
+        color: white;
+        border: none;
+    }
+    .badge-weather {
+        font-size: 0.9em;
+        padding: 5px 10px;
+        border-radius: 12px;
+        background-color: #e2e6ea;
+        color: #495057;
+    }
+</style>
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -8,12 +35,7 @@
                 <div class="col-sm-6">
                     <h1>Quản Lý Nhật Ký Tour</h1>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= BASE_URL_GUIDE ?>">Home</a></li>
-                        <li class="breadcrumb-item active">Nhật ký tour</li>
-                    </ol>
-                </div>
+                
             </div>
         </div>
     </section>

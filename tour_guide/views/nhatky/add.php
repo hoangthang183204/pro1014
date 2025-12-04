@@ -88,9 +88,11 @@
                 <div class="card">
                     <div class="card-header">Hình Ảnh / Video</div>
                     <div class="card-body">
-                        <input type="file" name="hinh_anh[]" class="form-control" multiple>
+                        <input type="file" name="hinh_anh[]" id="inputAnh" class="form-control" multiple>
                         <small class="text-muted">Chọn nhiều ảnh (Giữ Ctrl)</small>
                     </div>
+                    <div class="row mt-3" id="previewContainer">
+            </div>
                 </div>
             </div>
         </div>
@@ -115,6 +117,44 @@
             else input.removeAttribute('required');
         });
     });
+  
+    // Lắng nghe sự kiện khi người dùng chọn file
+    document.getElementById('inputAnh').addEventListener('change', function(event) {
+        var container = document.getElementById('previewContainer');
+        container.innerHTML = ''; // Xóa các ảnh preview cũ (nếu chọn lại)
+
+        var files = event.target.files; // Lấy danh sách file đã chọn
+
+        if (files) {
+            // Duyệt qua từng file
+            [].forEach.call(files, function(file) {
+                // Chỉ xử lý file ảnh
+                if (file.type.match('image.*')) {
+                    var reader = new FileReader();
+
+                    // Khi đọc xong file thì tạo thẻ img
+                    reader.onload = function(event) {
+                        var colDiv = document.createElement('div');
+                        colDiv.className = 'col-md-3 col-6 mb-2'; // Chia cột giống giao diện trên
+
+                        var img = document.createElement('img');
+                        img.className = 'img-thumbnail';
+                        img.style.width = '100%';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.src = event.target.result; // Dữ liệu ảnh base64
+
+                        colDiv.appendChild(img);
+                        container.appendChild(colDiv);
+                    };
+
+                    // Bắt đầu đọc file
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+
 </script>
 
 <?php include './views/layout/footer.php'; ?>
