@@ -123,27 +123,42 @@ class LichTrinhModel
         $this->db->bind(1, $tourInfo['tour_id']);
         $lichTrinhChiTiet = $this->db->resultSet();
 
-        // 3. Lấy danh sách khách hàng đã đặt tour
-        $query = "
-            SELECT 
-                pd.id as dat_tour_id,
-                kh.ho_ten,
-                kh.so_dien_thoai,
-                kh.cccd,
-                kh.gioi_tinh,
-                pd.so_luong_khach,
-                pd.tong_tien,
-                pd.trang_thai as trang_thai_dat
-            FROM phieu_dat_tour pd
-            JOIN khach_hang kh ON pd.khach_hang_id = kh.id
-            WHERE pd.lich_khoi_hanh_id = ?
-            AND pd.trang_thai IN ('đã cọc', 'hoàn tất')
-            ORDER BY pd.created_at DESC
-        ";
+        // 3. Lấy danh sách chi tiết từng khách hàng đã đặt tour KÈM thông tin phân phòng
+$query = "
+    SELECT 
+        kh.id as khach_hang_id,
+        kh.ho_ten,
+        kh.so_dien_thoai,
+        kh.cccd,
+        kh.gioi_tinh,
+        kh.ngay_sinh,
+        kh.email,
+        kh.dia_chi,
+        kh.ghi_chu,
+        pd.id as dat_tour_id,
+        pd.ma_dat_tour,
+        pd.so_luong_khach,
+        pd.tong_tien,
+        pd.trang_thai as trang_thai_dat,
+        pd.created_at as ngay_dat,
+        ppk.ten_khach_san,
+        ppk.so_phong,
+        ppk.loai_phong,
+        ppk.ngay_nhan_phong,
+        ppk.ngay_tra_phong
+    FROM phieu_dat_tour pd
+    JOIN khach_hang kh ON pd.khach_hang_id = kh.id
+    LEFT JOIN phan_phong_khach_san ppk ON pd.lich_khoi_hanh_id = ppk.lich_khoi_hanh_id 
+        AND kh.id = ppk.khach_hang_id
+    WHERE pd.lich_khoi_hanh_id = ?
+    AND pd.trang_thai IN ('chờ xác nhận', 'đã cọc', 'hoàn tất')  -- THÊM 'chờ xác nhận'
+    ORDER BY pd.created_at DESC, kh.ho_ten ASC
+";
 
-        $this->db->query($query);
-        $this->db->bind(1, $lichKhoiHanhId);
-        $danhSachKhach = $this->db->resultSet();
+$this->db->query($query);
+$this->db->bind(1, $lichKhoiHanhId);
+$danhSachKhach = $this->db->resultSet();
+
 
         // 4. Lấy checklist công việc
         $query = "

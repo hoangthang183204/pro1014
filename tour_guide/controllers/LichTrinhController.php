@@ -64,7 +64,6 @@ class LichTrinhController
                 exit();
             }
         }
-        
 
         // Lấy ID lịch khởi hành
         $lichKhoiHanhId = $_GET['id'] ?? null;
@@ -82,10 +81,17 @@ class LichTrinhController
             header("Location: " . BASE_URL_GUIDE . "?act=lich-trinh");
             exit();
         }
+         // DEBUG: Kiểm tra dữ liệu
+    echo "<pre>";
+    echo "LichKhoiHanh ID: " . $lichKhoiHanhId . "\n";
+    echo "Guide ID: " . $guideId . "\n";
+    echo "Data: " . print_r($data, true);
+    echo "</pre>";
+    // exit(); // Tạm thời comment để xem dữ liệu
 
         // Hiển thị view
         include __DIR__ . '/../views/schedule/detailLichTrinh.php';
-    }   
+    }
 
     /**
      * Xử lý cập nhật checklist
@@ -132,56 +138,6 @@ class LichTrinhController
             echo json_encode(['success' => false, 'message' => 'Cập nhật thất bại']);
         }
     }
-
-    // Thêm phương thức này vào class LichTrinhController
-
-/**
- * Cập nhật checklist cho hướng dẫn viên
- */
-public function updateChecklistForGuide()
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Kiểm tra đăng nhập
-        $userId = $_SESSION['user_id'] ?? $_SESSION['guide_id'] ?? null;
-        if (!$userId) {
-            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập']);
-            exit();
-        }
-
-        // Lấy ID hướng dẫn viên
-        $guideId = $this->model->getGuideIdByUserId($userId);
-        if (!$guideId) {
-            $guideId = $_SESSION['guide_id'] ?? null;
-            if (!$guideId) {
-                echo json_encode(['success' => false, 'message' => 'Không tìm thấy thông tin hướng dẫn viên']);
-                exit();
-            }
-        }
-
-        // Lấy dữ liệu từ POST
-        $checklistId = $_POST['id'] ?? 0;
-        $hoanThanh = $_POST['hoan_thanh'] ?? 0;
-
-        if (!$checklistId) {
-            echo json_encode(['success' => false, 'message' => 'Không tìm thấy checklist']);
-            exit();
-        }
-
-        // Cập nhật checklist
-        $result = $this->model->updateChecklistStatus($checklistId, $hoanThanh, $guideId);
-
-        if ($result) {
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Cập nhật thành công',
-                'thoi_gian' => date('d/m/Y H:i')
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Cập nhật thất bại']);
-        }
-        exit();
-    }
-}
     /**
      * Hiển thị lịch làm việc của hướng dẫn viên
      */
@@ -241,5 +197,48 @@ public function updateChecklistForGuide()
         // Hiển thị view
         include __DIR__ . '/../views/schedule/lichLamViec.php';
     }
+    public function debugCustomers($lichKhoiHanhId)
+    
+{
+    // Debug thông tin khách hàng
+    $userId = $_SESSION['user_id'] ?? $_SESSION['guide_id'] ?? null;
+    $guideId = $this->model->getGuideIdByUserId($userId);
+    $this->debugCustomers($lichKhoiHanhId);
+    
+    if (!$guideId) {
+        $guideId = $_SESSION['guide_id'] ?? null;
+    }
+    
+    $data = $this->model->getChiTietLichTrinh($lichKhoiHanhId, $guideId);
+    
+    echo "<pre style='background: #f0f0f0; padding: 20px; border: 1px solid #ccc;'>";
+    echo "<h3>DEBUG: Danh sách khách hàng</h3>";
+    echo "Lịch khởi hành ID: " . $lichKhoiHanhId . "\n";
+    echo "Guide ID: " . $guideId . "\n";
+    echo "Tổng khách hàng: " . count($data['danh_sach_khach'] ?? []) . "\n\n";
+    
+    if (!empty($data['danh_sach_khach'])) {
+        echo "Danh sách chi tiết:\n";
+        foreach ($data['danh_sach_khach'] as $index => $khach) {
+            echo "--- Khách #" . ($index + 1) . " ---\n";
+            echo "ID: " . ($khach['khach_hang_id'] ?? 'N/A') . "\n";
+            echo "Tên: " . ($khach['ho_ten'] ?? 'N/A') . "\n";
+            echo "SĐT: " . ($khach['so_dien_thoai'] ?? 'N/A') . "\n";
+            echo "CCCD: " . ($khach['cccd'] ?? 'N/A') . "\n";
+            echo "Email: " . ($khach['email'] ?? 'N/A') . "\n";
+            echo "Mã đặt: " . ($khach['ma_dat_tour'] ?? 'N/A') . "\n";
+            echo "Trạng thái: " . ($khach['trang_thai_dat'] ?? 'N/A') . "\n";
+            echo "Phòng: " . ($khach['so_phong'] ?? 'Chưa có') . "\n";
+            echo "Khách sạn: " . ($khach['ten_khach_san'] ?? 'Chưa có') . "\n\n";
+        }
+    } else {
+        echo "KHÔNG CÓ KHÁCH HÀNG NÀO!\n";
+    }
+    
+    echo "Tour Info:\n";
+    print_r($data['tour_info'] ?? []);
+    echo "</pre>";
+    exit();
+}
 }
 ?>
