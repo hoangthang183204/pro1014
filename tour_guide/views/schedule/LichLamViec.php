@@ -9,10 +9,17 @@ $currentMonth = $data['current_month'] ?? date('m');
 $currentYear = $data['current_year'] ?? date('Y');
 
 // Tính toán ngày đầu tháng và cuối tháng một cách an toàn
-$currentMonthStart = DateTime::createFromFormat('Y-m-d', "{$currentYear}-{$currentMonth}-01");
-// Sửa cách tính ngày cuối tháng
-$currentMonthEnd = clone $currentMonthStart;
-$currentMonthEnd->modify('last day of this month');
+try {
+    // Đảm bảo tháng có định dạng đúng (2 chữ số)
+    $currentMonthPadded = str_pad($currentMonth, 2, '0', STR_PAD_LEFT);
+    $currentMonthStart = new DateTime("{$currentYear}-{$currentMonthPadded}-01");
+    $currentMonthEnd = new DateTime($currentMonthStart->format('Y-m-t')); // 't' trả về ngày cuối tháng
+} catch (Exception $e) {
+    // Fallback về tháng hiện tại nếu có lỗi
+    $currentMonthStart = new DateTime();
+    $currentMonthStart->modify('first day of this month');
+    $currentMonthEnd = new DateTime($currentMonthStart->format('Y-m-t'));
+}
 ?>
 
 <main class="main-content">
@@ -98,12 +105,12 @@ $currentMonthEnd->modify('last day of this month');
                             <div class="list-group">
                                 <?php foreach ($lichTrinhTours as $tour): ?>
                                     <?php 
-                                    // Sửa cách tạo DateTime từ chuỗi
-                                    $tourStart = new DateTime($tour['ngay_bat_dau']);
-                                    $tourEnd = new DateTime($tour['ngay_ket_thuc']);
-                                    
-                                    // Kiểm tra xem tour có trong tháng này không
-                                    if ($tourStart <= $currentMonthEnd && $tourEnd >= $currentMonthStart):
+                                    try {
+                                        $tourStart = new DateTime($tour['ngay_bat_dau']);
+                                        $tourEnd = new DateTime($tour['ngay_ket_thuc']);
+                                        
+                                        // Kiểm tra xem tour có trong tháng này không
+                                        if ($tourStart <= $currentMonthEnd && $tourEnd >= $currentMonthStart):
                                     ?>
                                         <div class="list-group-item list-group-item-action mb-2">
                                             <div class="d-flex w-100 justify-content-between">
@@ -126,7 +133,13 @@ $currentMonthEnd->modify('last day of this month');
                                                 <?php endif; ?>
                                             </small>
                                         </div>
-                                    <?php endif; ?>
+                                    <?php 
+                                        endif;
+                                    } catch (Exception $e) {
+                                        // Bỏ qua tour có ngày không hợp lệ
+                                        continue;
+                                    }
+                                    ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
@@ -275,14 +288,20 @@ function generateCalendar(year, month) {
     const firstDay = new Date(year, month - 1, 1);
     // Ngày cuối cùng của tháng
     const lastDay = new Date(year, month, 0);
-    // Ngày đầu tiên trong tuần (0 = Chủ nhật)
-    const startDay = firstDay.getDay();
+    // Ngày đầu tiên trong tuần (0 = Chủ nhật, 1 = Thứ 2)
+    let startDay = firstDay.getDay();
+    // Chuyển từ Chủ nhật = 0 sang Thứ 2 = 0
+    startDay = startDay === 0 ? 6 : startDay - 1;
+    
     // Tổng số ngày trong tháng
     const daysInMonth = lastDay.getDate();
     
     // Tính toán số tuần
-    const weeks = Math.ceil((startDay + daysInMonth) / 7);
+    const totalCells = startDay + daysInMonth;
+    const weeks = Math.ceil(totalCells / 7);
+    
     let dayCounter = 1;
+    let currentWeek = 0;
     
     for (let week = 0; week < weeks; week++) {
         const row = document.createElement('tr');
@@ -291,11 +310,26 @@ function generateCalendar(year, month) {
             const cell = document.createElement('td');
             cell.className = 'calendar-day';
             
-            if ((week === 0 && dayOfWeek < startDay) || dayCounter > daysInMonth) {
+            // Tính ngày tháng cho ô hiện tại
+            const cellIndex = (week * 7) + dayOfWeek;
+            
+            if (cellIndex < startDay || dayCounter > daysInMonth) {
                 // Ô trống (tháng trước hoặc tháng sau)
                 cell.className += ' other-month';
-                const prevMonthDay = daysInMonth - (startDay - dayOfWeek) + 1;
-                cell.innerHTML = `<div class="calendar-date">${prevMonthDay > 0 ? prevMonthDay : ''}</div>`;
+                
+                // Tính ngày của tháng trước cho các ô đầu
+                if (cellIndex < startDay) {
+                    // Tính số ngày của tháng trước
+                    const prevMonth = month - 1 === 0 ? 12 : month - 1;
+                    const prevYear = month - 1 === 0 ? year - 1 : year;
+                    const prevMonthLastDay = new Date(prevYear, prevMonth, 0).getDate();
+                    const prevMonthDay = prevMonthLastDay - (startDay - cellIndex) + 1;
+                    cell.innerHTML = `<div class="calendar-date">${prevMonthDay}</div>`;
+                } else {
+                    // Tính ngày của tháng sau cho các ô cuối
+                    const nextMonthDay = cellIndex - startDay - daysInMonth + 1;
+                    cell.innerHTML = `<div class="calendar-date">${nextMonthDay}</div>`;
+                }
             } else {
                 // Ngày trong tháng
                 const currentDate = new Date(year, month - 1, dayCounter);
@@ -331,6 +365,7 @@ function generateCalendar(year, month) {
         }
         
         calendarBody.appendChild(row);
+        currentWeek++;
     }
 }
 
@@ -350,15 +385,24 @@ function getEventsForDate(dateStr) {
     
     // Kiểm tra tour
     tourData.forEach(tour => {
-        const tourStart = new Date(tour.ngay_bat_dau);
-        const tourEnd = new Date(tour.ngay_ket_thuc);
-        const currentDate = new Date(dateStr);
-        
-        if (currentDate >= tourStart && currentDate <= tourEnd) {
-            events.push({
-                type: 'tour',
-                title: tour.ten_tour
-            });
+        try {
+            const tourStart = new Date(tour.ngay_bat_dau);
+            const tourEnd = new Date(tour.ngay_ket_thuc);
+            const currentDate = new Date(dateStr);
+            
+            // Đặt giờ về 0 để so sánh chỉ ngày
+            tourStart.setHours(0, 0, 0, 0);
+            tourEnd.setHours(0, 0, 0, 0);
+            currentDate.setHours(0, 0, 0, 0);
+            
+            if (currentDate >= tourStart && currentDate <= tourEnd) {
+                events.push({
+                    type: 'tour',
+                    title: tour.ten_tour
+                });
+            }
+        } catch (e) {
+            console.error('Lỗi xử lý ngày tour:', e);
         }
     });
     

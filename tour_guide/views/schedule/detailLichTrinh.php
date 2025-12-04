@@ -32,6 +32,16 @@ $tour = array_merge([
     'luu_y_hanh_ly' => '',
     'luu_y_khac' => ''
 ], $tour);
+
+// Debug dữ liệu (có thể bỏ comment để kiểm tra)
+/*
+echo "<pre>";
+echo "Tổng số khách: " . count($danhSachKhach) . "\n";
+if (!empty($danhSachKhach)) {
+    print_r($danhSachKhach[0]);
+}
+echo "</pre>";
+*/
 ?>
 
 <main class="main-content">
@@ -49,7 +59,6 @@ $tour = array_merge([
             <div>
                 <h1 class="page-title mb-1"><?= htmlspecialchars($tour['ten_tour']) ?></h1>
                 <div class="d-flex align-items-center">
-                    <!-- Dòng đã sửa - sử dụng isset() để kiểm tra -->
                     <span class="badge badge-primary mr-2" style="color: green;">
                         <?= isset($tour['trang_thai_lich']) && !empty($tour['trang_thai_lich']) ? strtoupper($tour['trang_thai_lich']) : '' ?>
                     </span>
@@ -188,125 +197,139 @@ $tour = array_merge([
                 </div>
 
                 <!-- Danh sách khách hàng -->
-<div class="card mb-4">
-    <div class="card-header bg-info text-white">
-        <h5 class="mb-0"><i class="fas fa-users mr-2"></i> Danh Sách Khách Hàng Đã Đặt Tour</h5>
-    </div>
-    <div class="card-body">
-        <?php if (empty($danhSachKhach)): ?>
-            <div class="alert alert-info">Chưa có khách hàng nào đặt tour</div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>STT</th>
-                            <th>Họ tên</th>
-                            <th>Loại</th>
-                            <th>SĐT</th>
-                            <th>CCCD</th>
-                            <th>Ngày sinh</th>
-                            <th>Giới tính</th>
-                            <th>Email</th>
-                            <th>Khách sạn(Phòng)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $stt = 1;
-                        $tongKhach = count($danhSachKhach);
-                        foreach ($danhSachKhach as $khach): 
-                        ?>
-                            <tr>
-                                <td><?= $stt ?></td>
-                                <td>
-                                    <strong><?= htmlspecialchars($khach['ho_ten']) ?></strong>
-                                    <?php if ($khach['so_luong_khach'] > 1): ?>
-                                        <span class="badge badge-primary ml-1"></span>
-                                    <?php else: ?>
-                                        <span class="badge badge-secondary">Khách đi cùng</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?= htmlspecialchars($khach['so_dien_thoai']) ?></td>
-                                <td><?= htmlspecialchars($khach['cccd'] ?? 'Chưa cập nhật') ?></td>
-                                <td>
-                                    <?php if (!empty($khach['ngay_sinh'])): ?>
-                                        <?= date('d/m/Y', strtotime($khach['ngay_sinh'])) ?>
-                                    <?php else: ?>
-                                        Chưa cập nhật
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php
-                                    $gioiTinh = $khach['gioi_tinh'] ?? '';
-                                    echo match($gioiTinh) {
-                                        'nam' => 'Nam',
-                                        'nữ' => 'Nữ',
-                                        default => 'Chưa xác định'
-                                    };
-                                    ?>
-                                </td>
-                                <td><?= htmlspecialchars($khach['email'] ?? '') ?></td>
-                                <td>
-                                    <span class="badge badge-secondary" style=" color: #495057;">
-                                        <?= $khach['ma_dat_tour'] ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?php if (!empty($khach['ten_khach_san'])): ?>
-                                        <small style="color: #495057;">
-                                            <?= htmlspecialchars($khach['ten_khach_san']) ?><br>                                           <?= $khach['so_phong'] ?> (<?= $khach['loai_phong'] ?>)
-                                        </small>
-                                    <?php else: ?>
-                                        <span class="text-muted">Chưa phân phòng</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php $stt++; ?>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-users mr-2"></i> Danh Sách Khách Hàng Đã Đặt Tour</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($danhSachKhach)): ?>
+                            <div class="alert alert-info">Chưa có khách hàng nào đặt tour</div>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Họ tên</th>
+                                            <th>Loại</th>
+                                            <th>SĐT</th>
+                                            <th>CCCD</th>
+                                            <th>Ngày sinh</th>
+                                            <th>Giới tính</th>
+                                            <th>Email</th>
+                                            <th>Mã đặt tour</th>
+                                            <th>Khách sạn(Phòng)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+                                        $stt = 1;
+                                        $tongKhach = count($danhSachKhach);
+                                        foreach ($danhSachKhach as $khach): 
+                                        ?>
+                                            <tr>
+                                                <td><?= $stt ?></td>
+                                                <td>
+                                                    <strong><?= htmlspecialchars($khach['ho_ten']) ?></strong>
+                                                </td>
+                                                <td>
+                                                    <?php 
+                                                    if (isset($khach['loai_khach'])) {
+                                                        if ($khach['loai_khach'] == 'người đặt') {
+                                                            echo '<span class="badge badge-primary">Người đặt</span>';
+                                                        } else {
+                                                            echo '<span class="badge badge-secondary">Khách đi cùng</span>';
+                                                        }
+                                                    } else {
+                                                        echo '<span class="badge badge-warning">Chưa xác định</span>';
+                                                    }
+                                                    ?>
+                                                </td>
+                                                <td><?= htmlspecialchars($khach['so_dien_thoai']) ?></td>
+                                                <td><?= htmlspecialchars($khach['cccd'] ?? 'Chưa cập nhật') ?></td>
+                                                <td>
+                                                    <?php if (!empty($khach['ngay_sinh'])): ?>
+                                                        <?= date('d/m/Y', strtotime($khach['ngay_sinh'])) ?>
+                                                    <?php else: ?>
+                                                        Chưa cập nhật
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $gioiTinh = $khach['gioi_tinh'] ?? '';
+                                                    echo match($gioiTinh) {
+                                                        'nam' => 'Nam',
+                                                        'nữ' => 'Nữ',
+                                                        default => 'Chưa xác định'
+                                                    };
+                                                    ?>
+                                                </td>
+                                                <td><?= htmlspecialchars($khach['email'] ?? '') ?></td>
+                                                <td>
+                                                    <?php if (!empty($khach['ma_dat_tour'])): ?>
+                                                        <span class="badge badge-secondary" style="color: #495057;">
+                                                            <?= $khach['ma_dat_tour'] ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">Chưa có mã</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php if (!empty($khach['ten_khach_san'])): ?>
+                                                        <small style="color: #495057;">
+                                                            <?= htmlspecialchars($khach['ten_khach_san']) ?><br>
+                                                            <?= $khach['so_phong'] ?? '' ?> (<?= $khach['loai_phong'] ?? '' ?>)
+                                                        </small>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">Chưa phân phòng</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                            <?php $stt++; ?>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
 
-            <!-- Thống kê -->
-            <div class="row mt-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white text-center">
-                        <div class="card-body p-3">
-                            <h4 class="mb-0"><?= $tongKhach ?></h4>
-                            <small>Tổng số khách</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-success text-white text-center">
-                        <div class="card-body p-3">
-                            <h4 class="mb-0"><?= count(array_filter($danhSachKhach, fn($k) => !empty($k['cccd']))) ?></h4>
-                            <small>Đã có CCCD</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-white text-center">
-                        <div class="card-body p-3">
-                            <h4 class="mb-0"><?= count(array_filter($danhSachKhach, fn($k) => !empty($k['ten_khach_san']))) ?></h4>
-                            <small>Đã phân phòng</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card bg-info text-white text-center">
-                        <div class="card-body p-3">
-                            <h4 class="mb-0"><?= count(array_unique(array_column($danhSachKhach, 'ma_dat_tour'))) ?></h4>
-                            <small>Số phiếu đặt</small>
-                        </div>
+                            <!-- Thống kê -->
+                            <div class="row mt-4">
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white text-center">
+                                        <div class="card-body p-3">
+                                            <h4 class="mb-0"><?= $tongKhach ?></h4>
+                                            <small>Tổng số khách</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white text-center">
+                                        <div class="card-body p-3">
+                                            <h4 class="mb-0"><?= count(array_filter($danhSachKhach, fn($k) => !empty($k['cccd']))) ?></h4>
+                                            <small>Đã có CCCD</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white text-center">
+                                        <div class="card-body p-3">
+                                            <h4 class="mb-0"><?= count(array_filter($danhSachKhach, fn($k) => !empty($k['ten_khach_san']))) ?></h4>
+                                            <small>Đã phân phòng</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white text-center">
+                                        <div class="card-body p-3">
+                                            <h4 class="mb-0"><?= count(array_unique(array_column($danhSachKhach, 'ma_dat_tour'))) ?></h4>
+                                            <small>Số phiếu đặt</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
-    </div>
-</div>
-</div>
 
             <!-- Cột phải: Checklist & Thông tin khác -->
             <div class="col-lg-4">
@@ -637,7 +660,6 @@ function showToast(type, message) {
         toast.remove();
     });
 }
-xhr.open('POST', '<?= BASE_URL_GUIDE ?>?act=update-checklist-guide');
 
 // Thêm jQuery nếu chưa có
 if (typeof jQuery == 'undefined') {
