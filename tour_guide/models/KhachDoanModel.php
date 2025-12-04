@@ -6,23 +6,6 @@ class KhachDoanModel {
         $this->conn = connectDB();
     }
 
-    // Tự động tạo trạm mẫu nếu tour chưa có
-    public function checkAndCreateTramMau($id_lich) {
-        $sqlCheck = "SELECT COUNT(*) FROM tram_dung_chan WHERE lich_khoi_hanh_id = :id";
-        $stmtCheck = $this->conn->prepare($sqlCheck);
-        $stmtCheck->execute([':id' => $id_lich]);
-        if ($stmtCheck->fetchColumn() == 0) {
-            try {
-                $sql1 = "INSERT INTO tram_dung_chan (lich_khoi_hanh_id, ten_tram, thu_tu) VALUES (:id, 'Trạm 1: Điểm tập trung/Đón khách', 1)";
-                $this->conn->prepare($sql1)->execute([':id' => $id_lich]);
-
-                $sql2 = "INSERT INTO tram_dung_chan (lich_khoi_hanh_id, ten_tram, thu_tu) VALUES (:id, 'Trạm 2: Điểm kết thúc tour', 2)";
-                $this->conn->prepare($sql2)->execute([':id' => $id_lich]);
-                return true;
-            } catch (PDOException $e) { return false; }
-        }
-        return false;
-    }
 
     // Lấy danh sách các trạm
     public function getTramByLich($id_lich) {
