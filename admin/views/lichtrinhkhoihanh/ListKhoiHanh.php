@@ -185,7 +185,7 @@
                                                         ?>
                                                     <?php elseif ($trang_thai_hien_tai === 'đang đi'): ?>
                                                         <?php
-                            
+
                                                         $ngay_bat_dau = strtotime($lich['ngay_bat_dau']);
                                                         $ngay_ket_thuc = strtotime($lich['ngay_ket_thuc']);
                                                         $hom_nay = strtotime(date('Y-m-d'));
@@ -253,6 +253,12 @@
                                                                 <i class="fas fa-hotel"></i>
                                                             </a>
                                                         <?php endif; ?>
+
+                                                 
+                                                        <a href="?act=tram-dung-chan&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
+                                                            class="btn btn-success" title="Trạm dừng chân">
+                                                            <i class="fas fa-map-marker-alt"></i>
+                                                        </a>
 
                                                         <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "đã hủy" -->
                                                         <?php if ($cho_phep_xoa): ?>

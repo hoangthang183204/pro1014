@@ -121,7 +121,7 @@ match ($act) {
     'danh-muc-tours' => (new AdminDanhMucTourController())->toursByDanhMuc(),
     'danh-muc-filter' => (new AdminDanhMucTourController())->filterTours(),
 
-   
+
 
     // 'danh-muc-doi-tac' => (new AdminDanhMucTourController())->doiTac(),
     // 'danh-muc-doi-tac-create' => (new AdminDanhMucTourController())->createDoiTac(),
@@ -129,6 +129,13 @@ match ($act) {
     // 'danh-muc-doi-tac-edit' => (new AdminDanhMucTourController())->editDoiTac(),
     // 'danh-muc-doi-tac-update' => (new AdminDanhMucTourController())->updateDoiTac(),
     // 'danh-muc-doi-tac-delete' => (new AdminDanhMucTourController())->deleteDoiTac(),
+
+    // Quản lý Trạm dừng chân (PHP thuần)
+    'tram-dung-chan' => (new AdminLichKhoiHanhController())->tramDungChan(),
+    'tram-dung-chan-them' => (new AdminLichKhoiHanhController())->themTramDungChan(),
+    'xoa-tram' => (new AdminLichKhoiHanhController())->xoaTramDungChan(),
+    'sua-tram-form' => (new AdminLichKhoiHanhController())->suaTramDungChanForm(),
+    'sua-tram' => (new AdminLichKhoiHanhController())->suaTramDungChan(),
 
 
     'tour-clone' => (new AdminTourController())->clone(),
@@ -197,5 +204,4 @@ match ($act) {
     // Thống kê và tìm kiếm
     'dat-tour-thong-ke' => (new AdminDatTourController())->thongKe(),
     'dat-tour-print' => (new AdminDatTourController())->print()
-
 };
