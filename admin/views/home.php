@@ -286,7 +286,7 @@
     };
 
     const statusData = {
-        labels: ['Đã lên lịch', 'Đang diễn ra', 'Đã hoàn thành', 'Đã hủy'],
+        labels: ['Đã lên lịch', 'Đang đi', 'Đã hoàn thành', 'Đã hủy'],
         datasets: [{
             data: [
                 <?php echo $thongKe['tour_da_len_lich'] ?? 0; ?>,
