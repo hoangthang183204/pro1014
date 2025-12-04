@@ -123,7 +123,7 @@ class LichTrinhModel
         $this->db->bind(1, $tourInfo['tour_id']);
         $lichTrinhChiTiet = $this->db->resultSet();
 
-       // 3. Lấy tất cả khách hàng đã đặt tour (bao gồm cả khách đi cùng)
+        // 3. Lấy tất cả khách hàng đã đặt tour (bao gồm cả khách đi cùng)
         $query = "
             SELECT 
                 kh.id,
@@ -162,6 +162,14 @@ class LichTrinhModel
         $this->db->bind(1, $lichKhoiHanhId);
         $this->db->bind(2, $lichKhoiHanhId);
         $danhSachKhach = $this->db->resultSet();
+
+        // Debug - ghi log để kiểm tra
+        error_log("LichTrinhModel::getChiTietLichTrinh - Lịch khởi hành ID: " . $lichKhoiHanhId);
+        error_log("LichTrinhModel::getChiTietLichTrinh - Số khách hàng: " . count($danhSachKhach));
+        
+        if (count($danhSachKhach) > 0) {
+            error_log("LichTrinhModel::getChiTietLichTrinh - Mẫu khách hàng đầu tiên: " . json_encode($danhSachKhach[0]));
+        }
 
         // 4. Lấy checklist công việc
         $query = "
