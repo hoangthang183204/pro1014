@@ -18,11 +18,11 @@ $is_home = !isset($_GET['act']);
             </a>
         </li>
 
-        <li data-page="my-tours">
-            <a href="#"><i class="fas fa-route"></i> Tour Của Tôi</a>
-        </li>
-        <li data-page="customers">
-            <a href="#"><i class="fas fa-users"></i> Lịch Trình</a>
+        <li class="nav-item <?= (isset($_GET['act']) && $_GET['act'] == 'lich-trinh') ? 'active' : '' ?>">
+            <a href="<?= BASE_URL_GUIDE . '?act=lich-trinh' ?>" class="nav-link d-flex align-items-center">
+                <i class="nav-icon fas fa-calendar-alt"></i>
+                <p class="m-0 pl-2">Lịch Trình Tour</p>
+            </a>
         </li>
         <li class="nav-item">
             <a href="<?= BASE_URL_GUIDE . '?act=xem_danh_sach_khach' ?>"

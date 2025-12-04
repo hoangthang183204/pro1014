@@ -1,5 +1,3 @@
-[file name]: profile_settings.php
-[file content begin]
 <?php
 // Tệp: views/guide/profile_settings.php
 
