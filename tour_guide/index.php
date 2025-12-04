@@ -2,11 +2,10 @@
 session_name('GUIDE_SESSION');
 session_start();
 
-
 require_once '../commons/env.php'; 
 require_once '../commons/function.php'; 
 
-
+// Require Controllers
 require_once './controllers/ProductController.php';
 require_once './controllers/GuideTaiKhoanController.php';
 require_once './controllers/DashBoardHDVController.php';
@@ -14,6 +13,7 @@ require_once './controllers/PersonalGuideController.php';
 require_once './controllers/NhatKyController.php';
 require_once './controllers/KhachDoanController.php';
 require_once './controllers/LichTrinhController.php';
+require_once './controllers/BaoNghiController.php'; // THÊM DÒNG NÀY
 
 // Require Models
 require_once './models/ProductModel.php';
@@ -24,15 +24,11 @@ require_once './models/PersonalGuideModel.php';
 require_once './models/NhatKyModel.php';
 require_once './models/KhachDoanModel.php';
 require_once './models/LichTrinhModel.php';
-
-
-
+require_once './models/BaoNghiModel.php'; // THÊM DÒNG NÀY
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
-
 
 // Route
 $act = $_GET['act'] ?? '/';
@@ -70,10 +66,7 @@ match ($act) {
     'register-process' => (new GuideTaiKhoanController())->registerprocess(),
     'logout' => (new GuideTaiKhoanController())->logout(),
     
-    // Guide routes
-    // 'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
-  
-    //Thông tin tài khoản
+    // Thông tin tài khoản
     'my-profile' => (new PersonalGuideController())->showProfile(),
     'profile-settings' => (new PersonalGuideController())->showProfileSettings(),
     'update-profile' => (new PersonalGuideController())->updateProfile(),
@@ -97,6 +90,12 @@ match ($act) {
     'lich-lam-viec' => (new LichTrinhController())->lichLamViec(),
     'update-checklist-guide' => (new LichTrinhController())->updateChecklistForGuide(),
 
+    // Bao nghi routes - THÊM VÀO ĐÂY
+    'bao-nghi' => (new BaoNghiController())->index(),
+    'bao-nghi-create' => (new BaoNghiController())->create(),
+    'bao-nghi-store' => (new BaoNghiController())->store(),
+    'bao-nghi-detail' => (new BaoNghiController())->detail(),
+    'bao-nghi-cancel' => (new BaoNghiController())->cancel(),
+
     default => (new DashboardHDVController())->home(),
 };
-?>
