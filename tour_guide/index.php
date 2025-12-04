@@ -13,7 +13,7 @@ require_once './controllers/PersonalGuideController.php';
 require_once './controllers/NhatKyController.php';
 require_once './controllers/KhachDoanController.php';
 require_once './controllers/LichTrinhController.php';
-require_once './controllers/BaoNghiController.php'; // THÊM DÒNG NÀY
+require_once './controllers/BaoNghiController.php'; 
 
 // Require Models
 require_once './models/ProductModel.php';
@@ -24,7 +24,7 @@ require_once './models/PersonalGuideModel.php';
 require_once './models/NhatKyModel.php';
 require_once './models/KhachDoanModel.php';
 require_once './models/LichTrinhModel.php';
-require_once './models/BaoNghiModel.php'; // THÊM DÒNG NÀY
+require_once './models/BaoNghiModel.php'; 
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();

@@ -10,10 +10,6 @@ class BaoNghiController {
     }
     
      private function checkLogin() {
-        // Debug: Kiểm tra session
-        error_log("=== BaoNghiController Session Debug ===");
-        error_log("Session ID: " . session_id());
-        error_log("All Session Data: " . print_r($_SESSION, true));
         
         if (!isset($_SESSION['guide_id']) || empty($_SESSION['guide_id'])) {
             error_log("Session guide_id not found. Redirecting to login.");
@@ -28,16 +24,6 @@ class BaoNghiController {
     
     public function index() {
         $guideId = $this->checkLogin();
-        
-        // Debug: Log ID để kiểm tra
-        error_log("BaoNghiController - Guide ID from session: " . $guideId);
-        error_log("BaoNghiController - Current user should be ID: " . ($_SESSION['guide_id'] ?? 'NOT SET'));
-        
-        // Thêm debug hiển thị trực tiếp trên trang
-        echo '<script>';
-        echo 'console.log("BaoNghiController - Guide ID:", ' . json_encode($guideId) . ');';
-        echo 'console.log("BaoNghiController - Session Data:", ' . json_encode($_SESSION) . ');';
-        echo '</script>';
         
         // Lấy danh sách yêu cầu nghỉ
         $requests = $this->model->getAllByGuideId($guideId);
