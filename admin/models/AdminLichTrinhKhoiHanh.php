@@ -588,4 +588,139 @@ class AdminLichKhoiHanh
     {
         return $this->autoUpdateTrangThai();
     }
+
+
+    // Thêm các method sau vào class AdminLichKhoiHanh
+
+    // Quản lý Trạm dừng chân
+    public function getTramDungChan($lich_khoi_hanh_id)
+    {
+        try {
+            $query = "SELECT * FROM tram_dung_chan 
+                  WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                  ORDER BY thu_tu";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getTramDungChan: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function themTramDungChan($lich_khoi_hanh_id, $data)
+    {
+        try {
+            // Kiểm tra thứ tự trùng
+            $query_check = "SELECT COUNT(*) as count FROM tram_dung_chan 
+                       WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                       AND thu_tu = :thu_tu";
+            $stmt_check = $this->conn->prepare($query_check);
+            $stmt_check->execute([
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':thu_tu' => $data['thu_tu']
+            ]);
+            $result = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+            if ($result['count'] > 0) {
+                return ['success' => false, 'message' => 'Thứ tự trạm đã tồn tại'];
+            }
+
+            $query = "INSERT INTO tram_dung_chan 
+                  (lich_khoi_hanh_id, ten_tram, thu_tu, trang_thai) 
+                  VALUES 
+                  (:lich_khoi_hanh_id, :ten_tram, :thu_tu, 'chưa đến')";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':ten_tram' => $data['ten_tram'],
+                ':thu_tu' => $data['thu_tu']
+            ]);
+
+            return ['success' => true, 'message' => 'Thêm trạm thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi themTramDungChan: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống'];
+        }
+    }
+
+    public function suaTramDungChan($id, $data)
+    {
+        try {
+            // Kiểm tra thứ tự trùng (trừ chính nó)
+            $query_check = "SELECT COUNT(*) as count FROM tram_dung_chan 
+                       WHERE id != :id AND lich_khoi_hanh_id = 
+                       (SELECT lich_khoi_hanh_id FROM tram_dung_chan WHERE id = :id2)
+                       AND thu_tu = :thu_tu";
+            $stmt_check = $this->conn->prepare($query_check);
+            $stmt_check->execute([
+                ':id' => $id,
+                ':id2' => $id,
+                ':thu_tu' => $data['thu_tu']
+            ]);
+            $result = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+            if ($result['count'] > 0) {
+                return ['success' => false, 'message' => 'Thứ tự trạm đã tồn tại'];
+            }
+
+            $query = "UPDATE tram_dung_chan 
+                  SET ten_tram = :ten_tram,
+                      thu_tu = :thu_tu
+                  WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':id' => $id,
+                ':ten_tram' => $data['ten_tram'],
+                ':thu_tu' => $data['thu_tu']
+            ]);
+
+            return ['success' => true, 'message' => 'Cập nhật trạm thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi suaTramDungChan: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống'];
+        }
+    }
+
+    public function xoaTramDungChan($id)
+    {
+        try {
+            // Kiểm tra nếu trạm đã có checkin
+            $query_check = "SELECT COUNT(*) as count FROM checkin_khach_hang 
+                       WHERE tram_id = :id";
+            $stmt_check = $this->conn->prepare($query_check);
+            $stmt_check->execute([':id' => $id]);
+            $result = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+            if ($result['count'] > 0) {
+                return ['success' => false, 'message' => 'Không thể xóa trạm đã có khách checkin'];
+            }
+
+            $query = "DELETE FROM tram_dung_chan WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+
+            return ['success' => true, 'message' => 'Xóa trạm thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi xoaTramDungChan: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống'];
+        }
+    }
+
+    public function getTramById($id)
+    {
+        try {
+            $query = "SELECT * FROM tram_dung_chan WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getTramById: " . $e->getMessage());
+            return null;
+        }
+    }
 }

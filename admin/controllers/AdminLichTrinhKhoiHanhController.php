@@ -293,4 +293,112 @@ class AdminLichKhoiHanhController
             echo json_encode($result);
         }
     }
+
+
+    // Hiển thị trang quản lý trạm dừng chân
+    public function tramDungChan()
+    {
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
+
+        if (!$lich_khoi_hanh) {
+            $_SESSION['error'] = 'Lịch khởi hành không tồn tại';
+            header('Location: ?act=lich-khoi-hanh');
+            return;
+        }
+
+        $tram_dung_chan = $this->lichKhoiHanhModel->getTramDungChan($lich_khoi_hanh_id);
+
+        require_once './views/lichtrinhkhoihanh/tramDungChan.php';
+    }
+
+    // Thêm trạm dừng chân mới
+    public function themTramDungChan()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
+            $data = [
+                'ten_tram' => $_POST['ten_tram'] ?? '',
+                'thu_tu' => $_POST['thu_tu'] ?? 1
+            ];
+
+            $result = $this->lichKhoiHanhModel->themTramDungChan($lich_khoi_hanh_id, $data);
+
+            if ($result['success']) {
+                $_SESSION['success'] = $result['message'];
+            } else {
+                $_SESSION['error'] = $result['message'];
+            }
+
+            header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+        }
+    }
+
+    public function xoaTramDungChan()
+    {
+        $id = $_GET['id'] ?? 0;
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+
+        if (!$id || !$lich_khoi_hanh_id) {
+            $_SESSION['error'] = 'Thông tin không hợp lệ';
+            header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+            return;
+        }
+
+        $result = $this->lichKhoiHanhModel->xoaTramDungChan($id);
+
+        if ($result['success']) {
+            $_SESSION['success'] = $result['message'];
+        } else {
+            $_SESSION['error'] = $result['message'];
+        }
+
+        header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+    }
+
+    public function suaTramDungChanForm()
+    {
+        $id = $_GET['id'] ?? 0;
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+
+        if (!$id || !$lich_khoi_hanh_id) {
+            $_SESSION['error'] = 'Thông tin không hợp lệ';
+            header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+            return;
+        }
+
+        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
+        $tram = $this->lichKhoiHanhModel->getTramById($id);
+
+        if (!$lich_khoi_hanh || !$tram) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin';
+            header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+            return;
+        }
+
+        require_once './views/lichtrinhkhoihanh/suaTram.php';
+    }
+
+    // Xử lý sửa trạm
+    public function suaTramDungChan()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? 0;
+            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
+            $data = [
+                'ten_tram' => $_POST['ten_tram'] ?? '',
+                'thu_tu' => $_POST['thu_tu'] ?? 1
+            ];
+
+            $result = $this->lichKhoiHanhModel->suaTramDungChan($id, $data);
+
+            if ($result['success']) {
+                $_SESSION['success'] = $result['message'];
+            } else {
+                $_SESSION['error'] = $result['message'];
+            }
+
+            header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+        }
+    }
 }
