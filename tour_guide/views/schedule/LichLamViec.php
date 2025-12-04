@@ -20,6 +20,158 @@ try {
     $currentMonthStart->modify('first day of this month');
     $currentMonthEnd = new DateTime($currentMonthStart->format('Y-m-t'));
 }
+
+// Hàm helper để tạo tiêu đề sự kiện
+function getEventTitle($loaiLich, $ghiChu) {
+    $titles = [
+        'đã phân công' => 'Có tour',
+        'bận' => 'Bận',
+        'nghỉ' => 'Nghỉ',
+        'có thể làm' => 'Có thể làm'
+    ];
+    
+    $title = $titles[$loaiLich] ?? $loaiLich;
+    if ($ghiChu && strlen($ghiChu) > 0) {
+        $title .= ': ' . $ghiChu;
+    }
+    
+    return $title;
+}
+
+// Hàm helper để tạo lớp CSS cho sự kiện
+function getEventClass($type) {
+    switch($type) {
+        case 'tour': return 'tour-event';
+        case 'đã phân công': return 'tour-event';
+        case 'bận': return 'busy-event';
+        case 'nghỉ': return 'off-event';
+        default: return 'busy-event';
+    }
+}
+
+// Tạo mảng dữ liệu sự kiện cho dễ truy cập
+$eventsByDate = [];
+
+// Thêm lịch làm việc vào mảng sự kiện
+foreach ($lichLamViec as $item) {
+    $date = $item['ngay'];
+    if (!isset($eventsByDate[$date])) {
+        $eventsByDate[$date] = [];
+    }
+    $eventsByDate[$date][] = [
+        'type' => $item['loai_lich'],
+        'title' => getEventTitle($item['loai_lich'], $item['ghi_chu'] ?? ''),
+        'ghi_chu' => $item['ghi_chu'] ?? ''
+    ];
+}
+
+// Thêm tour vào mảng sự kiện (ưu tiên hiển thị tour)
+foreach ($lichTrinhTours as $tour) {
+    try {
+        $tourStart = new DateTime($tour['ngay_bat_dau']);
+        $tourEnd = new DateTime($tour['ngay_ket_thuc']);
+        
+        // Tạo khoảng ngày của tour
+        $period = new DatePeriod(
+            $tourStart,
+            new DateInterval('P1D'),
+            $tourEnd->modify('+1 day')
+        );
+        
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+            
+            // Nếu là ngày bắt đầu tour, hiển thị tên tour
+            if ($date->format('Y-m-d') == $tourStart->format('Y-m-d')) {
+                if (!isset($eventsByDate[$dateStr])) {
+                    $eventsByDate[$dateStr] = [];
+                }
+                // Chỉ thêm tour nếu chưa có sự kiện nào (ưu tiên tour)
+                $hasTour = false;
+                foreach ($eventsByDate[$dateStr] as $event) {
+                    if ($event['type'] === 'tour' || $event['type'] === 'đã phân công') {
+                        $hasTour = true;
+                        break;
+                    }
+                }
+                if (!$hasTour) {
+                    array_unshift($eventsByDate[$dateStr], [
+                        'type' => 'tour',
+                        'title' => $tour['ten_tour'],
+                        'tour_data' => $tour
+                    ]);
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // Bỏ qua tour có ngày không hợp lệ
+        continue;
+    }
+}
+
+// Tạo lịch bằng PHP
+function getCalendarDays($year, $month, $eventsByDate) {
+    // Ngày đầu tiên của tháng
+    $firstDay = new DateTime("$year-$month-01");
+    // Ngày cuối cùng của tháng
+    $lastDay = new DateTime($firstDay->format('Y-m-t'));
+    
+    // Ngày đầu tiên trong tuần (0 = Chủ nhật, 1 = Thứ 2)
+    $startDay = $firstDay->format('w');
+    // Chuyển từ Chủ nhật = 0 sang Thứ 2 = 0
+    $startDay = $startDay == 0 ? 6 : $startDay - 1;
+    
+    // Tổng số ngày trong tháng
+    $daysInMonth = $lastDay->format('j');
+    
+    // Tính toán số tuần
+    $totalCells = $startDay + $daysInMonth;
+    $weeks = ceil($totalCells / 7);
+    
+    $calendar = [];
+    $dayCounter = 1;
+    $currentDate = new DateTime();
+    
+    for ($week = 0; $week < $weeks; $week++) {
+        $weekDays = [];
+        
+        for ($dayOfWeek = 0; $dayOfWeek < 7; $dayOfWeek++) {
+            $cellIndex = ($week * 7) + $dayOfWeek;
+            
+            if ($cellIndex < $startDay || $dayCounter > $daysInMonth) {
+                // Ô trống (tháng trước hoặc tháng sau)
+                $weekDays[] = [
+                    'type' => 'empty',
+                    'day' => null,
+                    'date' => null,
+                    'events' => [],
+                    'is_today' => false
+                ];
+            } else {
+                // Ngày trong tháng
+                $dateStr = sprintf('%04d-%02d-%02d', $year, $month, $dayCounter);
+                $isToday = ($currentDate->format('Y-m-d') == $dateStr);
+                
+                $weekDays[] = [
+                    'type' => 'current',
+                    'day' => $dayCounter,
+                    'date' => $dateStr,
+                    'events' => $eventsByDate[$dateStr] ?? [],
+                    'is_today' => $isToday
+                ];
+                
+                $dayCounter++;
+            }
+        }
+        
+        $calendar[] = $weekDays;
+    }
+    
+    return $calendar;
+}
+
+// Tạo lịch
+$calendar = getCalendarDays($currentYear, $currentMonth, $eventsByDate);
 ?>
 
 <main class="main-content">
@@ -83,8 +235,30 @@ try {
                                         <th style="width: 14%">Chủ nhật</th>
                                     </tr>
                                 </thead>
-                                <tbody id="calendarBody">
-                                    <!-- Calendar will be generated by JavaScript -->
+                                <tbody>
+                                    <?php foreach ($calendar as $week): ?>
+                                    <tr>
+                                        <?php foreach ($week as $day): ?>
+                                        <td class="calendar-day <?= $day['type'] == 'empty' ? 'other-month empty-day' : '' ?> <?= $day['is_today'] ? 'today' : '' ?>" 
+                                            <?php if ($day['type'] == 'current'): ?>
+                                            onclick="showDayDetail('<?= $day['date'] ?>')"
+                                            style="cursor: pointer;"
+                                            <?php endif; ?>
+                                            >
+                                            <?php if ($day['type'] == 'current'): ?>
+                                                <div class="calendar-date"><?= $day['day'] ?></div>
+                                                <?php foreach ($day['events'] as $event): ?>
+                                                    <span class="<?= getEventClass($event['type']) ?>" 
+                                                          title="<?= htmlspecialchars($event['title']) ?>">
+                                                        <?= htmlspecialchars(mb_substr($event['title'], 0, 15)) ?>
+                                                        <?= mb_strlen($event['title']) > 15 ? '...' : '' ?>
+                                                    </span>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                    <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -170,12 +344,23 @@ try {
                                     break;
                             }
                         }
+                        
+                        // Đếm số ngày có tour từ mảng eventsByDate
+                        $countTourDays = 0;
+                        foreach ($eventsByDate as $date => $events) {
+                            foreach ($events as $event) {
+                                if ($event['type'] === 'tour') {
+                                    $countTourDays++;
+                                    break; // Mỗi ngày chỉ đếm 1 lần
+                                }
+                            }
+                        }
                         ?>
                         <div class="text-center">
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <div class="bg-primary text-white rounded p-3">
-                                        <h4 class="mb-0"><?= $countTour ?></h4>
+                                        <h4 class="mb-0"><?= $countTourDays ?></h4>
                                         <small>Ngày có tour</small>
                                     </div>
                                 </div>
@@ -213,13 +398,11 @@ try {
     min-height: 100px;
     padding: 5px;
     position: relative;
-    cursor: pointer;
     transition: all 0.3s;
 }
 
 .calendar-day:hover {
     background-color: #f8f9fa;
-    transform: scale(1.02);
 }
 
 .calendar-date {
@@ -237,6 +420,9 @@ try {
     font-size: 11px;
     margin-bottom: 2px;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .busy-event {
@@ -247,6 +433,9 @@ try {
     font-size: 11px;
     margin-bottom: 2px;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .off-event {
@@ -257,6 +446,9 @@ try {
     font-size: 11px;
     margin-bottom: 2px;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .empty-day {
@@ -275,176 +467,16 @@ try {
 </style>
 
 <script>
-// Biến toàn cục
-let scheduleData = <?= json_encode($lichLamViec) ?>;
-let tourData = <?= json_encode($lichTrinhTours) ?>;
-
-// Tạo lịch tháng
-function generateCalendar(year, month) {
-    const calendarBody = document.getElementById('calendarBody');
-    calendarBody.innerHTML = '';
+// JavaScript đơn giản
+function changeMonth() {
+    const monthPicker = document.getElementById('monthPicker');
+    const [year, month] = monthPicker.value.split('-');
     
-    // Ngày đầu tiên của tháng
-    const firstDay = new Date(year, month - 1, 1);
-    // Ngày cuối cùng của tháng
-    const lastDay = new Date(year, month, 0);
-    // Ngày đầu tiên trong tuần (0 = Chủ nhật, 1 = Thứ 2)
-    let startDay = firstDay.getDay();
-    // Chuyển từ Chủ nhật = 0 sang Thứ 2 = 0
-    startDay = startDay === 0 ? 6 : startDay - 1;
-    
-    // Tổng số ngày trong tháng
-    const daysInMonth = lastDay.getDate();
-    
-    // Tính toán số tuần
-    const totalCells = startDay + daysInMonth;
-    const weeks = Math.ceil(totalCells / 7);
-    
-    let dayCounter = 1;
-    let currentWeek = 0;
-    
-    for (let week = 0; week < weeks; week++) {
-        const row = document.createElement('tr');
-        
-        for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-            const cell = document.createElement('td');
-            cell.className = 'calendar-day';
-            
-            // Tính ngày tháng cho ô hiện tại
-            const cellIndex = (week * 7) + dayOfWeek;
-            
-            if (cellIndex < startDay || dayCounter > daysInMonth) {
-                // Ô trống (tháng trước hoặc tháng sau)
-                cell.className += ' other-month';
-                
-                // Tính ngày của tháng trước cho các ô đầu
-                if (cellIndex < startDay) {
-                    // Tính số ngày của tháng trước
-                    const prevMonth = month - 1 === 0 ? 12 : month - 1;
-                    const prevYear = month - 1 === 0 ? year - 1 : year;
-                    const prevMonthLastDay = new Date(prevYear, prevMonth, 0).getDate();
-                    const prevMonthDay = prevMonthLastDay - (startDay - cellIndex) + 1;
-                    cell.innerHTML = `<div class="calendar-date">${prevMonthDay}</div>`;
-                } else {
-                    // Tính ngày của tháng sau cho các ô cuối
-                    const nextMonthDay = cellIndex - startDay - daysInMonth + 1;
-                    cell.innerHTML = `<div class="calendar-date">${nextMonthDay}</div>`;
-                }
-            } else {
-                // Ngày trong tháng
-                const currentDate = new Date(year, month - 1, dayCounter);
-                const dateStr = currentDate.toISOString().split('T')[0];
-                const isToday = isSameDay(currentDate, new Date());
-                
-                if (isToday) {
-                    cell.className += ' today';
-                }
-                
-                let content = `<div class="calendar-date">${dayCounter}</div>`;
-                
-                // Hiển thị sự kiện trong ngày
-                const events = getEventsForDate(dateStr);
-                events.forEach(event => {
-                    let eventClass = '';
-                    switch(event.type) {
-                        case 'tour': eventClass = 'tour-event'; break;
-                        case 'busy': eventClass = 'busy-event'; break;
-                        case 'off': eventClass = 'off-event'; break;
-                    }
-                    content += `<span class="${eventClass}">${event.title}</span>`;
-                });
-                
-                cell.innerHTML = content;
-                cell.dataset.date = dateStr;
-                cell.addEventListener('click', () => showDayDetail(dateStr));
-                
-                dayCounter++;
-            }
-            
-            row.appendChild(cell);
-        }
-        
-        calendarBody.appendChild(row);
-        currentWeek++;
-    }
+    window.location.href = `<?= BASE_URL_GUIDE ?>?act=lich-lam-viec&month=${month}&year=${year}`;
 }
 
-// Lấy sự kiện cho một ngày cụ thể
-function getEventsForDate(dateStr) {
-    const events = [];
-    
-    // Kiểm tra lịch làm việc
-    scheduleData.forEach(item => {
-        if (item.ngay === dateStr) {
-            events.push({
-                type: getEventType(item.loai_lich),
-                title: getEventTitle(item.loai_lich, item.ghi_chu)
-            });
-        }
-    });
-    
-    // Kiểm tra tour
-    tourData.forEach(tour => {
-        try {
-            const tourStart = new Date(tour.ngay_bat_dau);
-            const tourEnd = new Date(tour.ngay_ket_thuc);
-            const currentDate = new Date(dateStr);
-            
-            // Đặt giờ về 0 để so sánh chỉ ngày
-            tourStart.setHours(0, 0, 0, 0);
-            tourEnd.setHours(0, 0, 0, 0);
-            currentDate.setHours(0, 0, 0, 0);
-            
-            if (currentDate >= tourStart && currentDate <= tourEnd) {
-                events.push({
-                    type: 'tour',
-                    title: tour.ten_tour
-                });
-            }
-        } catch (e) {
-            console.error('Lỗi xử lý ngày tour:', e);
-        }
-    });
-    
-    return events;
-}
-
-// Chuyển loại lịch thành loại sự kiện
-function getEventType(loaiLich) {
-    switch(loaiLich) {
-        case 'đã phân công': return 'tour';
-        case 'bận': return 'busy';
-        case 'nghỉ': return 'off';
-        default: return 'busy';
-    }
-}
-
-// Tạo tiêu đề sự kiện
-function getEventTitle(loaiLich, ghiChu) {
-    const titles = {
-        'đã phân công': 'Có tour',
-        'bận': 'Bận',
-        'nghỉ': 'Nghỉ',
-        'có thể làm': 'Có thể làm'
-    };
-    
-    let title = titles[loaiLich] || loaiLich;
-    if (ghiChu && ghiChu.length > 0) {
-        title += ': ' + ghiChu.substring(0, 20);
-    }
-    
-    return title;
-}
-
-// So sánh 2 ngày
-function isSameDay(date1, date2) {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
-}
-
-// Hiển thị chi tiết ngày
 function showDayDetail(dateStr) {
+    // Tạo modal đơn giản
     const date = new Date(dateStr);
     const formattedDate = date.toLocaleDateString('vi-VN', {
         weekday: 'long',
@@ -453,20 +485,10 @@ function showDayDetail(dateStr) {
         day: 'numeric'
     });
     
-    // Lấy sự kiện trong ngày
-    const events = getEventsForDate(dateStr);
-    
+    // Tạo nội dung modal từ PHP data
     let content = `<h5>${formattedDate}</h5>`;
-    
-    if (events.length === 0) {
-        content += '<p class="text-muted">Không có sự kiện nào</p>';
-    } else {
-        content += '<ul class="list-group">';
-        events.forEach(event => {
-            content += `<li class="list-group-item">${event.title}</li>`;
-        });
-        content += '</ul>';
-    }
+    content += '<p class="text-muted">Thông tin chi tiết về ngày này</p>';
+    content += '<p>Bạn có thể xem thông tin chi tiết trong phần "Lịch Trình"</p>';
     
     // Hiển thị modal
     const modal = new bootstrap.Modal(document.getElementById('dayDetailModal'));
@@ -474,19 +496,6 @@ function showDayDetail(dateStr) {
     document.getElementById('modalBody').innerHTML = content;
     modal.show();
 }
-
-// Thay đổi tháng
-function changeMonth() {
-    const monthPicker = document.getElementById('monthPicker');
-    const [year, month] = monthPicker.value.split('-');
-    
-    window.location.href = `<?= BASE_URL_GUIDE ?>?act=lich-lam-viec&month=${month}&year=${year}`;
-}
-
-// Khởi tạo lịch khi trang load
-document.addEventListener('DOMContentLoaded', function() {
-    generateCalendar(<?= $currentYear ?>, <?= $currentMonth ?>);
-});
 </script>
 
 <!-- Modal chi tiết ngày -->

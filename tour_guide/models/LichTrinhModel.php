@@ -123,53 +123,27 @@ class LichTrinhModel
         $this->db->bind(1, $tourInfo['tour_id']);
         $lichTrinhChiTiet = $this->db->resultSet();
 
-        // 3. Lấy tất cả khách hàng đã đặt tour (bao gồm cả khách đi cùng)
+        // 3. Lấy danh sách khách hàng đã đặt tour
         $query = "
             SELECT 
-                kh.id,
+                pd.id as dat_tour_id,
                 kh.ho_ten,
                 kh.so_dien_thoai,
                 kh.cccd,
                 kh.gioi_tinh,
-                kh.ngay_sinh,
-                kh.email,
-                kh.dia_chi,
-                kh.ghi_chu,
-                pd.ma_dat_tour,
-                pd.trang_thai as trang_thai_dat,
-                pd.created_at as ngay_dat,
-                pd.tong_tien,
                 pd.so_luong_khach,
-                pks.ten_khach_san,
-                pks.so_phong,
-                pks.loai_phong,
-                -- Kiểm tra xem đây là người đặt hay khách đi cùng
-                CASE 
-                    WHEN kh.id = pd.khach_hang_id THEN 'người đặt'
-                    ELSE 'khách đi cùng'
-                END as loai_khach
+                pd.tong_tien,
+                pd.trang_thai as trang_thai_dat
             FROM phieu_dat_tour pd
-            -- Lấy tất cả khách hàng có cùng phieu_dat_tour_id
-            JOIN khach_hang kh ON kh.phieu_dat_tour_id = pd.id
-            LEFT JOIN phan_phong_khach_san pks ON pks.khach_hang_id = kh.id 
-                AND pks.lich_khoi_hanh_id = ?
+            JOIN khach_hang kh ON pd.khach_hang_id = kh.id
             WHERE pd.lich_khoi_hanh_id = ?
             AND pd.trang_thai IN ('đã cọc', 'hoàn tất')
-            ORDER BY pd.created_at DESC, loai_khach DESC, kh.ho_ten ASC
+            ORDER BY pd.created_at DESC
         ";
 
         $this->db->query($query);
         $this->db->bind(1, $lichKhoiHanhId);
-        $this->db->bind(2, $lichKhoiHanhId);
         $danhSachKhach = $this->db->resultSet();
-
-        // Debug - ghi log để kiểm tra
-        error_log("LichTrinhModel::getChiTietLichTrinh - Lịch khởi hành ID: " . $lichKhoiHanhId);
-        error_log("LichTrinhModel::getChiTietLichTrinh - Số khách hàng: " . count($danhSachKhach));
-        
-        if (count($danhSachKhach) > 0) {
-            error_log("LichTrinhModel::getChiTietLichTrinh - Mẫu khách hàng đầu tiên: " . json_encode($danhSachKhach[0]));
-        }
 
         // 4. Lấy checklist công việc
         $query = "

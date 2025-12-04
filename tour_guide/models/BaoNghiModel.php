@@ -1,6 +1,4 @@
 <?php
-// File: models/BaoNghiModel.php
-
 class BaoNghiModel extends Database {
     
     /**

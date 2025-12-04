@@ -128,6 +128,182 @@ $request = $GLOBALS['request'] ?? [];
     border-radius: 8px;
     border-left: 4px solid #667eea;
 }
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 2px solid #667eea;
+}
+
+.page-title {
+    color: #2d3748;
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Nút Quay lại */
+.btn-outline {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* ===== CARD CHI TIẾT ===== */
+.profile-section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    border: 1px solid #e2e8f0;
+}
+
+.section-content {
+    padding: 0;
+}
+
+/* ===== GRID CHI TIẾT ===== */
+.request-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.detail-value {
+    color: #2d3748;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* ===== BADGE TRẠNG THÁI ===== */
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* ===== NÚT TẢI XUỐNG ===== */
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.btn-outline.btn-sm {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline.btn-sm:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* ===== PHẢN HỒI ADMIN ===== */
+.admin-feedback {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    margin-top: 0.5rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .request-detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-section {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-section {
+        padding: 1rem;
+    }
+    
+    .detail-item {
+        padding: 0.75rem;
+    }
+}
 </style>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>
