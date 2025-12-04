@@ -2,13 +2,16 @@
 // Tệp: controllers/PersonalGuideController.php
 
 require_once __DIR__ . '/../models/PersonalGuideModel.php';
+require_once __DIR__ . '/../models/BaoNghiModel.php'; // THÊM DÒNG NÀY
 
 class PersonalGuideController {
     private $model;
     private $uploadDir = '/uploads/avatars/guides/';
+    private $baoNghiModel; // THÊM DÒNG NÀY
 
     public function __construct() {
         $this->model = new PersonalGuideModel();
+        $this->baoNghiModel = new BaoNghiModel(); // THÊM DÒNG NÀY
     }
     
     private function checkLogin() {
@@ -64,20 +67,46 @@ class PersonalGuideController {
         return $fullPath;
     }
 
+    // XÓA PHƯƠNG THỨC showProfile() CŨ, GIỮ PHƯƠNG THỨC MỚI DƯỚI ĐÂY
     public function showProfile() {
         $guideId = $this->checkLogin();
         
         // Đảm bảo profile tồn tại
         $this->ensureGuideProfileExists($guideId);
         
+        // Lấy thông tin profile
         $profile = $this->model->getMyProfile($guideId);
-        $stats = $this->model->getGuideStats($guideId);
+        
+        // Lấy số tour đang hoạt động
         $activeTours = $this->model->getActiveToursCount($guideId);
         
-        $GLOBALS['profile'] = $profile;
-        $GLOBALS['stats'] = $stats;
-        $GLOBALS['activeTours'] = $activeTours;
+        // Lấy thông tin thống kê từ profile
+        $stats = [
+            'so_tour_da_dan' => $profile['so_tour_da_dan'] ?? 0,
+            'danh_gia_trung_binh' => $profile['danh_gia_trung_binh'] ?? 0
+        ];
         
+        // Lấy dữ liệu báo nghỉ
+        $baoNghiRequests = $this->baoNghiModel->getAllByGuideId($guideId);
+        $baoNghiStats = $this->baoNghiModel->getStats($guideId);
+        
+        // Tính số ngày nghỉ trong tháng
+        $daysOffResult = $this->baoNghiModel->countDaysOffThisMonth($guideId);
+        $daysOff = $daysOffResult['total_days'] ?? 0;
+        
+        // Gộp thống kê
+        $baoNghiStats = array_merge($baoNghiStats, [
+            'days_off' => $daysOff
+        ]);
+        
+        // Truyền dữ liệu qua $GLOBALS
+        $GLOBALS['profile'] = $profile;
+        $GLOBALS['activeTours'] = $activeTours;
+        $GLOBALS['stats'] = $stats;
+        $GLOBALS['baoNghiRequests'] = $baoNghiRequests;
+        $GLOBALS['baoNghiStats'] = $baoNghiStats;
+        
+        // Hiển thị view
         include __DIR__ . '/../views/guide/my_profile.php';
     }
 
@@ -93,73 +122,71 @@ class PersonalGuideController {
         include __DIR__ . '/../views/guide/profile_settings.php';
     }
     
-    // Tệp: controllers/PersonalGuideController.php
+    public function updateProfile() {
+        $guideId = $this->checkLogin();
+        
+        // Đảm bảo profile tồn tại trước khi cập nhật
+        $this->ensureGuideProfileExists($guideId);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $data = [
+                    'ho_ten' => trim($_POST['ho_ten'] ?? ''),
+                    'email' => trim($_POST['email'] ?? ''),
+                    'so_dien_thoai' => trim($_POST['so_dien_thoai'] ?? ''),
+                    'ngay_sinh' => trim($_POST['ngay_sinh'] ?? ''),
+                    'dia_chi' => trim($_POST['dia_chi'] ?? ''),
+                    'loai_huong_dan_vien' => trim($_POST['loai_huong_dan_vien'] ?? ''),
+                    'ngon_ngu' => !empty($_POST['ngon_ngu']) ? json_encode($_POST['ngon_ngu']) : '[]',
+                    'kinh_nghiem' => trim($_POST['kinh_nghiem'] ?? ''),
+                    'chuyen_mon' => trim($_POST['chuyen_mon'] ?? ''),
+                    'tinh_trang_suc_khoe' => trim($_POST['tinh_trang_suc_khoe'] ?? ''),
+                    'so_giay_phep_hanh_nghe' => trim($_POST['so_giay_phep_hanh_nghe'] ?? ''),
+                    'ngay_cap_giay_phep' => trim($_POST['ngay_cap_giay_phep'] ?? ''),
+                    'noi_cap_giay_phep' => trim($_POST['noi_cap_giay_phep'] ?? ''),
+                    // Thêm thống kê
+                    'so_tour_da_dan' => intval($_POST['so_tour_da_dan'] ?? 0),
+                    'danh_gia_trung_binh' => floatval($_POST['danh_gia_trung_binh'] ?? 0)
+                ];
+                
+                // Validate dữ liệu thống kê
+                if ($data['so_tour_da_dan'] < 0) {
+                    throw new Exception('Số tour đã dẫn không thể âm');
+                }
+                
+                if ($data['so_tour_da_dan'] > 999) {
+                    throw new Exception('Số tour đã dẫn tối đa là 999');
+                }
+                
+                if ($data['danh_gia_trung_binh'] < 0 || $data['danh_gia_trung_binh'] > 5) {
+                    throw new Exception('Đánh giá phải nằm trong khoảng 0.0 đến 5.0');
+                }
+                
+                // Update thông tin cơ bản
+                if (!$this->model->updateProfile($guideId, $data)) {
+                    throw new Exception('Cập nhật thông tin thất bại.');
+                }
+                
+                // Xử lý upload avatar
+                if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                    $this->handleAvatarUpload($guideId, $_FILES['avatar']);
+                }
 
-public function updateProfile() {
-    $guideId = $this->checkLogin();
-    
-    // Đảm bảo profile tồn tại trước khi cập nhật
-    $this->ensureGuideProfileExists($guideId);
-    
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        try {
-            $data = [
-                'ho_ten' => trim($_POST['ho_ten'] ?? ''),
-                'email' => trim($_POST['email'] ?? ''),
-                'so_dien_thoai' => trim($_POST['so_dien_thoai'] ?? ''),
-                'ngay_sinh' => trim($_POST['ngay_sinh'] ?? ''),
-                'dia_chi' => trim($_POST['dia_chi'] ?? ''),
-                'loai_huong_dan_vien' => trim($_POST['loai_huong_dan_vien'] ?? ''),
-                'ngon_ngu' => !empty($_POST['ngon_ngu']) ? json_encode($_POST['ngon_ngu']) : '[]',
-                'kinh_nghiem' => trim($_POST['kinh_nghiem'] ?? ''),
-                'chuyen_mon' => trim($_POST['chuyen_mon'] ?? ''),
-                'tinh_trang_suc_khoe' => trim($_POST['tinh_trang_suc_khoe'] ?? ''),
-                'so_giay_phep_hanh_nghe' => trim($_POST['so_giay_phep_hanh_nghe'] ?? ''),
-                'ngay_cap_giay_phep' => trim($_POST['ngay_cap_giay_phep'] ?? ''),
-                'noi_cap_giay_phep' => trim($_POST['noi_cap_giay_phep'] ?? ''),
-                // Thêm thống kê
-                'so_tour_da_dan' => intval($_POST['so_tour_da_dan'] ?? 0),
-                'danh_gia_trung_binh' => floatval($_POST['danh_gia_trung_binh'] ?? 0)
-            ];
-            
-            // Validate dữ liệu thống kê
-            if ($data['so_tour_da_dan'] < 0) {
-                throw new Exception('Số tour đã dẫn không thể âm');
-            }
-            
-            if ($data['so_tour_da_dan'] > 999) {
-                throw new Exception('Số tour đã dẫn tối đa là 999');
-            }
-            
-            if ($data['danh_gia_trung_binh'] < 0 || $data['danh_gia_trung_binh'] > 5) {
-                throw new Exception('Đánh giá phải nằm trong khoảng 0.0 đến 5.0');
-            }
-            
-            // Update thông tin cơ bản
-            if (!$this->model->updateProfile($guideId, $data)) {
-                throw new Exception('Cập nhật thông tin thất bại.');
-            }
-            
-            // Xử lý upload avatar
-            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
-                $this->handleAvatarUpload($guideId, $_FILES['avatar']);
-            }
+                // Cập nhật session name nếu có thay đổi
+                if (!empty($data['ho_ten'])) {
+                    $_SESSION['guide_name'] = $data['ho_ten'];
+                }
+                
+                $_SESSION['success'] = "Cập nhật hồ sơ thành công!";
 
-            // Cập nhật session name nếu có thay đổi
-            if (!empty($data['ho_ten'])) {
-                $_SESSION['guide_name'] = $data['ho_ten'];
+            } catch (Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
             }
-            
-            $_SESSION['success'] = "Cập nhật hồ sơ thành công!";
-
-        } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
         }
+        
+        header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
+        exit();
     }
-    
-    header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
-    exit();
-}
     
     private function handleAvatarUpload($guideId, $file) {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
