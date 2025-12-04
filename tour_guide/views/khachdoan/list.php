@@ -7,13 +7,7 @@
             <div class="col-sm-6">
                 <h2 class="m-0 text-dark">Danh Sách Hành Khách</h2>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end">
-                    <li class="breadcrumb-item"><a href="<?= BASE_URL_GUIDE ?>">Trang chủ</a></li>
-                    <li class="breadcrumb-item"><a href="?act=xem_danh_sach_khach">Chọn Tour</a></li>
-                    <li class="breadcrumb-item active">Chi tiết</li>
-                </ol>
-            </div>
+
         </div>
 
         <div class="card mb-3 border-primary shadow-sm">
@@ -30,7 +24,7 @@
                             <?php else: ?>
                                 <?php foreach ($dsTram as $tram): ?>
                                     <option value="<?= $tram['id'] ?>" <?= $selected_tram_id == $tram['id'] ? 'selected' : '' ?>>
-                                        Trạm <?= $tram['thu_tu'] ?>: <?= htmlspecialchars($tram['ten_tram']) ?>
+                                        <?= htmlspecialchars($tram['ten_tram']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -38,12 +32,13 @@
                     </div>
 
                     <div class="col-md-4 text-center mt-3 mt-md-0">
-                        <h5 class="mb-1">Tiến độ: <span class="text-success fw-bold"><?= $daDen ?></span> / <?= $totalKhach ?> khách</h5>
+                        <h5 class="mb-1">Tiến độ: <span class="text-success fw-bold"><?= $soLuongCoMat ?></span> / <?= $totalKhach ?> khách</h5>
+
                         <div class="progress" style="height: 15px;">
                             <div class="progress-bar bg-<?= $isDuNguoi ? 'success' : 'warning' ?> progress-bar-striped progress-bar-animated"
                                 role="progressbar"
-                                style="width: <?= ($totalKhach > 0) ? ($daDen / $totalKhach) * 100 : 0 ?>%">
-                                <?= ($totalKhach > 0) ? round(($daDen / $totalKhach) * 100) : 0 ?>%
+                                style="width: <?= ($totalKhach > 0) ? ($tienDoCheckIn / $totalKhach) * 100 : 0 ?>%">
+                                <?= ($totalKhach > 0) ? round(($tienDoCheckIn / $totalKhach) * 100) : 0 ?>%
                             </div>
                         </div>
                     </div>
@@ -112,8 +107,11 @@
                                 </tr>
                             <?php else: ?>
                                 <?php $i = 1;
-                                foreach ($dsKhach as $k): ?>
-                                    <tr>
+                                foreach ($dsKhach as $k):
+                                    $is_canceled = isset($k['da_huy_truoc_do']) && $k['da_huy_truoc_do'] > 0;
+                                    $row_class = $is_canceled ? 'table-secondary opacity-75' : '';
+                                ?>
+                                    <tr class="<?= $row_class ?>">
                                         <td class="px-3"><?= $i++ ?></td>
                                         <td class="px-3">
                                             <div class="fw-bold text-dark"><?= htmlspecialchars($k['ho_ten']) ?></div>
@@ -137,17 +135,23 @@
                                         </td>
 
                                         <td class="px-3 text-center">
-                                            <select class="form-select form-select-sm status-select fw-bold border-0 shadow-sm"
-                                                data-id="<?= $k['id'] ?>"
-                                                style="cursor: pointer; background-color: 
-                                                        <?= $k['trang_thai_checkin'] == 'đã đến' ? '#d1e7dd' : ($k['trang_thai_checkin'] == 'vắng mặt' ? '#f8d7da' : '#f8f9fa') ?>;
-                                                    color: 
-                                                        <?= $k['trang_thai_checkin'] == 'đã đến' ? '#0f5132' : ($k['trang_thai_checkin'] == 'vắng mặt' ? '#842029' : '#212529') ?>;">
+                                            <?php if ($is_canceled): ?>
+                                                <div class="badge bg-danger text-wrap py-2" style="width: 100%;">
+                                                    <i class="fas fa-ban me-1"></i> Đã vắng trạm trước
+                                                </div>
+                                            <?php else: ?>
+                                                <select class="form-select form-select-sm status-select fw-bold border-0 shadow-sm"
+                                                    data-id="<?= $k['id'] ?>"
+                                                    style="cursor: pointer; background-color: 
+                                    <?= $k['trang_thai_checkin'] == 'đã đến' ? '#d1e7dd' : ($k['trang_thai_checkin'] == 'vắng mặt' ? '#f8d7da' : '#f8f9fa') ?>;
+                                color: 
+                                    <?= $k['trang_thai_checkin'] == 'đã đến' ? '#0f5132' : ($k['trang_thai_checkin'] == 'vắng mặt' ? '#842029' : '#212529') ?>;">
 
-                                                <option value="chưa đến" <?= $k['trang_thai_checkin'] == 'chưa đến' ? 'selected' : '' ?>>⚪ Chưa đến</option>
-                                                <option value="đã đến" <?= $k['trang_thai_checkin'] == 'đã đến' ? 'selected' : '' ?>>🟢 Đã đến</option>
-                                                <option value="vắng mặt" <?= $k['trang_thai_checkin'] == 'vắng mặt' ? 'selected' : '' ?>>🔴 Vắng mặt</option>
-                                            </select>
+                                                    <option value="chưa đến" <?= $k['trang_thai_checkin'] == 'chưa đến' ? 'selected' : '' ?>>⚪ Chưa đến</option>
+                                                    <option value="đã đến" <?= $k['trang_thai_checkin'] == 'đã đến' ? 'selected' : '' ?>>🟢 Đã đến</option>
+                                                    <option value="vắng mặt" <?= $k['trang_thai_checkin'] == 'vắng mặt' ? 'selected' : '' ?>>🔴 Vắng mặt</option>
+                                                </select>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
