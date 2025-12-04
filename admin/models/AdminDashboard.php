@@ -25,7 +25,7 @@ class AdminDashboard
             $thongKe['tour_theo_thang'] = $this->getTourTheoThang(date('Y'));
             $thongKe['tour_hoan_thanh_theo_thang'] = $this->getTourHoanThanhTheoThang(date('Y'));
             $thongKe['tour_da_len_lich'] = $this->countTourByStatus('đã lên lịch');
-            $thongKe['tour_dang_dien_ra'] = $this->countTourByStatus('đang diễn ra');
+            $thongKe['tour_dang_dien_ra'] = $this->countTourByStatus('đang đi');
             $thongKe['tour_da_hoan_thanh'] = $this->countTourByStatus('đã hoàn thành');
             $thongKe['tour_da_huy'] = $this->countTourByStatus('đã hủy');
             
@@ -85,7 +85,7 @@ class AdminDashboard
             $stmt->execute([':nam' => $nam]);
             
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $data = array_fill(0, 12, 0); // Index 0-11 cho tháng 1-12
+            $data = array_fill(0, 12, 0);
             
             foreach ($result as $row) {
                 $data[$row['thang'] - 1] = (int)$row['so_luong'];
@@ -198,7 +198,7 @@ class AdminDashboard
                       FROM phieu_dat_tour 
                       WHERE MONTH(created_at) = MONTH(CURDATE()) 
                       AND YEAR(created_at) = YEAR(CURDATE())
-                      AND trang_thai = 'chờ xác nhận'";
+                      AND trang_thai = 'chưa thanh toán'";
             
             $stmt = $this->conn->prepare($query);
             $stmt->execute();
@@ -218,7 +218,7 @@ class AdminDashboard
             $query = "SELECT MONTH(created_at) as thang, COALESCE(SUM(tong_tien), 0) as doanh_thu
                       FROM phieu_dat_tour 
                       WHERE YEAR(created_at) = :nam 
-                      AND trang_thai IN ('hoàn tất', 'đã cọc')
+                      AND trang_thai IN ('đã thanh toán', 'giữ chỗ')
                       GROUP BY MONTH(created_at) 
                       ORDER BY thang";
             $stmt = $this->conn->prepare($query);
