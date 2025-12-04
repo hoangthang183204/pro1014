@@ -32,16 +32,6 @@ $tour = array_merge([
     'luu_y_hanh_ly' => '',
     'luu_y_khac' => ''
 ], $tour);
-
-// Debug dữ liệu (có thể bỏ comment để kiểm tra)
-/*
-echo "<pre>";
-echo "Tổng số khách: " . count($danhSachKhach) . "\n";
-if (!empty($danhSachKhach)) {
-    print_r($danhSachKhach[0]);
-}
-echo "</pre>";
-*/
 ?>
 
 <main class="main-content">
@@ -236,9 +226,9 @@ echo "</pre>";
                                                     <?php 
                                                     if (isset($khach['loai_khach'])) {
                                                         if ($khach['loai_khach'] == 'người đặt') {
-                                                            echo '<span class="badge badge-primary">Người đặt</span>';
+                                                            echo '<span class="badge badge-primary" style="color: green">Người đặt</span>';
                                                         } else {
-                                                            echo '<span class="badge badge-secondary">Khách đi cùng</span>';
+                                                            echo '<span class="badge badge-secondary" style="color: green">Khách đi cùng</span>';
                                                         }
                                                     } else {
                                                         echo '<span class="badge badge-warning">Chưa xác định</span>';

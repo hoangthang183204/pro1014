@@ -1,7 +1,4 @@
 <?php
-
-require_once __DIR__ . '/../models/BaoNghiModel.php';
-
 class BaoNghiController {
     private $model;
     

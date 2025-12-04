@@ -49,29 +49,33 @@ $profile = $GLOBALS['profile'] ?? [];
 $activeTours = $GLOBALS['activeTours'] ?? 0;
 $stats = $GLOBALS['stats'] ?? ['so_tour_da_dan' => 0, 'danh_gia_trung_binh' => 0];
 
-function getDefaultAvatar($name) {
-    $initial = mb_substr($name, 0, 1, 'UTF-8');
-    $colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
-    $colorIndex = ord($initial) % count($colors);
-    $backgroundColor = $colors[$colorIndex];
+if (!function_exists('getDefaultAvatar')) {
+    function getDefaultAvatar($name) {
+        $initial = mb_substr($name, 0, 1, 'UTF-8');
+        $colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
+        $colorIndex = ord($initial) % count($colors);
+        $backgroundColor = $colors[$colorIndex];
 
-    $svg = '<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
-        <rect width="150" height="150" fill="' . $backgroundColor . '" rx="8"/>
-        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="60" fill="white" 
-              text-anchor="middle" dominant-baseline="middle" font-weight="bold">' . $initial . '</text>
-    </svg>';
+        $svg = '<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+            <rect width="150" height="150" fill="' . $backgroundColor . '" rx="8"/>
+            <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="60" fill="white" 
+                  text-anchor="middle" dominant-baseline="middle" font-weight="bold">' . $initial . '</text>
+        </svg>';
 
-    return "data:image/svg+xml;base64," . base64_encode($svg);
+        return "data:image/svg+xml;base64," . base64_encode($svg);
+    }
 }
 
-function getAvatarUrl($profile) {
-    if (!empty($profile['hinh_anh'])) {
-        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/pro1014' . $profile['hinh_anh'];
-        if (file_exists($imagePath) && is_file($imagePath)) {
-            return "http://localhost/pro1014" . $profile['hinh_anh'];
+if (!function_exists('getAvatarUrl')) {
+    function getAvatarUrl($profile) {
+        if (!empty($profile['hinh_anh'])) {
+            $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/pro1014' . $profile['hinh_anh'];
+            if (file_exists($imagePath) && is_file($imagePath)) {
+                return "http://localhost/pro1014" . $profile['hinh_anh'];
+            }
         }
+        return getDefaultAvatar($profile['ho_ten'] ?? 'HDV');
     }
-    return getDefaultAvatar($profile['ho_ten'] ?? 'HDV');
 }
 
 $avatarUrl = getAvatarUrl($profile);
@@ -79,7 +83,6 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
 ?>
 
 <?php
-// ... phần PHP giữ nguyên ...
 
 ?>
 
@@ -553,6 +556,8 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
 </main>
 
 <style>
+
+    
 /* Reset và layout chính */
 .main-content {
     padding: 0;
@@ -952,6 +957,329 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
     background: #fed7d7;
     color: #9b2c2c;
     border: 1px solid #feb2b2;
+}
+.section-actions .btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: white;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 2px solid #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+    min-width: 180px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiệu ứng hover */
+.section-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+/* Hiệu ứng active */
+.section-actions .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Hiệu ứng focus */
+.section-actions .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+}
+
+/* Hiệu ứng cho icon */
+.section-actions .btn-primary i {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.section-actions .btn-primary:hover i {
+    transform: scale(1.1);
+}
+
+/* ===== NÚT QUAY LẠI ===== */
+/* Nút trong trang chi tiết và trang tạo yêu cầu */
+.page-header .btn-outline,
+.section-header .btn-outline {
+    background: white;
+    color: #495057;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 2px solid #6c757d;
+    box-shadow: 0 3px 10px rgba(108, 117, 125, 0.15);
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+}
+
+/* Hiệu ứng hover */
+.page-header .btn-outline:hover,
+.section-header .btn-outline:hover {
+    background: #f8f9fa;
+    border-color: #495057;
+    color: #212529;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Hiệu ứng active */
+.page-header .btn-outline:active,
+.section-header .btn-outline:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(108, 117, 125, 0.15);
+}
+
+/* Hiệu ứng focus */
+.page-header .btn-outline:focus,
+.section-header .btn-outline:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.25);
+}
+
+/* Hiệu ứng cho icon */
+.page-header .btn-outline i,
+.section-header .btn-outline i {
+    font-size: 14px;
+    transition: transform 0.2s ease;
+}
+
+.page-header .btn-outline:hover i,
+.section-header .btn-outline:hover i {
+    transform: translateX(-3px);
+}
+
+/* ===== CẢI THIỆN HEADER LAYOUT ===== */
+/* Page header */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+    color: white;
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Section header trong tab báo nghỉ */
+.profile-section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    border-bottom: none;
+}
+
+.section-header .section-title {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Đảm bảo nút luôn hiển thị rõ ràng */
+.btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-decoration: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+/* Hiệu ứng ripple cho tất cả các nút */
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+.btn:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    /* Page header mobile */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+        gap: 15px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5rem;
+        width: 100%;
+    }
+    
+    .page-header .btn-outline {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        margin-top: 10px;
+    }
+    
+    /* Section header mobile */
+    .profile-section .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+        gap: 15px;
+    }
+    
+    .section-header .section-title {
+        width: 100%;
+        font-size: 1.3rem;
+    }
+    
+    .section-actions {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .section-actions .btn-primary {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        min-width: auto;
+    }
+    
+    .section-header .btn-outline {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+    }
+}
+
+/* Đối với màn hình rất nhỏ */
+@media (max-width: 480px) {
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .profile-section .section-header {
+        padding: 1rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .section-header .section-title {
+        font-size: 1.2rem;
+    }
+    
+    .section-actions .btn-primary,
+    .page-header .btn-outline,
+    .section-header .btn-outline {
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+}
+
+/* ===== HIỆU ỨNG LOADING KHI CLICK ===== */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn.loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: button-loading 0.6s linear infinite;
+}
+
+@keyframes button-loading {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Đảm bảo không bị ghi đè bởi CSS khác */
+.btn.btn-primary,
+.btn.btn-outline {
+    border-style: solid !important;
+    border-width: 2px !important;
+}
+
+/* Trạng thái disabled */
+.btn:disabled,
+.btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn:disabled:hover,
+.btn[disabled]:hover {
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Responsive */
