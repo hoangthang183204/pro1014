@@ -73,7 +73,6 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
 
     <div class="profile-tabs">
         <button class="tab-button active" data-tab="view-profile">Xem Hồ Sơ</button>
-        <button class="tab-button" data-tab="edit-profile">Chỉnh Sửa Hồ Sơ</button>
     </div>
 
     <!-- TAB 1: Xem hồ sơ -->
