@@ -1,17 +1,15 @@
 <?php
-// Tệp: controllers/PersonalGuideController.php
-
 require_once __DIR__ . '/../models/PersonalGuideModel.php';
-require_once __DIR__ . '/../models/BaoNghiModel.php'; // THÊM DÒNG NÀY
+require_once __DIR__ . '/../models/BaoNghiModel.php'; 
 
 class PersonalGuideController {
     private $model;
     private $uploadDir = '/uploads/avatars/guides/';
-    private $baoNghiModel; // THÊM DÒNG NÀY
+    private $baoNghiModel; 
 
     public function __construct() {
         $this->model = new PersonalGuideModel();
-        $this->baoNghiModel = new BaoNghiModel(); // THÊM DÒNG NÀY
+        $this->baoNghiModel = new BaoNghiModel(); 
     }
     
     private function checkLogin() {
@@ -67,7 +65,6 @@ class PersonalGuideController {
         return $fullPath;
     }
 
-    // XÓA PHƯƠNG THỨC showProfile() CŨ, GIỮ PHƯƠNG THỨC MỚI DƯỚI ĐÂY
     public function showProfile() {
         $guideId = $this->checkLogin();
         

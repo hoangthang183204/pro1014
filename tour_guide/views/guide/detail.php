@@ -1,5 +1,4 @@
 <?php
-// File: views/guide/baonghi/detail.php
 include __DIR__ . '/../layout/header.php';
 include __DIR__ . '/../layout/sidebar.php';
 

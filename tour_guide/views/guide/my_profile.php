@@ -1,15 +1,4 @@
 <?php
-// DEBUG: Hiển thị thông tin session
-echo '<div style="display:none;">';
-echo '<script>';
-echo 'console.log("=== my_profile.php Session Debug ===");';
-echo 'console.log("Session ID:", "' . session_id() . '");';
-echo 'console.log("Guide ID:", "' . ($_SESSION['guide_id'] ?? 'NOT SET') . '");';
-echo 'console.log("Guide Name:", "' . ($_SESSION['guide_name'] ?? 'NOT SET') . '");';
-echo 'console.log("All Session:", ' . json_encode($_SESSION) . ');';
-echo '</script>';
-echo '</div>';
-
 include __DIR__ . '/../layout/header.php';
 include __DIR__ . '/../layout/sidebar.php';
 
