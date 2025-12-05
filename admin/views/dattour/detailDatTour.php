@@ -35,21 +35,30 @@
                                             <p><strong>Ngày kết thúc:</strong> <?php echo date('d/m/Y', strtotime($dat_tour['ngay_ket_thuc'])); ?></p>
                                         </div>
                                         <div class="col-md-6">
-                                            <p><strong>Trạng thái:</strong> 
-                                                <span class="badge bg-<?php 
-                                                    switch($dat_tour['trang_thai']) {
-                                                        case 'đã thanh toán': echo 'success'; break;
-                                                        case 'giữ chỗ': echo 'info'; break;
-                                                        case 'chưa thanh toán': echo 'warning'; break;
-                                                        case 'hủy': echo 'danger'; break;
-                                                        default: echo 'secondary';
-                                                    }
-                                                ?>">
+                                            <p><strong>Trạng thái:</strong>
+                                                <span class="badge bg-<?php
+                                                                        switch ($dat_tour['trang_thai']) {
+                                                                            case 'đã thanh toán':
+                                                                                echo 'success';
+                                                                                break;
+                                                                            case 'giữ chỗ':
+                                                                                echo 'info';
+                                                                                break;
+                                                                            case 'chưa thanh toán':
+                                                                                echo 'warning';
+                                                                                break;
+                                                                            case 'hủy':
+                                                                                echo 'danger';
+                                                                                break;
+                                                                            default:
+                                                                                echo 'secondary';
+                                                                        }
+                                                                        ?>">
                                                     <?php echo $dat_tour['trang_thai']; ?>
                                                 </span>
                                             </p>
                                             <p><strong>Số khách:</strong> <?php echo $dat_tour['so_luong_khach']; ?></p>
-                                            <p><strong>Tổng tiền:</strong> 
+                                            <p><strong>Tổng tiền:</strong>
                                                 <span class="text-success fw-bold">
                                                     <?php echo number_format($dat_tour['tong_tien'], 0, ',', '.'); ?> VNĐ
                                                 </span>
@@ -60,69 +69,98 @@
                             </div>
 
                             <!-- Lịch trình tour -->
-                            <?php if (!empty($lich_trinh_tour)): ?>
+                            <!-- Lịch trình tour -->
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
                                         <i class="fas fa-calendar-alt me-2"></i>Lịch Trình Tour
+                                        <?php if (!empty($lich_trinh_tour)): ?>
+                                            <span class="badge bg-secondary ms-2"><?php echo count($lich_trinh_tour); ?> ngày</span>
+                                        <?php endif; ?>
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="timeline">
-                                        <?php foreach ($lich_trinh_tour as $index => $lich): ?>
-                                            <div class="timeline-item mb-4">
-                                                <div class="timeline-marker bg-primary"></div>
-                                                <div class="timeline-content">
-                                                    <div class="card">
-                                                        <div class="card-header bg-light">
-                                                            <h6 class="mb-0">
-                                                                <strong>Ngày <?php echo $lich['so_ngay']; ?>:</strong> 
-                                                                <?php echo htmlspecialchars($lich['tieu_de']); ?>
-                                                            </h6>
-                                                        </div>
-                                                        <div class="card-body">
-                                                            <p><strong>Hoạt động:</strong><br>
-                                                                <?php echo nl2br(htmlspecialchars($lich['mo_ta_hoat_dong'])); ?>
-                                                            </p>
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <p><strong><i class="fas fa-bed me-1"></i>Chỗ ở:</strong><br>
-                                                                        <?php echo htmlspecialchars($lich['cho_o']); ?>
-                                                                    </p>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <p><strong><i class="fas fa-utensils me-1"></i>Bữa ăn:</strong><br>
-                                                                        <?php echo htmlspecialchars($lich['bua_an']); ?>
-                                                                    </p>
-                                                                </div>
+                                    <?php if (!empty($lich_trinh_tour)): ?>
+                                        <div class="tour-timeline">
+                                            <?php foreach ($lich_trinh_tour as $index => $lich): ?>
+                                                <div class="timeline-item mb-4">
+                                                    <div class="timeline-marker bg-primary">
+                                                        <span class="text-white fw-bold"><?php echo $lich['so_ngay']; ?></span>
+                                                    </div>
+                                                    <div class="timeline-content">
+                                                        <div class="card">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="mb-0 fw-bold">
+                                                                    Ngày <?php echo $lich['so_ngay']; ?>:
+                                                                    <?php echo htmlspecialchars($lich['tieu_de']); ?>
+                                                                </h6>
                                                             </div>
-                                                            <?php if (!empty($lich['phuong_tien'])): ?>
-                                                            <p><strong><i class="fas fa-bus me-1"></i>Phương tiện:</strong><br>
-                                                                <?php echo htmlspecialchars($lich['phuong_tien']); ?>
-                                                            </p>
-                                                            <?php endif; ?>
-                                                            <?php if (!empty($lich['ghi_chu_hdv'])): ?>
-                                                            <div class="alert alert-info mt-2">
-                                                                <strong><i class="fas fa-info-circle me-1"></i>Ghi chú HDV:</strong><br>
-                                                                <?php echo nl2br(htmlspecialchars($lich['ghi_chu_hdv'])); ?>
+                                                            <div class="card-body">
+                                                                <!-- Hoạt động -->
+                                                                <?php if (!empty($lich['mo_ta_hoat_dong'])): ?>
+                                                                    <div class="mb-3">
+                                                                        <h6 class="text-primary">
+                                                                            <i class="fas fa-map-marked-alt me-2"></i>Hoạt động chính
+                                                                        </h6>
+                                                                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($lich['mo_ta_hoat_dong'])); ?></p>
+                                                                    </div>
+                                                                <?php endif; ?>
+
+                                                                <div class="row">
+                                                                    <!-- Chỗ ở -->
+                                                                    <?php if (!empty($lich['cho_o'])): ?>
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <h6 class="text-success">
+                                                                                <i class="fas fa-bed me-2"></i>Chỗ ở
+                                                                            </h6>
+                                                                            <p class="mb-0"><?php echo htmlspecialchars($lich['cho_o']); ?></p>
+                                                                        </div>
+                                                                    <?php endif; ?>
+
+                                                                    <!-- Bữa ăn -->
+                                                                    <?php if (!empty($lich['bua_an'])): ?>
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <h6 class="text-warning">
+                                                                                <i class="fas fa-utensils me-2"></i>Bữa ăn
+                                                                            </h6>
+                                                                            <p class="mb-0"><?php echo htmlspecialchars($lich['bua_an']); ?></p>
+                                                                        </div>
+                                                                    <?php endif; ?>
+                                                                </div>
+
+                                                                <!-- Phương tiện -->
+                                                                <?php if (!empty($lich['phuong_tien'])): ?>
+                                                                    <div class="mb-3">
+                                                                        <h6 class="text-info">
+                                                                            <i class="fas fa-bus me-2"></i>Phương tiện
+                                                                        </h6>
+                                                                        <p class="mb-0"><?php echo htmlspecialchars($lich['phuong_tien']); ?></p>
+                                                                    </div>
+                                                                <?php endif; ?>
+
+                                                                <!-- Ghi chú HDV -->
+                                                                <?php if (!empty($lich['ghi_chu_hdv'])): ?>
+                                                                    <div class="alert alert-info mt-3">
+                                                                        <h6 class="alert-heading">
+                                                                            <i class="fas fa-info-circle me-2"></i>Ghi chú HDV
+                                                                        </h6>
+                                                                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($lich['ghi_chu_hdv'])); ?></p>
+                                                                    </div>
+                                                                <?php endif; ?>
                                                             </div>
-                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                            <p class="text-muted">Chưa có thông tin lịch trình cho tour này.</p>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                            <?php else: ?>
-                            <div class="card mb-4">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">Chưa có thông tin lịch trình cho tour này.</p>
-                                </div>
-                            </div>
-                            <?php endif; ?>
 
                             <!-- Danh sách khách hàng -->
                             <div class="card mb-4">
@@ -164,23 +202,8 @@
                             </div>
                         </div>
 
+
                         <div class="col-lg-4">
-                            <!-- Thông tin tour -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Thông Tin Tour</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Mã tour:</strong> <?php echo $dat_tour['ma_tour']; ?></p>
-                                    <p><strong>Giá tour/khách:</strong> 
-                                        <span class="text-primary fw-bold">
-                                            <?php echo number_format($dat_tour['gia_tour'], 0, ',', '.'); ?> VNĐ
-                                        </span>
-                                    </p>
-                                    <p><strong>Giờ tập trung:</strong> <?php echo date('H:i', strtotime($dat_tour['gio_tap_trung'])); ?></p>
-                                    <p><strong>Điểm tập trung:</strong> <?php echo htmlspecialchars($dat_tour['diem_tap_trung']); ?></p>
-                                </div>
-                            </div>
 
                             <!-- Thao tác -->
                             <div class="card mb-4">
@@ -192,7 +215,7 @@
                                         <a href="?act=dat-tour-print&id=<?php echo $dat_tour['id']; ?>" class="btn btn-info">
                                             <i class="fas fa-print me-1"></i> In Hóa Đơn
                                         </a>
-                                        
+
                                         <!-- Cập nhật trạng thái -->
                                         <form method="POST" action="?act=dat-tour-update-status" class="mt-3">
                                             <input type="hidden" name="id" value="<?php echo $dat_tour['id']; ?>">
@@ -211,6 +234,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 <?php else: ?>
                     <div class="alert alert-danger">Không tìm thấy thông tin đặt tour!</div>
@@ -221,38 +245,66 @@
 </div>
 
 <style>
-.timeline {
-    position: relative;
-    padding-left: 20px;
-}
+    /* Timeline cho lịch trình tour */
+    .tour-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
 
-.timeline-item {
-    position: relative;
-}
+    .tour-timeline:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #dee2e6, #6c757d);
+    }
 
-.timeline-marker {
-    position: absolute;
-    left: -28px;
-    top: 10px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    z-index: 1;
-}
+    .timeline-item {
+        position: relative;
+    }
 
-.timeline-content {
-    margin-left: 10px;
-}
+    .timeline-marker {
+        position: absolute;
+        left: -45px;
+        top: 20px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px #0d6efd;
+    }
 
-.timeline:before {
-    content: '';
-    position: absolute;
-    left: 12px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #dee2e6;
-}
+    .timeline-marker span {
+        font-size: 0.8rem;
+    }
+
+    .timeline-content {
+        margin-left: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .tour-timeline {
+            padding-left: 25px;
+        }
+
+        .timeline-marker {
+            left: -35px;
+            width: 25px;
+            height: 25px;
+        }
+
+        .timeline-marker span {
+            font-size: 0.7rem;
+        }
+    }
 </style>
 
 <?php include 'views/layout/footer.php'; ?>
