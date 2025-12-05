@@ -87,11 +87,26 @@
                 </div>
             </div>
 
+            <div class="p-3 bg-white border-bottom d-flex align-items-center gap-2">
+    <span class="fw-bold text-muted"><i class="fas fa-tasks me-1"></i> Thao tác nhanh:</span>
+    <button type="button" class="btn btn-success btn-sm fw-bold shadow-sm action-bulk" data-status="đã đến">
+        <i class="fas fa-check-circle me-1"></i> Đã đến (Chọn)
+    </button>
+    <button type="button" class="btn btn-danger btn-sm fw-bold shadow-sm action-bulk" data-status="vắng mặt">
+        <i class="fas fa-user-times me-1"></i> Vắng mặt (Chọn)
+    </button>
+     <button type="button" class="btn btn-light btn-sm border fw-bold shadow-sm action-bulk" data-status="chưa đến">
+        <i class="fas fa-undo me-1"></i> Reset (Chọn)
+    </button>
+</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped mb-0 align-middle">
                         <thead class="bg-light text-secondary">
                             <tr>
+                            <th class="px-3" style="width: 40px;">
+                <input type="checkbox" id="checkAll" class="form-check-input" style="cursor: pointer;">
+            </th>
                                 <th class="px-3">STT</th>
                                 <th class="px-3">Họ và Tên</th>
                                 <th class="px-3">Thông tin</th>
@@ -112,6 +127,13 @@
                                     $row_class = $is_canceled ? 'table-secondary opacity-75' : '';
                                 ?>
                                     <tr class="<?= $row_class ?>">
+                                    <td class="px-3">
+            <?php if (!$is_canceled): // Chỉ hiện checkbox nếu khách chưa bị hủy ?>
+                <input type="checkbox" class="form-check-input check-item" value="<?= $k['id'] ?>" style="cursor: pointer;">
+            <?php else: ?>
+                <input type="checkbox" class="form-check-input" disabled>
+            <?php endif; ?>
+        </td>
                                         <td class="px-3"><?= $i++ ?></td>
                                         <td class="px-3">
                                             <div class="fw-bold text-dark"><?= htmlspecialchars($k['ho_ten']) ?></div>
@@ -167,42 +189,101 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('.status-select').change(function() {
-            var status = $(this).val();
-            var id = $(this).data('id');
-            var tram_id = '<?= $selected_tram_id ?>';
-            var element = $(this);
+        // Lấy ID trạm hiện tại từ PHP
+        var currentTramId = '<?= $selected_tram_id ?>';
+        // Sự kiện khi bấm vào nút "Check All" ở tiêu đề
+        $('#checkAll').change(function() {
+            var isChecked = $(this).prop('checked');
+            // Chỉ chọn những ô không bị disable (những người chưa bị hủy/vắng trước đó)
+            $('.check-item:not(:disabled)').prop('checked', isChecked);
+        });
+        $('.action-bulk').click(function() {
+            var status = $(this).data('status'); // Lấy trạng thái: 'đã đến', 'vắng mặt', 'chưa đến'
+            
+            // Lấy danh sách các ID đã được tick chọn
+            var selectedIds = [];
+            $('.check-item:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
 
-            // Đổi màu ngay lập tức cho mượt
-            updateColor(element, status);
+            // Kiểm tra nếu chưa chọn ai
+            if (selectedIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một khách hàng để thao tác!');
+                return;
+            }
 
-            // Gửi Ajax
+            // Hộp thoại xác nhận
+            var confirmMsg = 'Bạn có chắc chắn muốn cập nhật trạng thái "' + status.toUpperCase() + '" cho ' + selectedIds.length + ' khách hàng?';
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            // Gửi Ajax cập nhật hàng loạt
             $.ajax({
-                url: '?act=check_in_khach',
+                url: '?act=check-all', // Router xử lý hàng loạt
                 type: 'POST',
-                dataType: 'json', // Bắt buộc phản hồi phải là JSON chuẩn
+                dataType: 'json',
                 data: {
-                    id: id,
+                    ids: selectedIds,
                     status: status,
-                    tram_id: tram_id
+                    tram_id: currentTramId
                 },
                 success: function(response) {
                     if (response.success) {
-                        console.log('Update thành công');
-                        // Chỉ reload nếu cần cập nhật thanh tiến độ
+                        // Reload lại trang để cập nhật thanh tiến độ và danh sách
                         location.reload();
                     } else {
-                        alert('Lỗi: Cập nhật thất bại! Vui lòng thử lại.');
-                        console.log(response);
+                        alert('Lỗi: ' + (response.message || 'Cập nhật thất bại. Vui lòng thử lại.'));
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.log(xhr.responseText); // Xem lỗi chi tiết trong Console (F12)
+                    console.error(xhr.responseText);
                     alert('Lỗi hệ thống: Không thể kết nối đến server.');
                 }
             });
         });
 
+        // ==========================================
+        // 3. LOGIC CẬP NHẬT LẺ TỪNG NGƯỜI (GIỮ NGUYÊN)
+        // ==========================================
+        
+        $('.status-select').change(function() {
+            var status = $(this).val();
+            var id = $(this).data('id');
+            var element = $(this);
+
+            // Đổi màu ngay lập tức cho mượt (UX)
+            updateColor(element, status);
+
+            // Gửi Ajax cập nhật đơn lẻ
+            $.ajax({
+                url: '?act=check_in_khach', // Router xử lý đơn lẻ
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id: id,
+                    status: status,
+                    tram_id: currentTramId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Update thành công id: ' + id);
+                        // Reload trang để cập nhật thanh tiến độ chung
+                        location.reload();
+                    } else {
+                        alert('Lỗi: Cập nhật thất bại!');
+                        // Nếu lỗi thì nên reload để trả lại trạng thái cũ
+                        location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                    alert('Lỗi hệ thống khi cập nhật khách hàng này.');
+                }
+            });
+        });
+
+        // Hàm đổi màu nền select box
         function updateColor(element, status) {
             if (status == 'đã đến') {
                 element.css({

@@ -138,5 +138,29 @@ class KhachDoanModel {
             return $stmt->fetch();
         } catch (PDOException $e) { return []; }
     }
+    // Hàm mới: Cập nhật hàng loạt
+    public function updateCheckInBulk($list_ids, $status, $tram_id) {
+        try {
+            $this->conn->beginTransaction(); // Dùng transaction để đảm bảo an toàn dữ liệu
+            $successCount = 0;
+            
+            foreach ($list_ids as $id_khach) {
+                // Gọi lại hàm updateCheckIn có sẵn để tái sử dụng logic
+                if ($this->updateCheckIn($id_khach, $status, $tram_id)) {
+                    $successCount++;
+                }
+            }
+            
+            $this->conn->commit();
+            return $successCount;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return false;
+        }
+    }
 }
+
+
+    
+
 ?>

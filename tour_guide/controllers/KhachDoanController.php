@@ -114,4 +114,27 @@ class KhachDoanController
 
         require_once './views/khachdoan/list.php';
     }
+
+    //  điểm danh hàng loạt
+    public function check_in_batch()
+    {
+        if (!checkGuideLogin()) {
+            echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $ids = $_POST['ids'] ?? []; // Mảng các ID khách
+            $status = $_POST['status'] ?? 'chưa đến';
+            $tram_id = $_POST['tram_id'] ?? null;
+
+            if (!empty($ids) && $tram_id) {
+                $count = $this->model->updateCheckInBulk($ids, $status, $tram_id);
+                echo json_encode(['success' => true, 'count' => $count]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+            }
+        }
+    }
+
 }
