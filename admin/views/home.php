@@ -10,6 +10,24 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
+        <!-- Thông báo session -->
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-check"></i> Thành công!</h5>
+                <?php echo htmlspecialchars($_SESSION['success']); ?>
+                <?php unset($_SESSION['success']); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-ban"></i> Lỗi!</h5>
+                <?php echo htmlspecialchars($_SESSION['error']); ?>
+                <?php unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
         <!-- Header -->
         <div class="dashboard-header py-3 mb-4">
             <div class="container">
@@ -28,6 +46,7 @@
                 </div>
             </div>
         </div>
+
 
         <div class="container">
             <!-- Thống kê nhanh -->
