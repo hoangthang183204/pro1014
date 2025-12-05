@@ -7,7 +7,6 @@
             <div class="col-sm-6">
                 <h2 class="m-0 text-dark">Danh Sách Hành Khách</h2>
             </div>
-
         </div>
 
         <div class="card mb-3 border-primary shadow-sm">
@@ -98,12 +97,14 @@
                                 <th class="px-3">Liên hệ</th>
                                 <th class="px-3">Ghi chú</th>
                                 <th class="px-3 text-center" style="width: 170px;">Trạng thái (Tại trạm)</th>
+                                <!-- THÊM CỘT MỚI -->
+                                <th class="px-3 text-center" style="width: 120px;">Yêu cầu đặc biệt</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($dsKhach)): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">Chưa có khách trong danh sách.</td>
+                                    <td colspan="7" class="text-center py-5 text-muted">Chưa có khách trong danh sách.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php $i = 1;
@@ -153,6 +154,35 @@
                                                 </select>
                                             <?php endif; ?>
                                         </td>
+
+                                        <!-- CỘT MỚI: Yêu cầu đặc biệt -->
+                                        <td class="px-3 text-center">
+                                            <?php
+                                            $hasYeuCau = isset($k['ghi_chu']) && !empty(trim($k['ghi_chu']));
+                                            $isConfirmed = isset($k['yeu_cau_confirmed']) && $k['yeu_cau_confirmed'] == 1;
+                                            ?>
+
+                                            <?php if ($hasYeuCau): ?>
+                                                <?php if ($isConfirmed): ?>
+                                                    <!-- ĐÃ XÁC NHẬN: Nút xanh, chỉ để xem -->
+                                                    <button class="btn btn-sm btn-success"
+                                                        onclick="viewYeuCau('<?= htmlspecialchars($k['ho_ten']) ?>', '<?= htmlspecialchars($k['ghi_chu']) ?>')">
+                                                        <i class="fas fa-check-circle me-1"></i> Đã xác nhận
+                                                    </button>
+                                                <?php else: ?>
+                                                    <!-- CHƯA XÁC NHẬN: Nút vàng, có thể xác nhận -->
+                                                    <button class="btn btn-sm btn-warning btn-yc"
+                                                        data-khach-id="<?= $k['id'] ?>"
+                                                        data-khach-ten="<?= htmlspecialchars($k['ho_ten']) ?>"
+                                                        data-ghi-chu="<?= htmlspecialchars($k['ghi_chu']) ?>">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i> Cần xác nhận
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <!-- KHÔNG CÓ YÊU CẦU -->
+                                                <span class="badge bg-light text-dark border">-</span>
+                                            <?php endif; ?>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -164,23 +194,89 @@
     </div>
 </div>
 
+<!-- Modal xác nhận yêu cầu -->
+<div class="modal fade" id="yeuCauModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-clipboard-check me-2"></i>Xác nhận yêu cầu đặc biệt
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Khách hàng:</label>
+                    <p class="form-control-plaintext fw-bold" id="modalKhachTen"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Yêu cầu đặc biệt:</label>
+                    <div class="alert alert-warning p-3" id="modalYeuCau"></div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmCheck">
+                    <label class="form-check-label" for="confirmCheck">
+                        <span class="fw-bold text-success">✓</span> Tôi đã kiểm tra và xử lý yêu cầu này
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success" id="btnXacNhan">
+                    <i class="fas fa-check me-1"></i> Xác nhận đã xử lý
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem yêu cầu đã xác nhận -->
+<div class="modal fade" id="viewYeuCauModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-eye me-2"></i>Xem yêu cầu đã xác nhận
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Khách hàng:</label>
+                    <p class="form-control-plaintext fw-bold" id="viewKhachTen"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Yêu cầu đặc biệt:</label>
+                    <div class="alert alert-info p-3" id="viewYeuCau"></div>
+                </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i> Yêu cầu này đã được xác nhận xử lý.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Xử lý change status check-in (GIỮ NGUYÊN)
         $('.status-select').change(function() {
             var status = $(this).val();
             var id = $(this).data('id');
             var tram_id = '<?= $selected_tram_id ?>';
             var element = $(this);
 
-            // Đổi màu ngay lập tức cho mượt
             updateColor(element, status);
 
-            // Gửi Ajax
             $.ajax({
                 url: '?act=check_in_khach',
                 type: 'POST',
-                dataType: 'json', // Bắt buộc phản hồi phải là JSON chuẩn
+                dataType: 'json',
                 data: {
                     id: id,
                     status: status,
@@ -188,17 +284,13 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        console.log('Update thành công');
-                        // Chỉ reload nếu cần cập nhật thanh tiến độ
                         location.reload();
                     } else {
-                        alert('Lỗi: Cập nhật thất bại! Vui lòng thử lại.');
-                        console.log(response);
+                        alert('Lỗi: Cập nhật thất bại!');
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText); // Xem lỗi chi tiết trong Console (F12)
-                    alert('Lỗi hệ thống: Không thể kết nối đến server.');
+                error: function() {
+                    alert('Lỗi hệ thống!');
                 }
             });
         });
@@ -221,6 +313,123 @@
                 });
             }
         }
+
+        // === XỬ LÝ YÊU CẦU ĐẶC BIỆT (ĐƠN GIẢN) ===
+        // === XỬ LÝ YÊU CẦU ĐẶC BIỆT (ĐƠN GIẢN) ===
+        let currentKhachId = null;
+        let currentButton = null;
+
+        // 1. Khi click nút "Cần xác nhận"
+        $(document).on('click', '.btn-yc', function() {
+            console.log('Button clicked');
+
+            currentKhachId = $(this).data('khach-id');
+            const khachTen = $(this).data('khach-ten');
+            const ghiChu = $(this).data('ghi-chu');
+            currentButton = $(this);
+
+            console.log('Data:', {
+                currentKhachId,
+                khachTen,
+                ghiChu
+            });
+
+            // Hiển thị thông tin lên modal
+            $('#modalKhachTen').text(khachTen);
+            $('#modalYeuCau').text(ghiChu);
+            $('#confirmCheck').prop('checked', false);
+
+            // Hiển thị modal
+            $('#yeuCauModal').modal('show');
+        });
+
+        // 2. Khi click nút "Xác nhận đã xử lý"
+      // 2. Khi click nút "Xác nhận đã xử lý"
+$('#btnXacNhan').click(function() {
+    console.log('Confirm clicked');
+    
+    if (!$('#confirmCheck').is(':checked')) {
+        alert('Vui lòng tích xác nhận đã kiểm tra yêu cầu!');
+        return;
+    }
+    
+    if (!currentKhachId) {
+        alert('Lỗi: Không tìm thấy thông tin khách hàng!');
+        return;
+    }
+    
+    console.log('Sending request... khach_id:', currentKhachId);
+    
+    // Hiển thị loading
+    $('#btnXacNhan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Đang xác nhận...');
+    
+    // Gửi AJAX request - CHỈ CẦN khach_id
+    $.ajax({
+        url: '?act=confirm_yeu_cau',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            khach_id: currentKhachId
+        },
+        success: function(response) {
+            console.log('Response:', response);
+            
+            // Khôi phục button
+            $('#btnXacNhan').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Xác nhận đã xử lý');
+            
+            if (response.success) {
+                // Đóng modal
+                $('#yeuCauModal').modal('hide');
+                
+                // Cập nhật button ngay lập tức
+                if (currentButton) {
+                    currentButton
+                        .removeClass('btn-warning')
+                        .addClass('btn-success')
+                        .html('<i class="fas fa-check-circle me-1"></i> Đã xác nhận')
+                        .prop('disabled', true)
+                        .removeClass('btn-yc');
+                        
+                    // Thêm sự kiện click để xem
+                    currentButton.off('click').click(function(e) {
+                        e.preventDefault();
+                        const khachTen = $(this).data('khach-ten');
+                        const ghiChu = $(this).data('ghi-chu');
+                        viewYeuCau(khachTen, ghiChu);
+                    });
+                }
+                
+                // Thông báo thành công
+                setTimeout(function() {
+                    alert('✓ Đã xác nhận thành công!');
+                }, 300);
+                
+            } else {
+                // Hiển thị lỗi chi tiết
+                let errorMsg = response.message || 'Không thể xác nhận';
+                
+                // Kiểm tra xem có lỗi cột database không
+                if (errorMsg.includes('yeu_cau_dac_biet_confirmed')) {
+                    errorMsg += '\n\nHƯỚNG DẪN FIX:\n' +
+                              '1. Mở phpMyAdmin hoặc công cụ quản lý database\n' +
+                              '2. Chạy SQL: ALTER TABLE checkin_khach_hang ADD COLUMN yeu_cau_dac_biet_confirmed TINYINT(1) DEFAULT 0;\n' +
+                              '3. Thử lại';
+                }
+                
+                alert('Lỗi: ' + errorMsg);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', error);
+            console.error('Response Text:', xhr.responseText);
+            
+            // Khôi phục button
+            $('#btnXacNhan').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Xác nhận đã xử lý');
+            
+            alert('Lỗi kết nối server!\nChi tiết: ' + xhr.responseText);
+        }
+    });
+});
     });
 </script>
 

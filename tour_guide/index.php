@@ -1,10 +1,10 @@
-<?php 
+<?php
 session_name('GUIDE_SESSION');
 session_start();
 
 
-require_once '../commons/env.php'; 
-require_once '../commons/function.php'; 
+require_once '../commons/env.php';
+require_once '../commons/function.php';
 
 
 require_once './controllers/ProductController.php';
@@ -14,16 +14,21 @@ require_once './controllers/PersonalGuideController.php';
 require_once './controllers/NhatKyController.php';
 require_once './controllers/KhachDoanController.php';
 require_once './controllers/LichTrinhController.php';
+require_once './controllers/DanhGiaController.php';
 
 // Require Models
 require_once './models/ProductModel.php';
 require_once './models/GuideTaiKhoan.php';
-require_once './models/DashBoardHDVModel.php';
+require_once './models/HDVDashboard.php';
 require_once './models/Database.php';
 require_once './models/PersonalGuideModel.php';
 require_once './models/NhatKyModel.php';
 require_once './models/KhachDoanModel.php';
 require_once './models/LichTrinhModel.php';
+require_once './models/DanhGiaModel.php';
+
+
+
 
 
 
@@ -51,8 +56,7 @@ if ($act === '/' && !checkGuideLogin()) {
     // Nếu là trang chủ và chưa đăng nhập, chuyển hướng đến login
     header("Location: " . BASE_URL_GUIDE . "?act=login");
     exit();
-}
-elseif (!in_array($act, $public_routes) && $act !== '/' && !checkGuideLogin()) {
+} elseif (!in_array($act, $public_routes) && $act !== '/' && !checkGuideLogin()) {
     // Nếu không phải public route, không phải trang chủ, và chưa đăng nhập
     $_SESSION['error'] = "Vui lòng đăng nhập để tiếp tục!";
     header("Location: " . BASE_URL_GUIDE . "?act=login");
@@ -62,22 +66,22 @@ elseif (!in_array($act, $public_routes) && $act !== '/' && !checkGuideLogin()) {
 match ($act) {
     // Trang chủ guide - CHỈ hiển thị khi đã đăng nhập
     '/' => (new DashboardHDVController())->home(),
-    
+
     // Auth routes
     'login' => (new GuideTaiKhoanController())->login(),
     'login-process' => (new GuideTaiKhoanController())->loginprocess(),
     'register' => (new GuideTaiKhoanController())->register(),
     'register-process' => (new GuideTaiKhoanController())->registerprocess(),
     'logout' => (new GuideTaiKhoanController())->logout(),
-    
+
     // Guide routes
     // 'guide-dashboard' => (new GuideTaiKhoanController())->guideDashboard(),
-  
+
     //Thông tin tài khoản
     'my-profile' => (new PersonalGuideController())->showProfile(),
     'profile-settings' => (new PersonalGuideController())->showProfileSettings(),
     'update-profile' => (new PersonalGuideController())->updateProfile(),
-  
+
     // Nhật ký tour routes
     'nhat_ky' => (new NhatKyController())->index(),
     'nhat_ky_add' => (new NhatKyController())->create(),
@@ -85,10 +89,11 @@ match ($act) {
     'nhat_ky_edit' => (new NhatKyController())->edit(),
     'nhat_ky_store' => (new NhatKyController())->store(),
     'nhat_ky_delete' => (new NhatKyController())->delete(),
-    
+
     // Khách đoàn routes
     'xem_danh_sach_khach' => (new KhachDoanController())->index(),
     'check_in_khach' => (new KhachDoanController())->update_checkin_status(),
+    'confirm_yeu_cau' => (new KhachDoanController())->confirm_yeu_cau(),
 
     // Lịch trình routes
     'lich-trinh' => (new LichTrinhController())->index(),
@@ -97,6 +102,14 @@ match ($act) {
     'lich-lam-viec' => (new LichTrinhController())->lichLamViec(),
     'update-checklist-guide' => (new LichTrinhController())->updateChecklistForGuide(),
 
+    // Đánh Giá
+    'danh_gia' => (new DanhGiaController())->index(),
+    'danh_gia_create' => (new DanhGiaController())->create(),
+    'danh_gia_store' => (new DanhGiaController())->store(),
+    'danh_gia_list' => (new DanhGiaController())->list(),
+    'danh_gia_detail' => (new DanhGiaController())->detail(),
+
+
+
     default => (new DashboardHDVController())->home(),
 };
-?>
