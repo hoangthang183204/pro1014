@@ -64,7 +64,6 @@ class LichTrinhController
                 exit();
             }
         }
-        
 
         // Lấy ID lịch khởi hành
         $lichKhoiHanhId = $_GET['id'] ?? null;
@@ -82,10 +81,17 @@ class LichTrinhController
             header("Location: " . BASE_URL_GUIDE . "?act=lich-trinh");
             exit();
         }
+         // DEBUG: Kiểm tra dữ liệu
+    echo "<pre>";
+    echo "LichKhoiHanh ID: " . $lichKhoiHanhId . "\n";
+    echo "Guide ID: " . $guideId . "\n";
+    echo "Data: " . print_r($data, true);
+    echo "</pre>";
+    // exit(); // Tạm thời comment để xem dữ liệu
 
         // Hiển thị view
         include __DIR__ . '/../views/schedule/detailLichTrinh.php';
-    }   
+    }
 
     /**
      * Xử lý cập nhật checklist
@@ -132,56 +138,6 @@ class LichTrinhController
             echo json_encode(['success' => false, 'message' => 'Cập nhật thất bại']);
         }
     }
-
-    // Thêm phương thức này vào class LichTrinhController
-
-/**
- * Cập nhật checklist cho hướng dẫn viên
- */
-public function updateChecklistForGuide()
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Kiểm tra đăng nhập
-        $userId = $_SESSION['user_id'] ?? $_SESSION['guide_id'] ?? null;
-        if (!$userId) {
-            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập']);
-            exit();
-        }
-
-        // Lấy ID hướng dẫn viên
-        $guideId = $this->model->getGuideIdByUserId($userId);
-        if (!$guideId) {
-            $guideId = $_SESSION['guide_id'] ?? null;
-            if (!$guideId) {
-                echo json_encode(['success' => false, 'message' => 'Không tìm thấy thông tin hướng dẫn viên']);
-                exit();
-            }
-        }
-
-        // Lấy dữ liệu từ POST
-        $checklistId = $_POST['id'] ?? 0;
-        $hoanThanh = $_POST['hoan_thanh'] ?? 0;
-
-        if (!$checklistId) {
-            echo json_encode(['success' => false, 'message' => 'Không tìm thấy checklist']);
-            exit();
-        }
-
-        // Cập nhật checklist
-        $result = $this->model->updateChecklistStatus($checklistId, $hoanThanh, $guideId);
-
-        if ($result) {
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Cập nhật thành công',
-                'thoi_gian' => date('d/m/Y H:i')
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Cập nhật thất bại']);
-        }
-        exit();
-    }
-}
     /**
      * Hiển thị lịch làm việc của hướng dẫn viên
      */
@@ -241,5 +197,47 @@ public function updateChecklistForGuide()
         // Hiển thị view
         include __DIR__ . '/../views/schedule/lichLamViec.php';
     }
+    public function updateChecklistForGuide()
+{
+    // Kiểm tra đăng nhập
+    $userId = $_SESSION['user_id'] ?? $_SESSION['guide_id'] ?? null;
+    if (!$userId) {
+        echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập']);
+        exit();
+    }
+
+    // Lấy ID hướng dẫn viên từ user_id
+    $guideId = $this->model->getGuideIdByUserId($userId);
+    if (!$guideId) {
+        $guideId = $_SESSION['guide_id'] ?? null;
+        if (!$guideId) {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy thông tin hướng dẫn viên']);
+            exit();
+        }
+    }
+
+    // Lấy dữ liệu từ POST
+    $checklistId = $_POST['id'] ?? null;
+    $status = $_POST['hoan_thanh'] ?? 0;
+    
+    // Validate
+    if (!$checklistId) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu thông tin checklist']);
+        exit();
+    }
+
+    // Cập nhật database
+    $result = $this->model->updateChecklistStatus($checklistId, $status, $guideId);
+
+    if ($result) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Cập nhật checklist thành công',
+            'thoi_gian' => date('d/m/Y H:i:s')
+        ]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Cập nhật thất bại']);
+    }
+}
 }
 ?>

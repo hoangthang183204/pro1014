@@ -10,6 +10,19 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="?act=danh-muc">
+                    <i class="fas fa-file-contract me-2"></i>
+                    Quản Lý Danh Mục Tour
+                </a>
+                <div class="card-tools">
+                    <a href="?act=danh-muc-tour-create" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus mr-1"></i> Thêm mới
+                    </a>
+                </div>
+            </div>
+        </nav>
         <div class="container mt-4">
             <!-- Thông báo session -->
             <?php if (!empty($_SESSION['success'])): ?>
@@ -30,62 +43,8 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Thống kê nhanh -->
-            <div class="row mb-4">
-                <div class="col-md-3 col-sm-6">
-                    <div class="info-box bg-primary">
-                        <span class="info-box-icon"><i class="fas fa-home"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Tour trong nước</span>
-                            <span class="info-box-number"><?= $thong_ke['tong_tour_trong_nuoc'] ?? 0 ?></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="info-box bg-success">
-                        <span class="info-box-icon"><i class="fas fa-globe-americas"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Tour quốc tế</span>
-                            <span class="info-box-number"><?= $thong_ke['tong_tour_quoc_te'] ?? 0 ?></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="info-box bg-info">
-                        <span class="info-box-icon"><i class="fas fa-user-cog"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Tour theo yêu cầu</span>
-                            <span class="info-box-number"><?= $thong_ke['tong_tour_custom'] ?? 0 ?></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-sm-6">
-                    <div class="info-box bg-warning">
-                        <span class="info-box-icon"><i class="fas fa-plane"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Tour đang diễn ra</span>
-                            <span class="info-box-number"><?= $thong_ke['tour_dang_dien_ra'] ?? 0 ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="card card-dark">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="nav-icon fas fa-folder me-2"></i>
-                        Quản Lý Danh Mục Tour
-                    </h3>
-                    <div class="card-tools">
-                        <a href="?act=danh-muc-tour-create" class="btn btn-sm btn-primary">
-                            <i class="fas fa-plus mr-1"></i> Thêm mới
-                        </a>
-                        <a href="?act=danh-muc-filter" class="btn btn-sm btn-success ml-1">
-                            <i class="fas fa-filter mr-1"></i> Lọc tour
-                        </a>
-                    </div>
-                </div>
-                <!-- /.card-header -->
+
                 <div class="card-body">
                     <!-- Bộ lọc -->
                     <div class="row mb-3">
@@ -130,14 +89,14 @@
                         </thead>
                         <tbody>
                             <?php if (!empty($danh_muc_list)): ?>
-                                <?php 
+                                <?php
                                 $loaiTourLabels = [
                                     'trong nước' => ['label' => 'Tour trong nước', 'class' => 'badge-primary'],
                                     'quốc tế' => ['label' => 'Tour quốc tế', 'class' => 'badge-success'],
                                     'theo yêu cầu' => ['label' => 'Tour theo yêu cầu', 'class' => 'badge-info']
                                 ];
                                 ?>
-                                
+
                                 <?php foreach ($danh_muc_list as $index => $danh_muc): ?>
                                     <tr>
                                         <td><?= $index + 1 ?></td>
@@ -150,7 +109,7 @@
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <?php 
+                                            <?php
                                             $loai = $danh_muc['loai_tour'];
                                             $info = $loaiTourLabels[$loai] ?? ['label' => $loai, 'class' => 'badge-secondary'];
                                             ?>
@@ -164,18 +123,16 @@
                                                     <?= $danh_muc['so_luong_tour'] ?> tour
                                                 </span>
                                                 <?php if ($danh_muc['so_luong_tour'] > 0): ?>
-                                                    <a href="?act=danh-muc-tours&danh_muc_id=<?= $danh_muc['id'] ?>" 
-                                                       class="btn btn-xs btn-link ml-2" 
-                                                       data-toggle="tooltip" 
-                                                       title="Xem danh sách tour">
-                                                        <i class="fas fa-eye"></i>
+                                                    <a href="?act=danh-muc-tours&danh_muc_id=<?= $danh_muc['id'] ?>"
+                                                        class="btn btn-xs btn-link ml-2"
+                                                        data-toggle="tooltip">
                                                     </a>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
                                         <td>
-                                            <?= !empty($danh_muc['mo_ta']) ? 
-                                                htmlspecialchars(mb_strimwidth($danh_muc['mo_ta'], 0, 50, "...")) : 
+                                            <?= !empty($danh_muc['mo_ta']) ?
+                                                htmlspecialchars(mb_strimwidth($danh_muc['mo_ta'], 0, 50, "...")) :
                                                 '<span class="text-muted">Không có mô tả</span>' ?>
                                         </td>
                                         <td>
@@ -188,12 +145,12 @@
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a href="?act=danh-muc-tour-edit&id=<?= $danh_muc['id'] ?>"
-                                                    class="btn btn-warning" 
-                                                    data-toggle="tooltip" 
+                                                    class="btn btn-warning"
+                                                    data-toggle="tooltip"
                                                     title="Sửa">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                
+
                                                 <?php if ($danh_muc['so_luong_tour'] == 0): ?>
                                                     <button type="button"
                                                         class="btn btn-danger btn-delete"
@@ -207,7 +164,7 @@
                                                     <button type="button"
                                                         class="btn btn-danger"
                                                         data-toggle="tooltip"
-                                                        title="Không thể xóa (có tour đang sử dụng)"
+
                                                         disabled>
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -296,20 +253,24 @@
         border-radius: .25rem;
         margin-bottom: 0;
     }
+
     .info-box-icon {
         border-top-left-radius: .25rem;
         border-bottom-left-radius: .25rem;
         font-size: 1.875rem;
         width: 70px;
     }
+
     .info-box-content {
         padding: 10px;
     }
+
     .info-box-text {
         text-transform: uppercase;
         font-weight: bold;
         font-size: 0.875rem;
     }
+
     .info-box-number {
         font-size: 1.5rem;
         font-weight: bold;
@@ -320,7 +281,7 @@
     $(document).ready(function() {
         // Khởi tạo tooltip
         $('[data-toggle="tooltip"]').tooltip();
-        
+
         // DataTable với các tùy chọn
         var table = $('#example1').DataTable({
             "responsive": true,
@@ -328,7 +289,9 @@
             "language": {
                 "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
             },
-            "order": [[0, 'asc']],
+            "order": [
+                [0, 'asc']
+            ],
             "pageLength": 10,
             "lengthMenu": [10, 25, 50, 100],
             "dom": '<"row"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',

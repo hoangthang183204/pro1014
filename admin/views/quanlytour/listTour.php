@@ -145,12 +145,6 @@
                                                             class="btn btn-secondary" title="Quản lý phiên bản">
                                                             <i class="fas fa-code-branch"></i>
                                                         </a>
-
-                                                        <!-- Nút Nhà cung cấp -->
-                                                        <a href="index.php?act=tour-nha-cung-cap&tour_id=<?php echo $tour['id']; ?>"
-                                                            class="btn btn-success" title="Nhà cung cấp">
-                                                            <i class="fas fa-handshake"></i>
-                                                        </a>
                                                     </div>
 
                                                     <!-- Hàng 2 -->

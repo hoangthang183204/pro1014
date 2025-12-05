@@ -688,18 +688,61 @@ class AdminDatTour
         }
     }
 
-    // Hoặc phương thức lấy lịch trình tour theo lịch khởi hành
-    public function getLichTrinhByLichKhoiHanh($lich_khoi_hanh_id)
+    // Trong class AdminDatTour
+    public function getNhaCungCapByLichKhoiHanh($lich_khoi_hanh_id)
     {
         try {
-            $query = "SELECT lt.* FROM lich_trinh_tour lt
-                  JOIN tour t ON lt.tour_id = t.id
-                  JOIN lich_khoi_hanh lkh ON t.id = lkh.tour_id
-                  WHERE lkh.id = :lich_khoi_hanh_id
-                  ORDER BY lt.thu_tu_sap_xep ASC, lt.so_ngay ASC";
+            $query = "SELECT pc.*, dt.ten_doi_tac, dt.loai_dich_vu, dt.thong_tin_lien_he 
+                  FROM phan_cong pc
+                  LEFT JOIN doi_tac dt ON pc.doi_tac_id = dt.id
+                  WHERE pc.lich_khoi_hanh_id = :lich_khoi_hanh_id
+                  AND pc.loai_phan_cong != 'hướng dẫn viên'
+                  ORDER BY 
+                    CASE pc.loai_phan_cong
+                        WHEN 'khách sạn' THEN 1
+                        WHEN 'vận chuyển' THEN 2
+                        WHEN 'nhà hàng' THEN 3
+                        WHEN 'vé tham quan' THEN 4
+                        ELSE 5
+                    END ASC";
+
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get Nha Cung Cap By Lich Khoi Hanh Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Sửa phương thức này trong class AdminDatTour
+    public function getLichTrinhByLichKhoiHanh($lich_khoi_hanh_id)
+    {
+        try {
+            // Lấy tour_id từ lịch khởi hành
+            $query = "SELECT t.id as tour_id 
+                  FROM lich_khoi_hanh lkh
+                  JOIN tour t ON lkh.tour_id = t.id
+                  WHERE lkh.id = :lich_khoi_hanh_id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$result || empty($result['tour_id'])) {
+                return [];
+            }
+
+            $tour_id = $result['tour_id'];
+
+            // Lấy lịch trình tour
+            $query2 = "SELECT * FROM lich_trinh_tour 
+                   WHERE tour_id = :tour_id 
+                   ORDER BY so_ngay ASC, thu_tu_sap_xep ASC";
+
+            $stmt2 = $this->conn->prepare($query2);
+            $stmt2->execute([':tour_id' => $tour_id]);
+            return $stmt2->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Get Lich Trinh By Lich Khoi Hanh Error: " . $e->getMessage());
             return [];

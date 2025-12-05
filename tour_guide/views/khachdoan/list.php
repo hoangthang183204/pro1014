@@ -23,7 +23,7 @@
                             <?php else: ?>
                                 <?php foreach ($dsTram as $tram): ?>
                                     <option value="<?= $tram['id'] ?>" <?= $selected_tram_id == $tram['id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($tram['ten_tram']) ?>
+                                        Trạm <?= $tram['thu_tu'] ?>: <?= htmlspecialchars($tram['ten_tram']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -86,11 +86,26 @@
                 </div>
             </div>
 
+            <div class="p-3 bg-white border-bottom d-flex align-items-center gap-2">
+    <span class="fw-bold text-muted"><i class="fas fa-tasks me-1"></i> Thao tác nhanh:</span>
+    <button type="button" class="btn btn-success btn-sm fw-bold shadow-sm action-bulk" data-status="đã đến">
+        <i class="fas fa-check-circle me-1"></i> Đã đến (Chọn)
+    </button>
+    <button type="button" class="btn btn-danger btn-sm fw-bold shadow-sm action-bulk" data-status="vắng mặt">
+        <i class="fas fa-user-times me-1"></i> Vắng mặt (Chọn)
+    </button>
+     <button type="button" class="btn btn-light btn-sm border fw-bold shadow-sm action-bulk" data-status="chưa đến">
+        <i class="fas fa-undo me-1"></i> Reset (Chọn)
+    </button>
+</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped mb-0 align-middle">
                         <thead class="bg-light text-secondary">
                             <tr>
+                            <th class="px-3" style="width: 40px;">
+                <input type="checkbox" id="checkAll" class="form-check-input" style="cursor: pointer;">
+            </th>
                                 <th class="px-3">STT</th>
                                 <th class="px-3">Họ và Tên</th>
                                 <th class="px-3">Thông tin</th>
@@ -113,6 +128,13 @@
                                     $row_class = $is_canceled ? 'table-secondary opacity-75' : '';
                                 ?>
                                     <tr class="<?= $row_class ?>">
+                                    <td class="px-3">
+            <?php if (!$is_canceled): // Chỉ hiện checkbox nếu khách chưa bị hủy ?>
+                <input type="checkbox" class="form-check-input check-item" value="<?= $k['id'] ?>" style="cursor: pointer;">
+            <?php else: ?>
+                <input type="checkbox" class="form-check-input" disabled>
+            <?php endif; ?>
+        </td>
                                         <td class="px-3"><?= $i++ ?></td>
                                         <td class="px-3">
                                             <div class="fw-bold text-dark"><?= htmlspecialchars($k['ho_ten']) ?></div>
@@ -268,19 +290,18 @@
         $('.status-select').change(function() {
             var status = $(this).val();
             var id = $(this).data('id');
-            var tram_id = '<?= $selected_tram_id ?>';
             var element = $(this);
 
             updateColor(element, status);
 
             $.ajax({
-                url: '?act=check_in_khach',
+                url: '?act=check_in_khach', // Router xử lý đơn lẻ
                 type: 'POST',
                 dataType: 'json',
                 data: {
                     id: id,
                     status: status,
-                    tram_id: tram_id
+                    tram_id: currentTramId
                 },
                 success: function(response) {
                     if (response.success) {
@@ -295,6 +316,7 @@
             });
         });
 
+        // Hàm đổi màu nền select box
         function updateColor(element, status) {
             if (status == 'đã đến') {
                 element.css({

@@ -47,8 +47,7 @@ class KhachDoanController
             return;
         }
 
-        // 1. Tự động tạo trạm nếu chưa có
-        $this->model->checkAndCreateTramMau($id_lich);
+        
 
         // 2. Lấy danh sách trạm & Xác định trạm hiện tại
         $dsTram = $this->model->getTramByLich($id_lich);
@@ -68,6 +67,23 @@ class KhachDoanController
 
         if (!empty($rawList)) {
             foreach ($rawList as $row) {
+                
+
+                // Lấy thông tin đã hủy trước đó
+                $daHuyTruocDo = $row['da_huy_truoc_do'] ?? 0;
+
+                // --- LOGIC ĐẾM MỚI (ĐÃ SỬA) ---
+                if ($daHuyTruocDo > 0) {
+                    $tienDoCheckIn++;
+                } else {
+                    // Nếu khách bình thường, xét trạng thái hiện tại
+                    if ($row['trang_thai_checkin'] == 'đã đến') {
+                        $soLuongCoMat++;    
+                        $tienDoCheckIn++;   
+                    } elseif ($row['trang_thai_checkin'] == 'vắng mặt') {
+                        $tienDoCheckIn++;   
+                    }
+                }
                 $ghiChu = $row['ghi_chu'] ?? '';
                 $nhom = "Mã vé: " . $row['ma_dat_tour'];
                 $yeuCauConfirmed = $row['yeu_cau_confirmed'] ?? 0;

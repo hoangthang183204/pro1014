@@ -1,11 +1,43 @@
 <?php
-// Tệp: views/guide/my_profile.php
-
 include __DIR__ . '/../layout/header.php';
 include __DIR__ . '/../layout/sidebar.php';
 
 $guideId = $_SESSION['guide_id'] ?? null;
 $guideName = $_SESSION['guide_name'] ?? 'Hướng dẫn viên';
+
+// Kiểm tra xem đang ở tab nào
+$currentTab = $_GET['tab'] ?? 'view-profile';
+if ($currentTab == 'bao-nghi' || (isset($_GET['act']) && strpos($_GET['act'], 'bao-nghi') !== false)) {
+    require_once __DIR__ . '/../../controllers/BaoNghiController.php';
+    $baoNghiController = new BaoNghiController();
+    
+    // Gọi phương thức index để load dữ liệu
+    if (isset($_GET['act'])) {
+        switch ($_GET['act']) {
+            case 'bao-nghi':
+            case 'bao-nghi-index':
+                $baoNghiController->index();
+                break;
+            case 'bao-nghi-create':
+                $baoNghiController->create();
+                break;
+            case 'bao-nghi-store':
+                $baoNghiController->store();
+                break;
+            case 'bao-nghi-detail':
+                $baoNghiController->detail();
+                break;
+            case 'bao-nghi-cancel':
+                $baoNghiController->cancel();
+                break;
+            default:
+                $baoNghiController->index();
+        }
+    } else {
+        $baoNghiController->index();
+    }
+    exit(); // Dừng xử lý tiếp vì controller đã render view
+}
 
 if (!$guideId) {
     header("Location: " . BASE_URL_GUIDE . "?act=login");
@@ -17,29 +49,33 @@ $profile = $GLOBALS['profile'] ?? [];
 $activeTours = $GLOBALS['activeTours'] ?? 0;
 $stats = $GLOBALS['stats'] ?? ['so_tour_da_dan' => 0, 'danh_gia_trung_binh' => 0];
 
-function getDefaultAvatar($name) {
-    $initial = mb_substr($name, 0, 1, 'UTF-8');
-    $colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
-    $colorIndex = ord($initial) % count($colors);
-    $backgroundColor = $colors[$colorIndex];
+if (!function_exists('getDefaultAvatar')) {
+    function getDefaultAvatar($name) {
+        $initial = mb_substr($name, 0, 1, 'UTF-8');
+        $colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
+        $colorIndex = ord($initial) % count($colors);
+        $backgroundColor = $colors[$colorIndex];
 
-    $svg = '<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
-        <rect width="150" height="150" fill="' . $backgroundColor . '" rx="8"/>
-        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="60" fill="white" 
-              text-anchor="middle" dominant-baseline="middle" font-weight="bold">' . $initial . '</text>
-    </svg>';
+        $svg = '<svg width="150" height="150" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+            <rect width="150" height="150" fill="' . $backgroundColor . '" rx="8"/>
+            <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="60" fill="white" 
+                  text-anchor="middle" dominant-baseline="middle" font-weight="bold">' . $initial . '</text>
+        </svg>';
 
-    return "data:image/svg+xml;base64," . base64_encode($svg);
+        return "data:image/svg+xml;base64," . base64_encode($svg);
+    }
 }
 
-function getAvatarUrl($profile) {
-    if (!empty($profile['hinh_anh'])) {
-        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/pro1014' . $profile['hinh_anh'];
-        if (file_exists($imagePath) && is_file($imagePath)) {
-            return "http://localhost/pro1014" . $profile['hinh_anh'];
+if (!function_exists('getAvatarUrl')) {
+    function getAvatarUrl($profile) {
+        if (!empty($profile['hinh_anh'])) {
+            $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/pro1014' . $profile['hinh_anh'];
+            if (file_exists($imagePath) && is_file($imagePath)) {
+                return "http://localhost/pro1014" . $profile['hinh_anh'];
+            }
         }
+        return getDefaultAvatar($profile['ho_ten'] ?? 'HDV');
     }
-    return getDefaultAvatar($profile['ho_ten'] ?? 'HDV');
 }
 
 $avatarUrl = getAvatarUrl($profile);
@@ -47,7 +83,6 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
 ?>
 
 <?php
-// ... phần PHP giữ nguyên ...
 
 ?>
 
@@ -73,6 +108,7 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
 
     <div class="profile-tabs">
         <button class="tab-button active" data-tab="view-profile">Xem Hồ Sơ</button>
+        <button class="tab-button" data-tab="bao-nghi">Yêu Cầu Nghỉ</button>
     </div>
 
     <!-- TAB 1: Xem hồ sơ -->
@@ -319,9 +355,209 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
             </form>
         </div>
     </div>
+    <div id="bao-nghi" class="tab-content">
+    <div class="profile-container">
+        <div class="profile-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản Lý Nghỉ Phép</h2>
+                <div class="section-actions">
+                    <button onclick="switchTab('create-bao-nghi')" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tạo Yêu Cầu Nghỉ
+                    </button>
+                </div>
+            </div>
+            <div class="section-content">
+                <!-- Thống kê -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number"><?= $baoNghiStats['pending'] ?? 0 ?></div>
+                            <div class="stat-label">Chờ duyệt</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number"><?= $baoNghiStats['approved'] ?? 0 ?></div>
+                            <div class="stat-label">Đã duyệt</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number"><?= $baoNghiStats['rejected'] ?? 0 ?></div>
+                            <div class="stat-label">Từ chối</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number"><?= $baoNghiStats['days_off'] ?? 0 ?></div>
+                            <div class="stat-label">Ngày nghỉ (tháng)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách yêu cầu -->
+                <div class="requests-section">
+                    <h3 class="section-subtitle">Lịch sử yêu cầu nghỉ</h3>
+                    
+                    <?php if (empty($baoNghiRequests)): ?>
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>Chưa có yêu cầu nghỉ nào</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="requests-table-container">
+                            <table class="requests-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã yêu cầu</th>
+                                        <th>Loại nghỉ</th>
+                                        <th>Ngày bắt đầu</th>
+                                        <th>Ngày kết thúc</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($baoNghiRequests as $request): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($request['ma_yeu_cau']) ?></td>
+                                            <td>
+                                                <span class="badge badge-info">
+                                                    <?= htmlspecialchars($request['loai_nghi']) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= date('d/m/Y', strtotime($request['ngay_bat_dau'])) ?></td>
+                                            <td>
+                                                <?= !empty($request['ngay_ket_thuc']) && $request['ngay_ket_thuc'] != $request['ngay_bat_dau'] 
+                                                    ? date('d/m/Y', strtotime($request['ngay_ket_thuc'])) 
+                                                    : '1 ngày' ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $statusColors = [
+                                                    'cho_duyet' => 'warning',
+                                                    'da_duyet' => 'success',
+                                                    'tu_choi' => 'danger',
+                                                    'da_huy' => 'secondary'
+                                                ];
+                                                $statusTexts = [
+                                                    'cho_duyet' => 'Chờ duyệt',
+                                                    'da_duyet' => 'Đã duyệt',
+                                                    'tu_choi' => 'Từ chối',
+                                                    'da_huy' => 'Đã hủy'
+                                                ];
+                                                ?>
+                                                <span class="badge badge-<?= $statusColors[$request['trang_thai']] ?? 'secondary' ?>">
+                                                    <?= $statusTexts[$request['trang_thai']] ?? $request['trang_thai'] ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <a href="<?= BASE_URL_GUIDE ?>?act=bao-nghi-detail&id=<?= $request['id'] ?>" 
+                                                       class="btn-icon" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <?php if ($request['trang_thai'] == 'cho_duyet'): ?>
+                                                        <button onclick="cancelRequest(<?= $request['id'] ?>)" 
+                                                                class="btn-icon btn-danger" title="Hủy yêu cầu">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab tạo yêu cầu nghỉ -->
+<div id="create-bao-nghi" class="tab-content">
+    <div class="profile-container">
+        <div class="profile-section">
+            <div class="section-header">
+                <h2 class="section-title">Tạo Yêu Cầu Nghỉ</h2>
+                <button onclick="switchTab('bao-nghi')" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </button>
+            </div>
+            <div class="section-content">
+                <form action="<?= BASE_URL_GUIDE ?>?act=bao-nghi-store" method="POST" enctype="multipart/form-data" class="bao-nghi-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="loai_nghi">Loại nghỉ *</label>
+                            <select id="loai_nghi" name="loai_nghi" required>
+                                <option value="">-- Chọn loại nghỉ --</option>
+                                <option value="nghỉ phép">Nghỉ phép</option>
+                                <option value="nghỉ ốm">Nghỉ ốm</option>
+                                <option value="nghỉ việc riêng">Việc riêng</option>
+                                <option value="nghỉ không lương">Nghỉ không lương</option>
+                                <option value="nghỉ khác">Nghỉ khác</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ngay_bat_dau">Ngày bắt đầu *</label>
+                            <input type="date" id="ngay_bat_dau" name="ngay_bat_dau" required 
+                                   min="<?= date('Y-m-d') ?>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ngay_ket_thuc">Ngày kết thúc</label>
+                            <input type="date" id="ngay_ket_thuc" name="ngay_ket_thuc">
+                            <small class="form-help">Để trống nếu nghỉ 1 ngày</small>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="ly_do">Lý do nghỉ *</label>
+                            <textarea id="ly_do" name="ly_do" rows="4" 
+                                      placeholder="Vui lòng mô tả lý do nghỉ..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="file_dinh_kem">File đính kèm (nếu có)</label>
+                            <input type="file" id="file_dinh_kem" name="file_dinh_kem" 
+                                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                            <small class="form-help">Hỗ trợ: PDF, Word, JPG, PNG. Tối đa 5MB</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Gửi Yêu Cầu
+                        </button>
+                        <button type="button" onclick="switchTab('bao-nghi')" class="btn btn-outline">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 </main>
 
 <style>
+
+    
 /* Reset và layout chính */
 .main-content {
     padding: 0;
@@ -722,6 +958,329 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
     color: #9b2c2c;
     border: 1px solid #feb2b2;
 }
+.section-actions .btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+    color: white;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 2px solid #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transition: all 0.3s ease;
+    min-width: 180px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiệu ứng hover */
+.section-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+}
+
+/* Hiệu ứng active */
+.section-actions .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Hiệu ứng focus */
+.section-actions .btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+}
+
+/* Hiệu ứng cho icon */
+.section-actions .btn-primary i {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.section-actions .btn-primary:hover i {
+    transform: scale(1.1);
+}
+
+/* ===== NÚT QUAY LẠI ===== */
+/* Nút trong trang chi tiết và trang tạo yêu cầu */
+.page-header .btn-outline,
+.section-header .btn-outline {
+    background: white;
+    color: #495057;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 2px solid #6c757d;
+    box-shadow: 0 3px 10px rgba(108, 117, 125, 0.15);
+    transition: all 0.3s ease;
+    min-width: 120px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+}
+
+/* Hiệu ứng hover */
+.page-header .btn-outline:hover,
+.section-header .btn-outline:hover {
+    background: #f8f9fa;
+    border-color: #495057;
+    color: #212529;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Hiệu ứng active */
+.page-header .btn-outline:active,
+.section-header .btn-outline:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(108, 117, 125, 0.15);
+}
+
+/* Hiệu ứng focus */
+.page-header .btn-outline:focus,
+.section-header .btn-outline:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.25);
+}
+
+/* Hiệu ứng cho icon */
+.page-header .btn-outline i,
+.section-header .btn-outline i {
+    font-size: 14px;
+    transition: transform 0.2s ease;
+}
+
+.page-header .btn-outline:hover i,
+.section-header .btn-outline:hover i {
+    transform: translateX(-3px);
+}
+
+/* ===== CẢI THIỆN HEADER LAYOUT ===== */
+/* Page header */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+    color: white;
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Section header trong tab báo nghỉ */
+.profile-section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    border-bottom: none;
+}
+
+.section-header .section-title {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Đảm bảo nút luôn hiển thị rõ ràng */
+.btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-decoration: none !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+/* Hiệu ứng ripple cho tất cả các nút */
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+.btn:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20);
+        opacity: 0;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    /* Page header mobile */
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+        gap: 15px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.5rem;
+        width: 100%;
+    }
+    
+    .page-header .btn-outline {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        margin-top: 10px;
+    }
+    
+    /* Section header mobile */
+    .profile-section .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+        gap: 15px;
+    }
+    
+    .section-header .section-title {
+        width: 100%;
+        font-size: 1.3rem;
+    }
+    
+    .section-actions {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .section-actions .btn-primary {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+        min-width: auto;
+    }
+    
+    .section-header .btn-outline {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
+    }
+}
+
+/* Đối với màn hình rất nhỏ */
+@media (max-width: 480px) {
+    .page-header {
+        padding: 1rem;
+    }
+    
+    .profile-section .section-header {
+        padding: 1rem;
+    }
+    
+    .page-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .section-header .section-title {
+        font-size: 1.2rem;
+    }
+    
+    .section-actions .btn-primary,
+    .page-header .btn-outline,
+    .section-header .btn-outline {
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+}
+
+/* ===== HIỆU ỨNG LOADING KHI CLICK ===== */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn.loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: button-loading 0.6s linear infinite;
+}
+
+@keyframes button-loading {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Đảm bảo không bị ghi đè bởi CSS khác */
+.btn.btn-primary,
+.btn.btn-outline {
+    border-style: solid !important;
+    border-width: 2px !important;
+}
+
+/* Trạng thái disabled */
+.btn:disabled,
+.btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn:disabled:hover,
+.btn[disabled]:hover {
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
 
 /* Responsive */
 @media (max-width: 1200px) {
@@ -863,6 +1422,237 @@ $languages = !empty($profile['ngon_ngu']) ? json_decode($profile['ngon_ngu'], tr
         padding: 1rem 1.25rem;
     }
 }
+/* Bao nghi styles */
+.section-actions {
+    margin-left: auto;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2d3748;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+.requests-section {
+    margin-top: 2rem;
+}
+
+.section-subtitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 2px dashed #cbd5e0;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #a0aec0;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+.requests-table-container {
+    overflow-x: auto;
+}
+
+.requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.requests-table th {
+    background: #f7fafc;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.requests-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #2d3748;
+}
+
+.requests-table tr:hover {
+    background: #f7fafc;
+}
+
+.requests-table .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf2f7;
+    color: #4a5568;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-icon:hover {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+.btn-icon.btn-danger {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.btn-icon.btn-danger:hover {
+    background: #feb2b2;
+}
+
+.bao-nghi-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .requests-table {
+        font-size: 0.9rem;
+    }
+    
+    .requests-table th,
+    .requests-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-actions {
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    .section-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
 </style>
 
 <script>
@@ -904,6 +1694,55 @@ if (avatarInput && avatarPreview) {
             }
             reader.readAsDataURL(file);
         }
+    });
+}
+// Hàm hủy yêu cầu nghỉ
+function cancelRequest(requestId) {
+    if (confirm('Bạn có chắc chắn muốn hủy yêu cầu nghỉ này?')) {
+        window.location.href = '<?= BASE_URL_GUIDE ?>?act=bao-nghi-cancel&id=' + requestId;
+    }
+}
+
+// Xử lý ngày kết thúc tự động
+const startDateInput = document.getElementById('ngay_bat_dau');
+const endDateInput = document.getElementById('ngay_ket_thuc');
+
+if (startDateInput && endDateInput) {
+    startDateInput.addEventListener('change', function() {
+        if (!endDateInput.value) {
+            endDateInput.value = this.value;
+        }
+        if (endDateInput.value < this.value) {
+            endDateInput.value = this.value;
+        }
+        endDateInput.min = this.value;
+    });
+}
+
+// Kiểm tra form
+const baoNghiForm = document.querySelector('.bao-nghi-form');
+if (baoNghiForm) {
+    baoNghiForm.addEventListener('submit', function(e) {
+        const startDate = new Date(startDateInput.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (startDate < today) {
+            e.preventDefault();
+            alert('Ngày bắt đầu không được nhỏ hơn ngày hiện tại!');
+            return false;
+        }
+        
+        if (endDateInput.value) {
+            const endDate = new Date(endDateInput.value);
+            if (endDate < startDate) {
+                e.preventDefault();
+                alert('Ngày kết thúc không được nhỏ hơn ngày bắt đầu!');
+                return false;
+            }
+        }
+        
+        return true;
     });
 }
 </script>
