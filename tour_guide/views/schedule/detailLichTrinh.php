@@ -7,7 +7,6 @@ $tour = $data['tour_info'] ?? [];
 $lichTrinh = $data['lich_trinh_chi_tiet'] ?? [];
 $danhSachKhach = $data['danh_sach_khach'] ?? [];
 $checklist = $data['checklist'] ?? [];
-$phanCongKhac = $data['phan_cong_khac'] ?? [];
 
 // Đặt giá trị mặc định cho mảng tour, tránh key chưa được định nghĩa
 $tour = array_merge([
@@ -219,6 +218,11 @@ $tour = array_merge([
                         <?php 
                         $stt = 1;
                         $totalCustomers = 0;
+                        $totalPaid = 0;
+                        $totalHold = 0;
+                        $totalUnpaid = 0;
+                        $totalCancelled = 0;
+                        $totalRoomsAssigned = 0;
                         foreach ($danhSachKhach as $khach): 
                             $totalCustomers++;
                             // Định dạng giới tính
@@ -229,20 +233,28 @@ $tour = array_merge([
                                 default => 'Chưa cập nhật'
                             };
                             
-                            // Định dạng trạng thái đặt
-                            $trangThaiText = match($khach['trang_thai_dat'] ?? '') {
-                                'hoàn tất' => 'Hoàn tất',
-                                'đã cọc' => 'Đã cọc',
-                                'chờ xác nhận' => 'Chờ xác nhận',
-                                default => 'Chưa xác định'
-                            };
+                            // Xác định trạng thái đặt và đếm
+                            $trangThaiDat = strtolower($khach['trang_thai_dat'] ?? '');
+                            $trangThaiClass = 'secondary';
+                            $trangThaiText = 'Chưa xác định';
                             
-                            $trangThaiClass = match($khach['trang_thai_dat'] ?? '') {
-                                'hoàn tất' => 'success',
-                                'đã cọc' => 'info',
-                                'chờ xác nhận' => 'warning',
-                                default => 'secondary'
-                            };
+                            if (str_contains($trangThaiDat, 'thanh toán') || $trangThaiDat == 'đã thanh toán') {
+                                $trangThaiClass = 'success';
+                                $trangThaiText = 'Đã thanh toán';
+                                $totalPaid++;
+                            } elseif (str_contains($trangThaiDat, 'giữ') || $trangThaiDat == 'giữ chỗ') {
+                                $trangThaiClass = 'warning';
+                                $trangThaiText = 'Giữ chỗ';
+                                $totalHold++;
+                            } elseif (str_contains($trangThaiDat, 'hủy') || $trangThaiDat == 'hủy') {
+                                $trangThaiClass = 'danger';
+                                $trangThaiText = 'Đã hủy';
+                                $totalCancelled++;
+                            } else {
+                                $trangThaiClass = 'secondary';
+                                $trangThaiText = 'Chưa thanh toán';
+                                $totalUnpaid++;
+                            }
                             
                             // Thông tin phòng
                             $roomInfo = '';
@@ -276,7 +288,7 @@ $tour = array_merge([
                             </td>
                             <td class="text-center">
                                 <?php if (!empty($khach['ma_dat_tour'])): ?>
-                                    <span class="badge badge-primary">
+                                    <span class="badge badge-primary" style="color: green;">
                                         <?= htmlspecialchars($khach['ma_dat_tour']) ?>
                                     </span>
                                 <?php else: ?>
