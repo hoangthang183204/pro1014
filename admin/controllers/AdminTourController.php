@@ -918,4 +918,5 @@ class AdminTourController
             }
         }
     }
+    
 }

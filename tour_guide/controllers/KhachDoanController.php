@@ -20,7 +20,7 @@ class KhachDoanController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? null;
             $status = $_POST['status'] ?? 'chưa đến';
-            $tram_id = $_POST['tram_id'] ?? null; // Nhận thêm ID trạm
+            $tram_id = $_POST['tram_id'] ?? null;
 
             if ($id && $tram_id) {
                 $result = $this->model->updateCheckIn($id, $status, $tram_id);
@@ -62,8 +62,8 @@ class KhachDoanController
 
         $rawList = $this->model->getKhachDoanByLich($id_lich, $selected_tram_id);
         $dsKhach = [];
-        $soLuongCoMat = 0; // Chỉ đếm người thực sự có mặt
-        $tienDoCheckIn = 0; // Đếm số người đã kiểm tra (bao gồm cả vắng)
+        $soLuongCoMat = 0;
+        $tienDoCheckIn = 0;
 
         if (!empty($rawList)) {
             foreach ($rawList as $row) {
@@ -86,6 +86,15 @@ class KhachDoanController
                 }
                 $ghiChu = $row['ghi_chu'] ?? '';
                 $nhom = "Mã vé: " . $row['ma_dat_tour'];
+                $yeuCauConfirmed = $row['yeu_cau_confirmed'] ?? 0;
+
+                // Đếm người đã check-in
+                if ($row['trang_thai_checkin'] == 'đã đến') {
+                    $soLuongCoMat++;
+                    $tienDoCheckIn++;
+                } elseif ($row['trang_thai_checkin'] == 'vắng mặt') {
+                    $tienDoCheckIn++;
+                }
 
                 $tuoi = '';
                 if (!empty($row['ngay_sinh'])) {
@@ -104,7 +113,8 @@ class KhachDoanController
                     'nguoi_dat' => $row['nguoi_dat'],
                     'nhom' => $nhom,
                     'ghi_chu' => $ghiChu,
-                    'da_huy_truoc_do' => $daHuyTruocDo
+                    'da_huy_truoc_do' => $row['da_huy_truoc_do'] ?? 0,
+                    'yeu_cau_confirmed' => $yeuCauConfirmed // THÊM DÒNG NÀY
                 ];
             }
         }
@@ -115,26 +125,69 @@ class KhachDoanController
         require_once './views/khachdoan/list.php';
     }
 
-    //  điểm danh hàng loạt
-    public function check_in_batch()
+
+
+    // === THÊM MỚI: Phương thức confirm yêu cầu đặc biệt ===
+    public function confirm_yeu_cau()
     {
+        // Bật hiển thị lỗi PHP
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+
         if (!checkGuideLogin()) {
             echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
             return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ids = $_POST['ids'] ?? []; // Mảng các ID khách
-            $status = $_POST['status'] ?? 'chưa đến';
-            $tram_id = $_POST['tram_id'] ?? null;
+            // Debug chi tiết
+            error_log("=== CONFIRM YEU CAU DEBUG ===");
+            error_log("POST data: " . print_r($_POST, true));
+            error_log("Session guide_id: " . ($_SESSION['guide_id'] ?? 'NOT SET'));
 
-            if (!empty($ids) && $tram_id) {
-                $count = $this->model->updateCheckInBulk($ids, $status, $tram_id);
-                echo json_encode(['success' => true, 'count' => $count]);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+            $khach_id = $_POST['khach_id'] ?? null;
+
+            error_log("khach_id từ POST: " . ($khach_id ?: 'NULL'));
+
+            if (!$khach_id) {
+                error_log("ERROR: Thiếu khach_id");
+                echo json_encode(['success' => false, 'message' => 'Thiếu ID khách hàng']);
+                return;
             }
+
+            // Kiểm tra xem khach_id có phải là số không
+            if (!is_numeric($khach_id)) {
+                error_log("ERROR: khach_id không phải số: " . $khach_id);
+                echo json_encode(['success' => false, 'message' => 'ID khách hàng không hợp lệ']);
+                return;
+            }
+
+            // CHỈ CẦN khach_id, không cần tram_id nữa
+            try {
+                $result = $this->model->confirmYeuCauDacBiet($khach_id);
+
+                error_log("Kết quả từ Model: " . ($result ? 'TRUE' : 'FALSE'));
+
+                if ($result) {
+                    echo json_encode(['success' => true, 'message' => 'Đã xác nhận thành công']);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Không thể xác nhận. Vui lòng kiểm tra: 
+                    1. Cột yeu_cau_dac_biet_confirmed có trong bảng checkin_khach_hang không?
+                    2. Khách hàng có tồn tại không?
+                    3. Kiểm tra error log PHP.'
+                    ]);
+                }
+            } catch (Exception $e) {
+                error_log("EXCEPTION in confirm_yeu_cau: " . $e->getMessage());
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Lỗi hệ thống: ' . $e->getMessage()
+                ]);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ']);
         }
     }
-
 }
