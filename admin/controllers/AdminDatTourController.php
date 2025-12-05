@@ -120,6 +120,9 @@ class AdminDatTourController
         // Lấy lịch trình tour
         $lich_trinh_tour = $this->datTourModel->getLichTrinhByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
 
+        // Lấy thông tin nhà cung cấp
+        $nha_cung_cap = $this->datTourModel->getNhaCungCapByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
+
         require_once 'views/dattour/detailDatTour.php';
     }
 

@@ -216,8 +216,11 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <!-- Nút Sửa - Hiển thị với mọi trạng thái trừ "đã hoàn thành" và "đã hủy" -->
+
+                                                    <!-- Hàng 1 -->
+                                                    <div class="btn-group btn-group-sm mb-1">
+
+                                                        <!-- Nút Sửa -->
                                                         <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
                                                             <a href="?act=lich-khoi-hanh-edit&id=<?php echo $lich['id']; ?>"
                                                                 class="btn btn-primary" title="Sửa lịch">
@@ -229,7 +232,7 @@
                                                             </button>
                                                         <?php endif; ?>
 
-                                                        <!-- Nút Phân công HDV - Hiển thị với mọi trạng thái trừ "đã hoàn thành" và "đã hủy" -->
+                                                        <!-- Nút Phân công HDV -->
                                                         <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
                                                             <a href="?act=phan-cong&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
                                                                 class="btn btn-info" title="Phân công HDV">
@@ -241,26 +244,36 @@
                                                             </button>
                                                         <?php endif; ?>
 
-                                                        <!-- Nút Checklist - Hiển thị với mọi trạng thái -->
+                                                        <!-- Checklist -->
                                                         <a href="?act=checklist-truoc-tour&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
                                                             class="btn btn-warning" title="Checklist">
                                                             <i class="fas fa-tasks"></i>
                                                         </a>
 
+                                                    </div>
+
+                                                    <!-- Hàng 2 -->
+                                                    <div class="btn-group btn-group-sm">
+
+                                                        <!-- Phân phòng -->
                                                         <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
                                                             <a href="?act=phan-phong&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
                                                                 class="btn btn-info" title="Phân phòng">
                                                                 <i class="fas fa-hotel"></i>
                                                             </a>
+                                                        <?php else: ?>
+                                                            <button class="btn btn-secondary" disabled title="Không thể phân phòng">
+                                                                <i class="fas fa-hotel"></i>
+                                                            </button>
                                                         <?php endif; ?>
 
-                                                 
+                                                        <!-- Trạm dừng chân -->
                                                         <a href="?act=tram-dung-chan&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
                                                             class="btn btn-success" title="Trạm dừng chân">
                                                             <i class="fas fa-map-marker-alt"></i>
                                                         </a>
 
-                                                        <!-- Nút Xoá - Chỉ hiển thị khi trạng thái là "đã hủy" -->
+                                                        <!-- Xóa -->
                                                         <?php if ($cho_phep_xoa): ?>
                                                             <a href="?act=lich-khoi-hanh-delete&id=<?php echo $lich['id']; ?>"
                                                                 class="btn btn-danger"
@@ -273,8 +286,11 @@
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         <?php endif; ?>
+
                                                     </div>
+
                                                 </td>
+
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
