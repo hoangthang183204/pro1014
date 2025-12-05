@@ -10,26 +10,30 @@ class KhachDoanController
         $this->model = new KhachDoanModel();
     }
 
-    public function update_checkin_status()
-    {
-        if (!checkGuideLogin()) {
-            echo json_encode(['success' => false]);
-            return;
-        }
+    // Trong file KhachDoanController.php
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['id'] ?? null;
-            $status = $_POST['status'] ?? 'chưa đến';
-            $tram_id = $_POST['tram_id'] ?? null;
-
-            if ($id && $tram_id) {
-                $result = $this->model->updateCheckIn($id, $status, $tram_id);
-                echo json_encode(['success' => $result]);
-            } else {
-                echo json_encode(['success' => false]);
-            }
-        }
+public function update_checkin_status()
+{
+    // Kiểm tra đăng nhập
+    if (!checkGuideLogin()) {
+        echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
+        exit(); // <--- Thêm exit
     }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = $_POST['id'] ?? null;
+        $status = $_POST['status'] ?? 'chưa đến';
+        $tram_id = $_POST['tram_id'] ?? null;
+
+        if ($id && $tram_id) {
+            $result = $this->model->updateCheckIn($id, $status, $tram_id);
+            echo json_encode(['success' => $result]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Thiếu dữ liệu']);
+        }
+        exit(); // <--- BẮT BUỘC PHẢI CÓ DÒNG NÀY để ngắt HTML thừa
+    }
+}
 
     public function index()
     {
@@ -47,7 +51,7 @@ class KhachDoanController
             return;
         }
 
-        
+
 
         // 2. Lấy danh sách trạm & Xác định trạm hiện tại
         $dsTram = $this->model->getTramByLich($id_lich);
@@ -67,7 +71,7 @@ class KhachDoanController
 
         if (!empty($rawList)) {
             foreach ($rawList as $row) {
-                
+
 
                 // Lấy thông tin đã hủy trước đó
                 $daHuyTruocDo = $row['da_huy_truoc_do'] ?? 0;
@@ -78,23 +82,17 @@ class KhachDoanController
                 } else {
                     // Nếu khách bình thường, xét trạng thái hiện tại
                     if ($row['trang_thai_checkin'] == 'đã đến') {
-                        $soLuongCoMat++;    
-                        $tienDoCheckIn++;   
+                        $soLuongCoMat++;
+                        $tienDoCheckIn++;
                     } elseif ($row['trang_thai_checkin'] == 'vắng mặt') {
-                        $tienDoCheckIn++;   
+                        $tienDoCheckIn++;
                     }
                 }
                 $ghiChu = $row['ghi_chu'] ?? '';
                 $nhom = "Mã vé: " . $row['ma_dat_tour'];
                 $yeuCauConfirmed = $row['yeu_cau_confirmed'] ?? 0;
 
-                // Đếm người đã check-in
-                if ($row['trang_thai_checkin'] == 'đã đến') {
-                    $soLuongCoMat++;
-                    $tienDoCheckIn++;
-                } elseif ($row['trang_thai_checkin'] == 'vắng mặt') {
-                    $tienDoCheckIn++;
-                }
+
 
                 $tuoi = '';
                 if (!empty($row['ngay_sinh'])) {
@@ -123,6 +121,34 @@ class KhachDoanController
         $isDuNguoi = ($totalKhach > 0 && $tienDoCheckIn == $totalKhach);
 
         require_once './views/khachdoan/list.php';
+    }
+    // === THÊM MỚI: Xử lý Check-in hàng loạt ===
+    public function check_in_bulk()
+    {
+        if (!checkGuideLogin()) {
+            echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $ids = $_POST['ids'] ?? []; // Mảng ID khách hàng
+            $status = $_POST['status'] ?? '';
+            $tram_id = $_POST['tram_id'] ?? 0;
+
+            if (empty($ids) || empty($status) || empty($tram_id)) {
+                echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+                return;
+            }
+
+            // Gọi Model xử lý hàng loạt
+            $count = $this->model->updateCheckInBulk($ids, $status, $tram_id);
+
+            if ($count !== false) {
+                echo json_encode(['success' => true, 'count' => $count]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật database']);
+            }
+        }
     }
 
 

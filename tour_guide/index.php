@@ -88,7 +88,9 @@ match ($act) {
     // Khách đoàn routes
     'xem_danh_sach_khach' => (new KhachDoanController())->index(),
     'check_in_khach' => (new KhachDoanController())->update_checkin_status(),
+    'check_in_bulk' => (new KhachDoanController())->check_in_bulk(),
     'confirm_yeu_cau' => (new KhachDoanController())->confirm_yeu_cau(),
+    'update_checkin_status' => (new KhachDoanController())->update_checkin_status(),
 
     // Lịch trình routes
     'lich-trinh' => (new LichTrinhController())->index(),
@@ -104,16 +106,17 @@ match ($act) {
     'danh_gia_list' => (new DanhGiaController())->list(),
     'danh_gia_detail' => (new DanhGiaController())->detail(),
 
+     // Bao nghi routes - THÊM VÀO ĐÂY
+     'bao-nghi' => (new BaoNghiController())->index(),
+     'bao-nghi-create' => (new BaoNghiController())->create(),
+     'bao-nghi-store' => (new BaoNghiController())->store(),
+     'bao-nghi-detail' => (new BaoNghiController())->detail(),
+     'bao-nghi-cancel' => (new BaoNghiController())->cancel(),
 
 
     default => (new DashboardHDVController())->home(),
 };
-    // Bao nghi routes - THÊM VÀO ĐÂY
-    'bao-nghi' => (new BaoNghiController())->index(),
-    'bao-nghi-create' => (new BaoNghiController())->create(),
-    'bao-nghi-store' => (new BaoNghiController())->store(),
-    'bao-nghi-detail' => (new BaoNghiController())->detail(),
-    'bao-nghi-cancel' => (new BaoNghiController())->cancel(),
+   
 
-    default => (new DashboardHDVController())->home(),
-};
+    
+

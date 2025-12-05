@@ -146,6 +146,7 @@ class KhachDoanModel
 
             return $stmt->execute();
         } catch (PDOException $e) {
+            error_log("Lỗi Update Checkin: " . $e->getMessage());
             return false;
         }
     }
