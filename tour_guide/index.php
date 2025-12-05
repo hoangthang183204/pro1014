@@ -88,7 +88,9 @@ match ($act) {
     // Khách đoàn routes
     'xem_danh_sach_khach' => (new KhachDoanController())->index(),
     'check_in_khach' => (new KhachDoanController())->update_checkin_status(),
+    'check_in_bulk' => (new KhachDoanController())->check_in_bulk(),
     'confirm_yeu_cau' => (new KhachDoanController())->confirm_yeu_cau(),
+    'update_checkin_status' => (new KhachDoanController())->update_checkin_status(),
 
     // Lịch trình routes
     'lich-trinh' => (new LichTrinhController())->index(),
