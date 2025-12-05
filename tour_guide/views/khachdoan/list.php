@@ -24,7 +24,7 @@
                             <?php else: ?>
                                 <?php foreach ($dsTram as $tram): ?>
                                     <option value="<?= $tram['id'] ?>" <?= $selected_tram_id == $tram['id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($tram['ten_tram']) ?>
+                                        Trạm <?= $tram['thu_tu'] ?>: <?= htmlspecialchars($tram['ten_tram']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
