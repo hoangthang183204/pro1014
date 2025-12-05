@@ -146,6 +146,32 @@
             right: 20px;
             z-index: 1000;
         }
+        
+        /* Status badges */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .status-paid {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+        
+        .status-unpaid {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+        
+        .status-hold {
+            background-color: #fff3cd;
+            color: #664d03;
+            border: 1px solid #ffecb5;
+        }
     </style>
 </head>
 <body>
@@ -184,10 +210,9 @@
                 </div>
                 <div class="col-6 text-end">
                     <h3 class="invoice-title mb-2">HÓA ĐƠN THANH TOÁN</h3>
-                    <p class="mb-1"><strong>Mã hóa đơn:</strong> <?php echo $hoa_don['ma_hoa_don'] ?? 'HD' . date('YmdHis'); ?></p>
-                    <p class="mb-1"><strong>Mã booking:</strong> <?php echo $dat_tour['ma_dat_tour']; ?></p>
+                    <p class="mb-1"><strong>Mã hóa đơn:</strong> <?php echo isset($hoa_don['ma_hoa_don']) ? $hoa_don['ma_hoa_don'] : 'HD' . date('YmdHis'); ?></p>
+                    <p class="mb-1"><strong>Mã booking:</strong> <?php echo htmlspecialchars($dat_tour['ma_dat_tour'] ?? 'N/A'); ?></p>
                     <p class="mb-1"><strong>Ngày lập:</strong> <?php echo date('d/m/Y'); ?></p>
-                    <p class="mb-0"><strong>Hạn thanh toán:</strong> <?php echo date('d/m/Y', strtotime('+2 days')); ?></p>
                 </div>
             </div>
         </div>
@@ -278,14 +303,21 @@
                                     ?>
                                 </td>
                                 <td class="text-center">
-                                    <?php echo ($dat_tour['so_luong_khach'] ?? 0) . ' khách'; ?>
+                                    <?php 
+                                    $so_luong = $dat_tour['so_luong_khach'] ?? 0;
+                                    echo ($so_luong > 0 ? $so_luong : 1) . ' khách'; 
+                                    ?>
                                 </td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($dat_tour['gia_tour'])) {
+                                    if (isset($dat_tour['gia_tour']) && $dat_tour['gia_tour'] > 0) {
                                         echo number_format($dat_tour['gia_tour'], 0, ',', '.') . '₫';
                                     } else {
-                                        echo 'N/A';
+                                        // Nếu không có giá tour, tính từ tổng tiền / số lượng
+                                        $gia_tour = isset($dat_tour['tong_tien']) && $dat_tour['tong_tien'] > 0 && $so_luong > 0 
+                                            ? $dat_tour['tong_tien'] / $so_luong 
+                                            : 0;
+                                        echo number_format($gia_tour, 0, ',', '.') . '₫';
                                     }
                                     ?>
                                 </td>
@@ -322,7 +354,7 @@
                                 <td><?php echo htmlspecialchars($khach['ho_ten'] ?? 'N/A'); ?></td>
                                 <td class="text-center">
                                     <?php 
-                                    if (isset($khach['ngay_sinh']) && !empty($khach['ngay_sinh'])) {
+                                    if (isset($khach['ngay_sinh']) && !empty($khach['ngay_sinh']) && $khach['ngay_sinh'] != '0000-00-00') {
                                         echo date('d/m/Y', strtotime($khach['ngay_sinh']));
                                     } else {
                                         echo 'N/A';
@@ -332,7 +364,14 @@
                                 <td class="text-center">
                                     <?php 
                                     if (isset($khach['gioi_tinh'])) {
-                                        echo $khach['gioi_tinh'];
+                                        $gioi_tinh = $khach['gioi_tinh'];
+                                        if ($gioi_tinh == 'nam') {
+                                            echo '<span class="badge bg-primary">Nam</span>';
+                                        } elseif ($gioi_tinh == 'nữ') {
+                                            echo '<span class="badge bg-danger">Nữ</span>';
+                                        } else {
+                                            echo '<span class="badge bg-secondary">Khác</span>';
+                                        }
                                     } else {
                                         echo 'N/A';
                                     }
@@ -343,10 +382,10 @@
                                 </td>
                                 <td>
                                     <?php 
-                                    if (isset($khach['ghi_chu']) && !empty($khach['ghi_chu'])) {
+                                    if (isset($khach['ghi_chu']) && !empty(trim($khach['ghi_chu']))) {
                                         echo htmlspecialchars($khach['ghi_chu']);
                                     } else {
-                                        echo 'Không có';
+                                        echo '<span class="text-muted">Không có</span>';
                                     }
                                     ?>
                                 </td>
@@ -371,42 +410,25 @@
                             <table class="table table-borderless table-sm mb-0">
                                 <tr>
                                     <td width="60%"><strong>Tổng tiền tour:</strong></td>
-                                    <td class="text-end">
+                                    <td class="text-end fw-bold fs-5 text-blue">
                                         <?php 
-                                        if (isset($dat_tour['tong_tien'])) {
-                                            echo number_format($dat_tour['tong_tien'], 0, ',', '.') . '₫';
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Đã thanh toán:</strong></td>
-                                    <td class="text-end text-green">
-                                        <?php 
-                                        $da_thanh_toan = $hoa_don['da_thanh_toan'] ?? 0;
-                                        echo number_format($da_thanh_toan, 0, ',', '.') . '₫';
-                                        ?>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Còn nợ:</strong></td>
-                                    <td class="text-end text-red">
-                                        <?php 
-                                        $con_no = $hoa_don['con_no'] ?? ($dat_tour['tong_tien'] ?? 0);
-                                        echo number_format($con_no, 0, ',', '.') . '₫';
+                                        $tong_tien = $dat_tour['tong_tien'] ?? 0;
+                                        echo number_format($tong_tien, 0, ',', '.') . '₫';
                                         ?>
                                     </td>
                                 </tr>
                                 <tr class="border-top">
-                                    <td><strong>TỔNG CỘNG:</strong></td>
-                                    <td class="text-end fw-bold fs-5 text-blue">
+                                    <td><strong>Trạng thái thanh toán:</strong></td>
+                                    <td class="text-end">
                                         <?php 
-                                        if (isset($dat_tour['tong_tien'])) {
-                                            echo number_format($dat_tour['tong_tien'], 0, ',', '.') . '₫';
+                                        $trang_thai = $dat_tour['trang_thai'] ?? 'chưa thanh toán';
+                                        
+                                        if ($trang_thai == 'đã thanh toán') {
+                                            echo '<span class="status-badge status-paid"><i class="fas fa-check-circle me-1"></i> Đã thanh toán</span>';
+                                        } elseif ($trang_thai == 'giữ chỗ') {
+                                            echo '<span class="status-badge status-hold"><i class="fas fa-clock me-1"></i> Giữ chỗ</span>';
                                         } else {
-                                            echo 'N/A';
+                                            echo '<span class="status-badge status-unpaid"><i class="fas fa-times-circle me-1"></i> Chưa thanh toán</span>';
                                         }
                                         ?>
                                     </td>
@@ -426,7 +448,7 @@
                     <p class="mb-2">
                         <strong>
                             <?php 
-                            $phuong_thuc = $hoa_don['phuong_thuc_thanh_toan'] ?? 'tiền mặt';
+                            $phuong_thuc = $hoa_don['phuong_thuc_thanh_toan'] ?? 'chuyển khoản';
                             echo getPaymentMethodText($phuong_thuc);
                             ?>
                         </strong>
@@ -437,7 +459,7 @@
                     <p class="mb-1 small"><strong>Chủ tài khoản:</strong> CÔNG TY TNHH DU LỊCH LATA</p>
                     <p class="mb-0 small">
                         <strong>Nội dung chuyển khoản:</strong> 
-                        <?php echo $dat_tour['ma_dat_tour']; ?> - <?php echo htmlspecialchars($dat_tour['ho_ten'] ?? 'Khách hàng'); ?>
+                        <?php echo htmlspecialchars($dat_tour['ma_dat_tour'] ?? 'N/A'); ?> - <?php echo htmlspecialchars($dat_tour['ho_ten'] ?? 'Khách hàng'); ?>
                     </p>
                     <?php endif; ?>
                 </div>
@@ -448,7 +470,15 @@
                     <p class="fw-bold mb-1">NGƯỜI LẬP HÓA ĐƠN</p>
                     <p class="text-muted">(Ký và ghi rõ họ tên)</p>
                     <div style="margin-top: 60px;"></div>
-                    <p class="border-top pt-2"><?php echo htmlspecialchars($dat_tour['nguoi_tao_ten'] ?? 'Quản trị viên'); ?></p>
+                    <p class="border-top pt-2">
+                        <?php 
+                        if (isset($dat_tour['nguoi_tao_ten']) && !empty($dat_tour['nguoi_tao_ten'])) {
+                            echo htmlspecialchars($dat_tour['nguoi_tao_ten']);
+                        } else {
+                            echo 'Quản trị viên';
+                        }
+                        ?>
+                    </p>
                 </div>
             </div>
         </div>
@@ -459,7 +489,6 @@
                 <h6 class="alert-heading text-blue mb-2">
                     <i class="fas fa-info-circle me-2"></i>GHI CHÚ QUAN TRỌNG
                 </h6>
-                <p class="mb-1">• Quý khách vui lòng thanh toán trước ngày <strong><?php echo date('d/m/Y', strtotime('+7 days')); ?></strong></p>
                 <p class="mb-1">• Hóa đơn này là chứng từ thanh toán có giá trị pháp lý</p>
                 <p class="mb-1">• Mọi thắc mắc xin liên hệ hotline: <strong>1900 1008</strong> hoặc email: <strong>lata@viettravel.com</strong></p>
                 <p class="mb-0">• Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!</p>

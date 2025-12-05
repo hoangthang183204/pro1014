@@ -104,7 +104,7 @@
                                 </div>
                             </div>
 
-                            <!-- Ghi chú -->
+                            <!-- Ghi chú
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
@@ -115,7 +115,7 @@
                                 <div class="card-body">
                                     <textarea name="ghi_chu" class="form-control" rows="3" placeholder="Ghi chú thêm..."></textarea>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="col-lg-4">
