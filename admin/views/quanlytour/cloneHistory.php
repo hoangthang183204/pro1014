@@ -46,9 +46,8 @@
                         </div>
                     </div>
 
-                    <!-- Stats -->
                     <div class="card card-info mt-3">
-                        <div class="card-header">
+                        <!-- <div class="card-header">
                             <h3 class="card-title">Thống kê clone</h3>
                         </div>
                         <div class="card-body">
@@ -105,7 +104,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 

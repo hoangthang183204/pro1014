@@ -15,7 +15,7 @@ $lich_khoi_hanh_id = $lich_khoi_hanh['id'];
                 <div class="container-fluid">
                     <a class="navbar-brand" href="?act=lich-khoi-hanh">
                         <i class="fas fa-map-marker-alt me-2"></i>
-                        Quản Lý Trạm Dừng Chân
+                        Quản Lý Lộ Trình
                     </a>
                     <div>
                         <a href="?act=lich-khoi-hanh" class="btn btn-secondary">
@@ -83,14 +83,14 @@ $lich_khoi_hanh_id = $lich_khoi_hanh['id'];
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-header bg-success text-white">
-                                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Thêm trạm dừng chân</h5>
+                                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Thêm Lộ Trình</h5>
                             </div>
                             <div class="card-body">
                                 <form action="?act=tram-dung-chan-them" method="POST">
                                     <input type="hidden" name="lich_khoi_hanh_id" value="<?php echo $lich_khoi_hanh_id; ?>">
                                     
                                     <div class="mb-3">
-                                        <label class="form-label">Tên trạm *</label>
+                                        <label class="form-label">Tên lộ trình *</label>
                                         <input type="text" name="ten_tram" class="form-control" required 
                                                placeholder="VD: Điểm đón, Trạm nghỉ, Điểm đến...">
                                     </div>
@@ -102,7 +102,7 @@ $lich_khoi_hanh_id = $lich_khoi_hanh['id'];
                                     
                                     <div class="d-grid">
                                         <button type="submit" class="btn btn-success">
-                                            <i class="fas fa-plus me-1"></i> Thêm trạm
+                                            <i class="fas fa-plus me-1"></i> Thêm lộ trình
                                         </button>
                                     </div>
                                 </form>
@@ -114,14 +114,14 @@ $lich_khoi_hanh_id = $lich_khoi_hanh['id'];
                     <div class="col-md-8">
                         <div class="card">
                             <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách trạm dừng chân</h5>
-                                <span class="badge bg-light text-dark"><?php echo count($tram_dung_chan); ?> trạm</span>
+                                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách lộ trình</h5>
+                                <span class="badge bg-light text-dark"><?php echo count($tram_dung_chan); ?> lộ trình</span>
                             </div>
                             <div class="card-body p-0">
                                 <?php if (empty($tram_dung_chan)): ?>
                                     <div class="text-center py-4">
                                         <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
-                                        <h5 class="text-muted">Chưa có trạm dừng chân</h5>
+                                        <h5 class="text-muted">Chưa có lộ trình</h5>
                                         <p class="text-muted">Hãy thêm trạm đầu tiên cho tour này</p>
                                     </div>
                                 <?php else: ?>
@@ -130,7 +130,7 @@ $lich_khoi_hanh_id = $lich_khoi_hanh['id'];
                                             <thead class="bg-light">
                                                 <tr>
                                                     <th width="50">#</th>
-                                                    <th>Tên trạm</th>
+                                                    <th>Tên lộ trình</th>
                                                     <th width="180" class="text-center">Thao tác</th>
                                                 </tr>
                                             </thead>

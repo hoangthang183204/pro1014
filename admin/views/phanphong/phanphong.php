@@ -132,9 +132,9 @@
                                     Danh Sách Đặt Phòng
                                 </h5>
                                 <div>
-                                    <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalThemHangLoat">
+                                    <!-- <button class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalThemHangLoat">
                                         <i class="fas fa-layer-group me-1"></i> Đặt Nhiều Phòng
-                                    </button>
+                                    </button> -->
                                     <button class="btn btn-success btn-sm" onclick="printRoomList()">
                                         <i class="fas fa-print me-1"></i> In Danh Sách
                                     </button>
