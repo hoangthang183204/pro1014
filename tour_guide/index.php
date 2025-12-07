@@ -110,9 +110,6 @@ match ($act) {
      'bao-nghi' => (new BaoNghiController())->index(),
      'bao-nghi-create' => (new BaoNghiController())->create(),
      'bao-nghi-store' => (new BaoNghiController())->store(),
-     'bao-nghi-detail' => (new BaoNghiController())->detail(),
-     'bao-nghi-cancel' => (new BaoNghiController())->cancel(),
-
 
     default => (new DashboardHDVController())->home(),
 };

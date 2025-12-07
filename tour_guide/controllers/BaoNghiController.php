@@ -6,47 +6,67 @@ class BaoNghiController {
         $this->model = new BaoNghiModel();
     }
     
-     private function checkLogin() {
-        
+    private function checkLogin() {
         if (!isset($_SESSION['guide_id']) || empty($_SESSION['guide_id'])) {
-            error_log("Session guide_id not found. Redirecting to login.");
+            header("Location: " . BASE_URL_GUIDE . "?act=login");
+            exit();
+        }
+        return $_SESSION['guide_id'];
+    }
+    
+    // Phương thức chính để xem profile
+    public function myProfile() {
+        $guideId = $this->checkLogin();
+        
+        // Lấy thông tin hướng dẫn viên từ database
+        $db = new Database();
+        $sql = "SELECT * FROM huong_dan_vien WHERE id = :id";
+        $db->query($sql);
+        $db->bind(':id', $guideId);
+        $profile = $db->single();
+        
+        if (!$profile) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin hướng dẫn viên';
             header("Location: " . BASE_URL_GUIDE . "?act=login");
             exit();
         }
         
-        $guideId = $_SESSION['guide_id'];
-        error_log("Returning guide_id from session: " . $guideId);
-        return $guideId;
+        // Lấy số tour đã dẫn và đánh giá trung bình
+        $statsSql = "SELECT 
+                        COUNT(DISTINCT ct.tour_id) as so_tour_da_dan,
+                        AVG(dg.diem_danh_gia) as danh_gia_trung_binh
+                     FROM chi_tiet_tour ct
+                     LEFT JOIN danh_gia dg ON ct.tour_id = dg.tour_id AND dg.huong_dan_vien_id = :id
+                     WHERE ct.huong_dan_vien_id = :id";
+        
+        $db->query($statsSql);
+        $db->bind(':id', $guideId);
+        $stats = $db->single();
+        
+        // Truyền dữ liệu cho view
+        $GLOBALS['profile'] = $profile;
+        $GLOBALS['stats'] = $stats;
+        
+        // Hiển thị view
+        include __DIR__ . '/../views/guide/my_profile.php';
     }
     
+    // Các phương thức khác cho chức năng báo nghỉ (giữ nguyên nếu cần)
     public function index() {
         $guideId = $this->checkLogin();
         
         // Lấy danh sách yêu cầu nghỉ
         $requests = $this->model->getAllByGuideId($guideId);
         
-        // Debug: Log số lượng request
-        error_log("BaoNghiController - Requests count: " . count($requests));
-        
         // Lấy thống kê
         $stats = $this->model->getStats($guideId);
-        
-        // Tính số ngày nghỉ trong tháng
-        $daysOffResult = $this->model->countDaysOffThisMonth($guideId);
-        $daysOff = $daysOffResult['total_days'] ?? 0;
-        
-        // Gộp thống kê
-        $stats['days_off'] = $daysOff;
         
         // Truyền dữ liệu
         $GLOBALS['baoNghiRequests'] = $requests;
         $GLOBALS['baoNghiStats'] = $stats;
         
-        // Debug: Log để kiểm tra
-        error_log("BaoNghiController - Stats: " . print_r($stats, true));
-        
-        // Hiển thị view
-        include __DIR__ . '/../views/guide/my_profile.php';
+        // Hiển thị view cho tab báo nghỉ
+        include __DIR__ . '/../views/guide/index.php';
     }
     
     public function create() {
@@ -69,7 +89,7 @@ class BaoNghiController {
                     'ngay_bat_dau' => trim($_POST['ngay_bat_dau'] ?? ''),
                     'ngay_ket_thuc' => !empty($_POST['ngay_ket_thuc']) ? trim($_POST['ngay_ket_thuc']) : null,
                     'ly_do' => trim($_POST['ly_do'] ?? ''),
-                    'file_dinh_kem' => null, // Xử lý sau
+                    'file_dinh_kem' => null,
                     'trang_thai' => 'cho_duyet',
                     'nguoi_tao' => $guideId
                 ];
@@ -90,7 +110,7 @@ class BaoNghiController {
                 // Lưu vào database
                 if ($this->model->create($data)) {
                     $_SESSION['success'] = 'Gửi yêu cầu nghỉ thành công!';
-                    header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
+                    header("Location: " . BASE_URL_GUIDE . "?act=bao-nghi");
                     exit();
                 } else {
                     throw new Exception('Không thể tạo yêu cầu nghỉ');
@@ -104,69 +124,6 @@ class BaoNghiController {
         }
         
         header("Location: " . BASE_URL_GUIDE . "?act=bao-nghi");
-        exit();
-    }
-    
-    public function detail() {
-        $guideId = $this->checkLogin();
-        $id = $_GET['id'] ?? 0;
-        
-        if (!$id) {
-            $_SESSION['error'] = 'Không tìm thấy yêu cầu';
-            header("Location: " . BASE_URL_GUIDE . "?act=bao-nghi");
-            exit();
-        }
-        
-        $request = $this->model->getById($id, $guideId);
-        
-        if (!$request) {
-            $_SESSION['error'] = 'Yêu cầu không tồn tại hoặc bạn không có quyền xem';
-            header("Location: " . BASE_URL_GUIDE . "?act=bao-nghi");
-            exit();
-        }
-        
-        $GLOBALS['request'] = $request;
-        include __DIR__ . '/../views/guide/detail.php';
-    }
-    
-    public function cancel() {
-        $guideId = $this->checkLogin();
-        $id = $_GET['id'] ?? 0;
-        
-        if (!$id) {
-            $_SESSION['error'] = 'Không tìm thấy yêu cầu';
-            header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
-            exit();
-        }
-        
-        // Kiểm tra quyền sở hữu
-        $request = $this->model->getById($id, $guideId);
-        if (!$request) {
-            $_SESSION['error'] = 'Bạn không có quyền hủy yêu cầu này';
-            header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
-            exit();
-        }
-        
-        // Chỉ được hủy khi đang chờ duyệt
-        if ($request['trang_thai'] !== 'cho_duyet') {
-            $_SESSION['error'] = 'Chỉ có thể hủy yêu cầu đang chờ duyệt';
-            header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
-            exit();
-        }
-        
-        // Cập nhật trạng thái
-        $data = [
-            'trang_thai' => 'da_huy',
-            'nguoi_cap_nhat' => $guideId
-        ];
-        
-        if ($this->model->update($id, $data)) {
-            $_SESSION['success'] = 'Hủy yêu cầu nghỉ thành công';
-        } else {
-            $_SESSION['error'] = 'Không thể hủy yêu cầu';
-        }
-        
-        header("Location: " . BASE_URL_GUIDE . "?act=my-profile");
         exit();
     }
     
