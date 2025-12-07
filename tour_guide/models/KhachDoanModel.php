@@ -330,9 +330,98 @@ class KhachDoanModel
             return false;
         }
     }
+// File: models/KhachDoanModel.php
+
+public function getAllowedTramIds($lich_id)
+{
+    // 1. Lấy danh sách tất cả các trạm
+    $tramList = $this->getTramByLich($lich_id);
+    if (empty($tramList)) return [];
+
+    // Mặc định luôn cho phép trạm đầu tiên (hoặc trạm đang active)
+    $allowed = [];
+
+    // 2. Duyệt qua từng trạm để kiểm tra xem đã xong chưa
+    foreach ($tramList as $key => $tram) {
+        // Luôn thêm trạm này vào danh sách cho phép
+        $allowed[] = $tram['id'];
+
+        // --- LOGIC MỚI: ĐẾM SỐ NGƯỜI CÒN SÓT (CHƯA XỬ LÝ) ---
+        // Người còn sót là người:
+        // 1. CHƯA check-in tại trạm này (hoặc chưa có record, hoặc trạng thái là 'chưa đến')
+        // 2. VÀ KHÔNG bị vắng mặt ở các trạm trước đó
+        
+        $sqlPending = "SELECT COUNT(*) FROM khach_hang kh 
+                       JOIN phieu_dat_tour pdt ON kh.phieu_dat_tour_id = pdt.id 
+                       WHERE pdt.lich_khoi_hanh_id = :lich_id
+                       
+                       -- Điều kiện 1: Chưa xong ở trạm hiện tại
+                       AND NOT EXISTS (
+                           SELECT 1 FROM checkin_khach_hang ck 
+                           WHERE ck.khach_hang_id = kh.id 
+                           AND ck.tram_id = :tram_id 
+                           AND ck.trang_thai != 'chưa đến'
+                       )
+                       
+                       -- Điều kiện 2: Không bị vắng mặt ở trạm trước
+                       AND NOT EXISTS (
+                           SELECT 1 FROM checkin_khach_hang ck_prev
+                           JOIN tram_dung_chan t_prev ON ck_prev.tram_id = t_prev.id
+                           WHERE ck_prev.khach_hang_id = kh.id 
+                           AND ck_prev.lich_khoi_hanh_id = :lich_id
+                           AND ck_prev.trang_thai = 'vắng mặt'
+                           AND t_prev.thu_tu < :current_thu_tu
+                       )";
+
+        $stmt = $this->conn->prepare($sqlPending);
+        $stmt->execute([
+            ':lich_id' => $lich_id, 
+            ':tram_id' => $tram['id'],
+            ':current_thu_tu' => $tram['thu_tu']
+        ]);
+        
+        $pendingCount = $stmt->fetchColumn();
+
+        // Nếu còn người chưa xử lý ($pendingCount > 0)
+        // => Trạm này CHƯA XONG.
+        // => Dừng lại, không cho phép mở các trạm sau nữa.
+        if ($pendingCount > 0) {
+            return $allowed;
+        }
+
+        // Nếu $pendingCount == 0 (Tất cả đã xong hoặc đã vắng trước đó)
+        // => Trạm này ĐÃ XONG (100%).
+        // => Vòng lặp tiếp tục để thêm trạm kế tiếp vào danh sách $allowed.
+        
+        // Tuy nhiên, logic "Chặn quay lại" của bạn yêu cầu chỉ trả về trạm active.
+        // Nên ta cần kiểm tra trạm tiếp theo đã bắt đầu chưa để quyết định return.
+        
+        if (isset($tramList[$key + 1])) {
+            $nextTramId = $tramList[$key + 1]['id'];
+            
+            // Kiểm tra trạm sau có ai check-in chưa
+            $sqlNext = "SELECT COUNT(*) FROM checkin_khach_hang 
+                        WHERE lich_khoi_hanh_id = :lich_id 
+                        AND tram_id = :next_id 
+                        AND trang_thai != 'chưa đến'";
+            $stmtNext = $this->conn->prepare($sqlNext);
+            $stmtNext->execute([':lich_id' => $lich_id, ':next_id' => $nextTramId]);
+            $isNextStarted = $stmtNext->fetchColumn() > 0;
+
+            if (!$isNextStarted) {
+                // Trạm này xong, trạm sau chưa làm -> Mở cả 2 để người dùng bấm "Đi tiếp"
+                // (Sau khi bấm và check-in bên kia, vòng lặp lần sau sẽ khóa trạm này lại)
+                return [$tram['id'], $nextTramId];
+            }
+        } else {
+            // Đây là trạm cuối cùng và đã xong
+            return [$tram['id']];
+        }
+    }
+    
+    // Fallback
+    return [end($tramList)['id']];
 }
 
-
-    
-
+}
 ?>

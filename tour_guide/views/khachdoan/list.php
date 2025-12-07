@@ -16,14 +16,42 @@
                     <input type="hidden" name="id" value="<?= $_GET['id'] ?>">
 
                     <div class="col-md-5">
-                        <label class="fw-bold mb-1 text-primary"><i class="fas fa-map-marker-alt me-1"></i> Chọn Trạm Điểm Danh:</label>
+                        <label class="fw-bold mb-1 text-primary"><i class="fas fa-map-marker-alt me-1"></i> Chọn Lộ Trình Điểm Danh:</label>
                         <select name="tram_id" class="form-select border-primary fw-bold" onchange="this.form.submit()">
                             <?php if (empty($dsTram)): ?>
-                                <option value="0">Đang tạo trạm...</option>
+                                <option value="0">Đang tạo Lộ Trình...</option>
                             <?php else: ?>
+                                <?php
+                                // Lấy thứ tự (thu_tu) của trạm đang được chọn hiện tại để so sánh
+                                $current_thu_tu = 0;
+                                foreach ($dsTram as $t) {
+                                    if ($t['id'] == $selected_tram_id) {
+                                        $current_thu_tu = $t['thu_tu'];
+                                        break;
+                                    }
+                                }
+                                ?>
+
                                 <?php foreach ($dsTram as $tram): ?>
-                                    <option value="<?= $tram['id'] ?>" <?= $selected_tram_id == $tram['id'] ? 'selected' : '' ?>>
-                                        Trạm <?= $tram['thu_tu'] ?>: <?= htmlspecialchars($tram['ten_tram']) ?>
+                                    <?php
+                                    // Kiểm tra xem Lộ trình này có được phép chọn không
+                                    $isAllowed = in_array($tram['id'], $allowedTramIds);
+
+                                    // Logic hiển thị thông báo
+                                    $note = '';
+                                    if (!$isAllowed) {
+                                        if ($tram['thu_tu'] < $current_thu_tu) {
+                                            $note = '(Đã hoàn thành - Không thể quay lại)';
+                                        } else {
+                                            $note = '(Hoàn thành Lộ trình hiện tại để mở)';
+                                        }
+                                    }
+                                    ?>
+                                    <option value="<?= $tram['id'] ?>"
+                                        <?= $selected_tram_id == $tram['id'] ? 'selected' : '' ?>
+                                        <?= !$isAllowed ? 'disabled' : '' ?>
+                                        style="<?= !$isAllowed ? 'color: #999; background: #eee;' : '' ?>">
+                                        Lộ Trình <?= $tram['thu_tu'] ?>: <?= htmlspecialchars($tram['ten_tram']) ?> <?= $note ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -378,11 +406,20 @@
 
         function updateColor(element, status) {
             if (status == 'đã đến') {
-                element.css({'background-color': '#d1e7dd', 'color': '#0f5132'});
+                element.css({
+                    'background-color': '#d1e7dd',
+                    'color': '#0f5132'
+                });
             } else if (status == 'vắng mặt') {
-                element.css({'background-color': '#f8d7da', 'color': '#842029'});
+                element.css({
+                    'background-color': '#f8d7da',
+                    'color': '#842029'
+                });
             } else {
-                element.css({'background-color': '#f8f9fa', 'color': '#212529'});
+                element.css({
+                    'background-color': '#f8f9fa',
+                    'color': '#212529'
+                });
             }
         }
 
@@ -400,25 +437,28 @@
 
         $('#btnXacNhan').click(function() {
             if (!$('#confirmCheck').is(':checked')) {
-                alert('Vui lòng tích xác nhận!'); return;
+                alert('Vui lòng tích xác nhận!');
+                return;
             }
             $.ajax({
                 url: '?act=confirm_yeu_cau',
                 type: 'POST',
                 dataType: 'json',
-                data: { khach_id: currentKhachId },
+                data: {
+                    khach_id: currentKhachId
+                },
                 success: function(res) {
-                    if(res.success) { 
-                        alert('Thành công!'); 
-                        location.reload(); 
-                    } else { 
-                        alert('Lỗi: ' + res.message); 
+                    if (res.success) {
+                        alert('Thành công!');
+                        location.reload();
+                    } else {
+                        alert('Lỗi: ' + res.message);
                     }
                 }
             });
         });
     });
-    
+
     function viewYeuCau(ten, ghichu) {
         $('#viewKhachTen').text(ten);
         $('#viewYeuCau').text(ghichu);

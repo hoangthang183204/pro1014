@@ -10,33 +10,32 @@ class KhachDoanController
         $this->model = new KhachDoanModel();
     }
 
-    // Trong file KhachDoanController.php
-
-public function update_checkin_status()
-{
-    // Kiểm tra đăng nhập
-    if (!checkGuideLogin()) {
-        echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
-        exit(); // <--- Thêm exit
-    }
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $id = $_POST['id'] ?? null;
-        $status = $_POST['status'] ?? 'chưa đến';
-        $tram_id = $_POST['tram_id'] ?? null;
-
-        if ($id && $tram_id) {
-            $result = $this->model->updateCheckIn($id, $status, $tram_id);
-            echo json_encode(['success' => $result]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Thiếu dữ liệu']);
+    public function update_checkin_status()
+    {
+        // Kiểm tra đăng nhập
+        if (!checkGuideLogin()) {
+            echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
+            exit();
         }
-        exit(); // <--- BẮT BUỘC PHẢI CÓ DÒNG NÀY để ngắt HTML thừa
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? null;
+            $status = $_POST['status'] ?? 'chưa đến';
+            $tram_id = $_POST['tram_id'] ?? null;
+
+            if ($id && $tram_id) {
+                $result = $this->model->updateCheckIn($id, $status, $tram_id);
+                echo json_encode(['success' => $result]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Thiếu dữ liệu']);
+            }
+            exit(); // Đã có exit -> Tốt
+        }
     }
-}
 
     public function index()
     {
+        // 1. Kiểm tra đăng nhập
         if (!checkGuideLogin()) {
             $_SESSION['error'] = "Vui lòng đăng nhập!";
             header("Location: " . BASE_URL_GUIDE . "?act=login");
@@ -44,6 +43,8 @@ public function update_checkin_status()
         }
 
         $id_lich = $_GET['id'] ?? null;
+        
+        // Nếu chưa chọn lịch, hiển thị danh sách tour
         if (!$id_lich) {
             $guide_id = $_SESSION['guide_id'];
             $myTours = $this->model->getToursByGuide($guide_id);
@@ -51,19 +52,39 @@ public function update_checkin_status()
             return;
         }
 
-
-
-        // 2. Lấy danh sách trạm & Xác định trạm hiện tại
+        // 2. Lấy danh sách trạm
         $dsTram = $this->model->getTramByLich($id_lich);
-        $selected_tram_id = $_GET['tram_id'] ?? ($dsTram[0]['id'] ?? 0);
 
-        // 3. Lấy thông tin tour & Danh sách khách theo trạm
+        // =========================================================================
+        // [LOGIC MỚI] KIỂM TRA VÀ CHẶN TRẠM CHƯA MỞ KHÓA
+        // =========================================================================
+        $allowedTramIds = $this->model->getAllowedTramIds($id_lich);
+
+        // [ĐÃ SỬA] Kiểm tra an toàn: Nếu không có trạm nào thì mặc định là 0
+        $defaultTramId = !empty($dsTram) ? $dsTram[0]['id'] : 0;
+        $requested_tram_id = $_GET['tram_id'] ?? $defaultTramId;
+
+        // Kiểm tra: Nếu trạm muốn xem KHÔNG nằm trong danh sách được phép
+        if (!empty($allowedTramIds) && !in_array($requested_tram_id, $allowedTramIds)) {
+            // Tìm trạm cao nhất (xa nhất) mà họ được phép truy cập
+            $lastAllowedId = end($allowedTramIds);
+            
+            // Chuyển hướng trình duyệt về trạm hợp lệ đó
+            header("Location: ?act=xem_danh_sach_khach&id=$id_lich&tram_id=$lastAllowedId");
+            exit();
+        }
+
+        $selected_tram_id = $requested_tram_id;
+        // =========================================================================
+
+        // 3. Lấy thông tin tour
         $info = $this->model->getTourInfoById($id_lich);
         $tourInfo = [
             'ten_tour' => $info['ten_tour'] ?? 'Không tìm thấy tour',
             'ngay_di' => isset($info['ngay_bat_dau']) ? date('d/m/Y', strtotime($info['ngay_bat_dau'])) : 'N/A'
         ];
 
+        // 4. Lấy danh sách khách và tính toán tiến độ
         $rawList = $this->model->getKhachDoanByLich($id_lich, $selected_tram_id);
         $dsKhach = [];
         $soLuongCoMat = 0;
@@ -71,16 +92,10 @@ public function update_checkin_status()
 
         if (!empty($rawList)) {
             foreach ($rawList as $row) {
-
-
-                // Lấy thông tin đã hủy trước đó
                 $daHuyTruocDo = $row['da_huy_truoc_do'] ?? 0;
-
-                // --- LOGIC ĐẾM MỚI (ĐÃ SỬA) ---
                 if ($daHuyTruocDo > 0) {
                     $tienDoCheckIn++;
                 } else {
-                    // Nếu khách bình thường, xét trạng thái hiện tại
                     if ($row['trang_thai_checkin'] == 'đã đến') {
                         $soLuongCoMat++;
                         $tienDoCheckIn++;
@@ -88,11 +103,10 @@ public function update_checkin_status()
                         $tienDoCheckIn++;
                     }
                 }
+
                 $ghiChu = $row['ghi_chu'] ?? '';
                 $nhom = "Mã vé: " . $row['ma_dat_tour'];
                 $yeuCauConfirmed = $row['yeu_cau_confirmed'] ?? 0;
-
-
 
                 $tuoi = '';
                 if (!empty($row['ngay_sinh'])) {
@@ -111,8 +125,8 @@ public function update_checkin_status()
                     'nguoi_dat' => $row['nguoi_dat'],
                     'nhom' => $nhom,
                     'ghi_chu' => $ghiChu,
-                    'da_huy_truoc_do' => $row['da_huy_truoc_do'] ?? 0,
-                    'yeu_cau_confirmed' => $yeuCauConfirmed // THÊM DÒNG NÀY
+                    'da_huy_truoc_do' => $daHuyTruocDo,
+                    'yeu_cau_confirmed' => $yeuCauConfirmed
                 ];
             }
         }
@@ -122,25 +136,25 @@ public function update_checkin_status()
 
         require_once './views/khachdoan/list.php';
     }
-    // === THÊM MỚI: Xử lý Check-in hàng loạt ===
+
+    // === Xử lý Check-in hàng loạt ===
     public function check_in_bulk()
     {
         if (!checkGuideLogin()) {
             echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
-            return;
+            exit(); // [ĐÃ SỬA] Thêm exit
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $ids = $_POST['ids'] ?? []; // Mảng ID khách hàng
+            $ids = $_POST['ids'] ?? [];
             $status = $_POST['status'] ?? '';
             $tram_id = $_POST['tram_id'] ?? 0;
 
             if (empty($ids) || empty($status) || empty($tram_id)) {
                 echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
-                return;
+                exit(); // [ĐÃ SỬA] Thêm exit
             }
 
-            // Gọi Model xử lý hàng loạt
             $count = $this->model->updateCheckInBulk($ids, $status, $tram_id);
 
             if ($count !== false) {
@@ -148,72 +162,39 @@ public function update_checkin_status()
             } else {
                 echo json_encode(['success' => false, 'message' => 'Lỗi cập nhật database']);
             }
+            exit();
         }
     }
 
-
-
-    // === THÊM MỚI: Phương thức confirm yêu cầu đặc biệt ===
+    // === Phương thức confirm yêu cầu đặc biệt ===
     public function confirm_yeu_cau()
     {
-        // Bật hiển thị lỗi PHP
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-
+        // Bật hiển thị lỗi PHP để debug nếu cần
+        // error_reporting(E_ALL); ini_set('display_errors', 1);
         if (!checkGuideLogin()) {
             echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
-            return;
+            exit(); // [ĐÃ SỬA] Thêm exit
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Debug chi tiết
-            error_log("=== CONFIRM YEU CAU DEBUG ===");
-            error_log("POST data: " . print_r($_POST, true));
-            error_log("Session guide_id: " . ($_SESSION['guide_id'] ?? 'NOT SET'));
-
             $khach_id = $_POST['khach_id'] ?? null;
 
-            error_log("khach_id từ POST: " . ($khach_id ?: 'NULL'));
-
-            if (!$khach_id) {
-                error_log("ERROR: Thiếu khach_id");
-                echo json_encode(['success' => false, 'message' => 'Thiếu ID khách hàng']);
-                return;
-            }
-
-            // Kiểm tra xem khach_id có phải là số không
-            if (!is_numeric($khach_id)) {
-                error_log("ERROR: khach_id không phải số: " . $khach_id);
+            if (!$khach_id || !is_numeric($khach_id)) {
                 echo json_encode(['success' => false, 'message' => 'ID khách hàng không hợp lệ']);
-                return;
+                exit(); // [ĐÃ SỬA] Thêm exit
             }
 
-            // CHỈ CẦN khach_id, không cần tram_id nữa
             try {
                 $result = $this->model->confirmYeuCauDacBiet($khach_id);
-
-                error_log("Kết quả từ Model: " . ($result ? 'TRUE' : 'FALSE'));
-
                 if ($result) {
                     echo json_encode(['success' => true, 'message' => 'Đã xác nhận thành công']);
                 } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => 'Không thể xác nhận. Vui lòng kiểm tra: 
-                    1. Cột yeu_cau_dac_biet_confirmed có trong bảng checkin_khach_hang không?
-                    2. Khách hàng có tồn tại không?
-                    3. Kiểm tra error log PHP.'
-                    ]);
+                    echo json_encode(['success' => false, 'message' => 'Không thể xác nhận.']);
                 }
             } catch (Exception $e) {
-                error_log("EXCEPTION in confirm_yeu_cau: " . $e->getMessage());
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Lỗi hệ thống: ' . $e->getMessage()
-                ]);
+                echo json_encode(['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
             }
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ']);
+            exit();
         }
     }
-}
+} 
