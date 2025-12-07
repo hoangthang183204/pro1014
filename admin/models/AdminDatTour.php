@@ -25,6 +25,43 @@ class AdminDatTour
         }
     }
 
+    // Thêm phương thức này vào class AdminDatTour
+    public function getTourImageByDatTour($dat_tour_id)
+    {
+        try {
+            $query = "SELECT 
+            t.hinh_anh,
+            t.ten_tour,
+            t.ma_tour
+        FROM phieu_dat_tour pdt
+        JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
+        JOIN tour t ON lkh.tour_id = t.id
+        WHERE pdt.id = :dat_tour_id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':dat_tour_id' => $dat_tour_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($result && !empty($result['hinh_anh'])) {
+                // Xử lý đường dẫn ảnh
+                if (filter_var($result['hinh_anh'], FILTER_VALIDATE_URL)) {
+                    $result['hinh_anh_full'] = $result['hinh_anh'];
+                } elseif (strpos($result['hinh_anh'], 'http') === 0 || strpos($result['hinh_anh'], '//') === 0) {
+                    $result['hinh_anh_full'] = $result['hinh_anh'];
+                } else {
+                    $result['hinh_anh_full'] = 'uploads/tours/' . $result['hinh_anh'];
+                }
+            } else {
+                $result['hinh_anh_full'] = 'https://via.placeholder.com/600x400?text=Chưa+có+ảnh';
+            }
+
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Lỗi getTourImageByDatTour: " . $e->getMessage());
+            return null;
+        }
+    }
+
     // Lấy khách hàng chính
     public function getKhachHangChinh($phieu_dat_tour_id)
     {

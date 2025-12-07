@@ -4,29 +4,46 @@
 
 <div class="content-wrapper">
     <section class="content">
-        <div class="container mt-4">
-            <!-- Header -->
-            <div class="content-header mb-3">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                Clone Tour Thành Công!
-                            </h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="?act=dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="?act=tour"><i class="fas fa-suitcase"></i> Quản lý Tour</a></li>
-                                <li class="breadcrumb-item"><a href="?act=tour-edit&id=<?php echo $tour['id']; ?>"><?php echo htmlspecialchars($tour['ten_tour']); ?></a></li>
-                                <li class="breadcrumb-item active text-success"><i class="fas fa-check-circle"></i> Clone thành công</li>
-                            </ol>
-                        </div>
-                    </div>
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    Clone Tour Thành Công!
+                </a>
+                <div>
+                    <a href="?act=tour" class="btn btn-outline-light me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Về Danh sách Tour
+                    </a>
                 </div>
             </div>
+        </nav>
+        <div class="container mt-4">
+            <!-- Thông báo -->
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <div class="flex-grow-1">
+                            <?php echo htmlspecialchars($_SESSION['success']); ?>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
 
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <div class="flex-grow-1">
+                            <?php echo htmlspecialchars($_SESSION['error']); ?>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
             <!-- Success Card -->
             <div class="card card-success">
                 <div class="card-header">
@@ -121,8 +138,8 @@
                                                 </p>
                                             </div>
                                             <div class="media-right">
-                                                <a href="index.php?act=tour-edit&id=<?php echo $original_tour['id']; ?>" 
-                                                   class="btn btn-sm btn-outline-secondary">
+                                                <a href="index.php?act=tour-edit&id=<?php echo $original_tour['id']; ?>"
+                                                    class="btn btn-sm btn-outline-secondary">
                                                     <i class="fas fa-external-link-alt"></i> Mở tour gốc
                                                 </a>
                                             </div>
@@ -139,8 +156,8 @@
                                         <h6 class="card-title mb-0">Hình ảnh tour</h6>
                                     </div>
                                     <div class="card-body text-center">
-                                        <img src="uploads/tours/<?php echo htmlspecialchars($tour['hinh_anh']); ?>" 
-                                             alt="Tour Image" class="img-fluid rounded" style="max-height: 200px;">
+                                        <img src="uploads/tours/<?php echo htmlspecialchars($tour['hinh_anh']); ?>"
+                                            alt="Tour Image" class="img-fluid rounded" style="max-height: 200px;">
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -155,24 +172,24 @@
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="list-group list-group-flush">
-                                        <a href="index.php?act=tour-edit&id=<?php echo $tour['id']; ?>" 
-                                           class="list-group-item list-group-item-action">
+                                        <a href="index.php?act=tour-edit&id=<?php echo $tour['id']; ?>"
+                                            class="list-group-item list-group-item-action">
                                             <i class="fas fa-edit me-2 text-primary"></i>Sửa tour mới
                                         </a>
-                                        <a href="index.php?act=tour-lich-trinh&tour_id=<?php echo $tour['id']; ?>" 
-                                           class="list-group-item list-group-item-action">
+                                        <a href="index.php?act=tour-lich-trinh&tour_id=<?php echo $tour['id']; ?>"
+                                            class="list-group-item list-group-item-action">
                                             <i class="fas fa-calendar-alt me-2 text-info"></i>Quản lý lịch trình
                                         </a>
-                                        <a href="index.php?act=tour-phien-ban&tour_id=<?php echo $tour['id']; ?>" 
-                                           class="list-group-item list-group-item-action">
+                                        <a href="index.php?act=tour-phien-ban&tour_id=<?php echo $tour['id']; ?>"
+                                            class="list-group-item list-group-item-action">
                                             <i class="fas fa-tags me-2 text-warning"></i>Phiên bản tour
                                         </a>
-                                        <a href="index.php?act=tour-media&tour_id=<?php echo $tour['id']; ?>" 
-                                           class="list-group-item list-group-item-action">
+                                        <a href="index.php?act=tour-media&tour_id=<?php echo $tour['id']; ?>"
+                                            class="list-group-item list-group-item-action">
                                             <i class="fas fa-images me-2 text-success"></i>Quản lý hình ảnh
                                         </a>
-                                        <a href="index.php?act=tour" 
-                                           class="list-group-item list-group-item-action">
+                                        <a href="index.php?act=tour"
+                                            class="list-group-item list-group-item-action">
                                             <i class="fas fa-list me-2 text-secondary"></i>Danh sách tour
                                         </a>
                                     </div>
@@ -218,8 +235,8 @@
 <?php include './views/layout/footer.php'; ?>
 
 <script>
-// Tự động chuyển về trang edit sau 10 giây nếu không có hành động
-setTimeout(() => {
-    window.location.href = 'index.php?act=tour-edit&id=<?php echo $tour['id']; ?>';
-}, 10000);
+    // Tự động chuyển về trang edit sau 10 giây nếu không có hành động
+    setTimeout(() => {
+        window.location.href = 'index.php?act=tour-edit&id=<?php echo $tour['id']; ?>';
+    }, 10000);
 </script>
