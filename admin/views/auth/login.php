@@ -272,7 +272,7 @@
                     <input type="checkbox" id="remember" name="remember">
                     <label for="remember">Ghi nhớ đăng nhập</label>
                 </div>
-                <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                <!-- <a href="#" class="forgot-link">Quên mật khẩu?</a> -->
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">
@@ -281,10 +281,10 @@
             </button>
         </form>
 
-        <div class="register-section">
+        <!-- <div class="register-section">
             <span>Chưa có tài khoản?</span>
             <a href="?act=register" class="register-link">Đăng ký ngay</a>
-        </div>
+        </div> -->
     </div>
 
     <script>
