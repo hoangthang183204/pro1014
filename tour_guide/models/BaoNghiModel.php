@@ -1,15 +1,13 @@
 <?php
 class BaoNghiModel extends Database {
     
-    /**
-     * Lấy tất cả yêu cầu nghỉ của hướng dẫn viên
-     */
     public function getAllByGuideId($huong_dan_vien_id) {
         $sql = "SELECT 
                     bn.*,
                     hdv.ho_ten,
                     hdv.so_dien_thoai,
-                    hdv.email
+                    hdv.email,
+                    hdv.trang_thai as trang_thai_hdv
                 FROM bao_nghi bn
                 LEFT JOIN huong_dan_vien hdv ON bn.huong_dan_vien_id = hdv.id
                 WHERE bn.huong_dan_vien_id = :huong_dan_vien_id
@@ -30,7 +28,7 @@ class BaoNghiModel extends Database {
      * Lấy yêu cầu nghỉ theo ID
      */
     public function getById($id, $huong_dan_vien_id = null) {
-        $sql = "SELECT bn.*, hdv.ho_ten, hdv.so_dien_thoai, hdv.email 
+        $sql = "SELECT bn.*, hdv.ho_ten, hdv.so_dien_thoai, hdv.email, hdv.trang_thai as trang_thai_hdv 
                 FROM bao_nghi bn
                 LEFT JOIN huong_dan_vien hdv ON bn.huong_dan_vien_id = hdv.id
                 WHERE bn.id = :id";
@@ -65,6 +63,7 @@ class BaoNghiModel extends Database {
                     ly_do,
                     file_dinh_kem,
                     trang_thai,
+                    ghi_chu_quan_tri,
                     ngay_tao,
                     nguoi_tao
                 ) VALUES (
@@ -76,6 +75,7 @@ class BaoNghiModel extends Database {
                     :ly_do,
                     :file_dinh_kem,
                     :trang_thai,
+                    :ghi_chu_quan_tri,
                     NOW(),
                     :nguoi_tao
                 )";
@@ -92,6 +92,7 @@ class BaoNghiModel extends Database {
             $this->bind(':ly_do', $data['ly_do']);
             $this->bind(':file_dinh_kem', $data['file_dinh_kem'] ?? null);
             $this->bind(':trang_thai', $data['trang_thai']);
+            $this->bind(':ghi_chu_quan_tri', $data['ghi_chu_quan_tri'] ?? null);
             $this->bind(':nguoi_tao', $data['nguoi_tao']);
             
             $result = $this->execute();
@@ -113,6 +114,7 @@ class BaoNghiModel extends Database {
                     ly_do = :ly_do,
                     file_dinh_kem = :file_dinh_kem,
                     trang_thai = :trang_thai,
+                    ghi_chu_quan_tri = :ghi_chu_quan_tri,
                     ngay_cap_nhat = NOW(),
                     nguoi_cap_nhat = :nguoi_cap_nhat
                 WHERE id = :id";
@@ -128,6 +130,7 @@ class BaoNghiModel extends Database {
             $this->bind(':ly_do', $data['ly_do']);
             $this->bind(':file_dinh_kem', $data['file_dinh_kem'] ?? null);
             $this->bind(':trang_thai', $data['trang_thai']);
+            $this->bind(':ghi_chu_quan_tri', $data['ghi_chu_quan_tri'] ?? null);
             $this->bind(':nguoi_cap_nhat', $data['nguoi_cap_nhat'] ?? $data['huong_dan_vien_id']);
             
             $result = $this->execute();
@@ -258,9 +261,57 @@ class BaoNghiModel extends Database {
     }
     
     /**
+     * Lấy tất cả yêu cầu thay đổi trạng thái (cho admin)
+     */
+    public function getAllStatusChangeRequests() {
+        $sql = "SELECT 
+                    bn.*,
+                    hdv.ho_ten,
+                    hdv.so_dien_thoai,
+                    hdv.email,
+                    hdv.trang_thai as trang_thai_hien_tai
+                FROM bao_nghi bn
+                LEFT JOIN huong_dan_vien hdv ON bn.huong_dan_vien_id = hdv.id
+                WHERE bn.loai_nghi = 'thay_doi_trang_thai'
+                ORDER BY bn.ngay_tao DESC";
+        
+        try {
+            $this->query($sql);
+            return $this->resultSet() ?: [];
+        } catch (Exception $e) {
+            error_log("Error in getAllStatusChangeRequests: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Lấy tất cả yêu cầu nghỉ (cho admin)
+     */
+    public function getAllRequests() {
+        $sql = "SELECT 
+                    bn.*,
+                    hdv.ho_ten,
+                    hdv.so_dien_thoai,
+                    hdv.email,
+                    hdv.trang_thai as trang_thai_hdv
+                FROM bao_nghi bn
+                LEFT JOIN huong_dan_vien hdv ON bn.huong_dan_vien_id = hdv.id
+                ORDER BY bn.ngay_tao DESC";
+        
+        try {
+            $this->query($sql);
+            return $this->resultSet() ?: [];
+        } catch (Exception $e) {
+            error_log("Error in getAllRequests: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
      * Phương thức hỗ trợ để lấy ID vừa insert
      */
     public function lastInsertId() {
         return parent::lastInsertId();
     }
 }
+?>
