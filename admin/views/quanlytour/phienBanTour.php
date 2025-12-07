@@ -5,24 +5,25 @@
 
 <div class="content-wrapper">
     <section class="content">
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-code-branch me-2"></i>
+                    Quản lý Phiên Bản: <?php echo htmlspecialchars($tour['ma_tour'] . ' - ' . $tour['ten_tour']); ?>
+                </a>
+                <div>
+                    <a href="?act=tour" class="btn btn-outline-light me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Về Danh sách Tour
+                    </a>
+                    <a href="?act=phien-ban-create&tour_id=<?php echo $tour['id']; ?>" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i> Tạo Phiên Bản Mới
+                    </a>
+                </div>
+            </div>
+        </nav>
         <div class="container mt-4">
             <!-- Header -->
-            <nav class="navbar navbar-dark bg-dark">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="#">
-                        <i class="fas fa-code-branch me-2"></i>
-                        Quản lý Phiên Bản: <?php echo htmlspecialchars($tour['ma_tour'] . ' - ' . $tour['ten_tour']); ?>
-                    </a>
-                    <div>
-                        <a href="?act=tour" class="btn btn-outline-light me-2">
-                            <i class="fas fa-arrow-left me-1"></i> Về Danh sách Tour
-                        </a>
-                        <a href="?act=phien-ban-create&tour_id=<?php echo $tour['id']; ?>" class="btn btn-success">
-                            <i class="fas fa-plus me-1"></i> Tạo Phiên Bản Mới
-                        </a>
-                    </div>
-                </div>
-            </nav>
+
 
             <!-- Thông báo -->
             <?php if (isset($_SESSION['success'])): ?>

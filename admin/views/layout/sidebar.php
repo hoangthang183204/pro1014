@@ -113,14 +113,14 @@
               </li>
             </ul>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a href=" <?= BASE_URL_ADMIN . '?act=chinh-sach' ?> " class="nav-link">
               <i class="nav-icon fas fa-file-contract"></i>
               <p>
                 Chính Sách
               </p>
             </a>
-          </li>
+          </li> -->
           <!--  -->
         </ul>
       </nav>

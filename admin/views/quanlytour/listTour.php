@@ -21,12 +21,30 @@
 
             <div class="container mt-4">
                 <!-- Thông báo -->
-                <?php if (isset($_GET['success'])): ?>
-                    <div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <div class="flex-grow-1">
+                                <?php echo htmlspecialchars($_SESSION['success']); ?>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                    <?php unset($_SESSION['success']); ?>
                 <?php endif; ?>
 
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <div class="flex-grow-1">
+                                <?php echo htmlspecialchars($_SESSION['error']); ?>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
                 <?php endif; ?>
 
                 <!-- Bộ lọc -->
@@ -82,7 +100,8 @@
                                     <thead class="bg-light">
                                         <tr>
                                             <th width="120">Mã Tour</th>
-                                            <th>Tên Tour</th>
+                                            <th width="200">Tên Tour</th>
+                                            <th>Ảnh Tour</th>
                                             <th width="150">Danh mục</th>
                                             <th width="150" class="text-center">Giá</th>
                                             <th width="120" class="text-center">Trạng thái</th>
@@ -92,7 +111,7 @@
                                     <tbody>
                                         <?php foreach ($tours as $tour): ?>
                                             <?php
-                                            // Kiểm tra quyền xoá (chỉ được xoá khi trạng thái là "tạm dừng")
+
                                             $cho_phep_xoa = ($tour['trang_thai'] === 'tạm dừng');
                                             ?>
                                             <tr>
@@ -105,6 +124,16 @@
                                                         <small class="text-muted">
                                                             <?php echo htmlspecialchars(mb_substr($tour['mo_ta'], 0, 100) . (strlen($tour['mo_ta']) > 100 ? '...' : '')); ?>
                                                         </small>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <?php if (!empty($tour['hinh_anh'])): ?>
+                                                        <img src="uploads/tours/<?php echo htmlspecialchars($tour['hinh_anh']); ?>"
+                                                            alt="<?php echo htmlspecialchars($tour['ten_tour']); ?>"
+                                                            class="img-thumbnail tour-image"
+                                                            style="width: 100px; height: 80px; object-fit: cover;">
+                                                    <?php else: ?>
+                                                        <span class="text-muted small">Không có ảnh</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>

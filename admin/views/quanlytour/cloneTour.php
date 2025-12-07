@@ -4,29 +4,20 @@
 
 <div class="content-wrapper">
     <section class="content">
-        <div class="container mt-4">
-            <!-- Header -->
-            <div class="content-header mb-3">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">
-                                <i class="fas fa-copy me-2"></i>
-                                Clone Tour: <span class="text-primary"><?php echo htmlspecialchars($tour['ten_tour']); ?></span>
-                            </h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="?act=dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="?act=tour"><i class="fas fa-suitcase"></i> Quản lý Tour</a></li>
-                                <li class="breadcrumb-item"><a href="?act=tour-edit&id=<?php echo $tour['id']; ?>"><?php echo htmlspecialchars($tour['ten_tour']); ?></a></li>
-                                <li class="breadcrumb-item active"><i class="fas fa-copy"></i> Clone Tour</li>
-                            </ol>
-                        </div>
-                    </div>
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand">
+                    <i class="fas fa-copy me-2"></i>
+                    Clone Tour: <span class="text-primary"><?php echo htmlspecialchars($tour['ten_tour']); ?></span>
+                </a>
+                <div>
+                    <a href="?act=tour" class="btn btn-outline-light me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Về Danh sách Tour
+                    </a>
                 </div>
             </div>
-
+        </nav>
+        <div class="container mt-4">
             <!-- Thông báo -->
             <?php if (isset($_SESSION['success'])): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">

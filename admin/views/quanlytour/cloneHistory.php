@@ -4,29 +4,20 @@
 
 <div class="content-wrapper">
     <section class="content">
-        <div class="container mt-4">
-            <!-- Header -->
-            <div class="content-header mb-3">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">
-                                <i class="fas fa-history me-2"></i>
-                                Lịch sử Clone: <span class="text-primary"><?php echo htmlspecialchars($tour['ten_tour']); ?></span>
-                            </h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="?act=dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
-                                <li class="breadcrumb-item"><a href="?act=tour"><i class="fas fa-suitcase"></i> Quản lý Tour</a></li>
-                                <li class="breadcrumb-item"><a href="?act=tour-edit&id=<?php echo $tour['id']; ?>"><?php echo htmlspecialchars($tour['ten_tour']); ?></a></li>
-                                <li class="breadcrumb-item active"><i class="fas fa-history"></i> Lịch sử clone</li>
-                            </ol>
-                        </div>
-                    </div>
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand">
+                    <i class="fas fa-history me-2"></i>
+                    Lịch sử Clone: <span class="text-primary"><?php echo htmlspecialchars($tour['ten_tour']); ?></span>
+                </a>
+                <div>
+                    <a href="?act=tour" class="btn btn-outline-light me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Về Danh sách Tour
+                    </a>
                 </div>
             </div>
-
+        </nav>
+        <div class="container mt-4">
             <div class="row">
                 <div class="col-md-3">
                     <!-- Info card -->
@@ -55,13 +46,13 @@
                                 <div class="col-6 mb-3">
                                     <div class="p-2 bg-primary bg-opacity-10 rounded">
                                         <h5 class="text-primary mb-1">
-                                            <?php 
-                                                $total_lich_trinh = 0;
-                                                foreach ($clone_history as $history) {
-                                                    $details = json_decode($history['clone_details'] ?? '{}', true);
-                                                    $total_lich_trinh += $details['lich_trinh_cloned'] ?? 0;
-                                                }
-                                                echo $total_lich_trinh;
+                                            <?php
+                                            $total_lich_trinh = 0;
+                                            foreach ($clone_history as $history) {
+                                                $details = json_decode($history['clone_details'] ?? '{}', true);
+                                                $total_lich_trinh += $details['lich_trinh_cloned'] ?? 0;
+                                            }
+                                            echo $total_lich_trinh;
                                             ?>
                                         </h5>
                                         <small class="text-muted">Lịch trình</small>
@@ -70,13 +61,13 @@
                                 <div class="col-6 mb-3">
                                     <div class="p-2 bg-success bg-opacity-10 rounded">
                                         <h5 class="text-success mb-1">
-                                            <?php 
-                                                $total_phien_ban = 0;
-                                                foreach ($clone_history as $history) {
-                                                    $details = json_decode($history['clone_details'] ?? '{}', true);
-                                                    $total_phien_ban += $details['phien_ban_cloned'] ?? 0;
-                                                }
-                                                echo $total_phien_ban;
+                                            <?php
+                                            $total_phien_ban = 0;
+                                            foreach ($clone_history as $history) {
+                                                $details = json_decode($history['clone_details'] ?? '{}', true);
+                                                $total_phien_ban += $details['phien_ban_cloned'] ?? 0;
+                                            }
+                                            echo $total_phien_ban;
                                             ?>
                                         </h5>
                                         <small class="text-muted">Phiên bản</small>
@@ -85,13 +76,13 @@
                                 <div class="col-6">
                                     <div class="p-2 bg-warning bg-opacity-10 rounded">
                                         <h5 class="text-warning mb-1">
-                                            <?php 
-                                                $total_media = 0;
-                                                foreach ($clone_history as $history) {
-                                                    $details = json_decode($history['clone_details'] ?? '{}', true);
-                                                    $total_media += $details['media_cloned'] ?? 0;
-                                                }
-                                                echo $total_media;
+                                            <?php
+                                            $total_media = 0;
+                                            foreach ($clone_history as $history) {
+                                                $details = json_decode($history['clone_details'] ?? '{}', true);
+                                                $total_media += $details['media_cloned'] ?? 0;
+                                            }
+                                            echo $total_media;
                                             ?>
                                         </h5>
                                         <small class="text-muted">Media</small>
@@ -149,11 +140,11 @@
                                                     </td>
                                                     <td>
                                                         <div class="font-weight-bold"><?php echo htmlspecialchars($history['new_tour_name']); ?></div>
-                                                        <?php 
+                                                        <?php
                                                         $details = json_decode($history['clone_details'] ?? '{}', true);
                                                         if ($details): ?>
                                                             <small class="text-muted">
-                                                                <?php 
+                                                                <?php
                                                                 $items = [];
                                                                 if (isset($details['lich_trinh_cloned']) && $details['lich_trinh_cloned'] > 0) {
                                                                     $items[] = $details['lich_trinh_cloned'] . ' lịch trình';
@@ -179,16 +170,16 @@
                                                     </td>
                                                     <td>
                                                         <div class="btn-group btn-group-sm">
-                                                            <a href="index.php?act=tour-edit&id=<?php echo $history['new_tour_id']; ?>" 
-                                                               class="btn btn-outline-primary" title="Mở">
+                                                            <a href="index.php?act=tour-edit&id=<?php echo $history['new_tour_id']; ?>"
+                                                                class="btn btn-outline-primary" title="Mở">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <a href="index.php?act=tour-clone&id=<?php echo $history['new_tour_id']; ?>" 
-                                                               class="btn btn-outline-success" title="Clone từ bản này">
+                                                            <a href="index.php?act=tour-clone&id=<?php echo $history['new_tour_id']; ?>"
+                                                                class="btn btn-outline-success" title="Clone từ bản này">
                                                                 <i class="fas fa-copy"></i>
                                                             </a>
-                                                            <a href="index.php?act=tour-lich-trinh&tour_id=<?php echo $history['new_tour_id']; ?>" 
-                                                               class="btn btn-outline-info" title="Lịch trình">
+                                                            <a href="index.php?act=tour-lich-trinh&tour_id=<?php echo $history['new_tour_id']; ?>"
+                                                                class="btn btn-outline-info" title="Lịch trình">
                                                                 <i class="fas fa-calendar-alt"></i>
                                                             </a>
                                                         </div>

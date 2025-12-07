@@ -97,33 +97,73 @@ class AdminDatTourController
         require_once 'views/dattour/createDatTour.php';
     }
 
-    // Trong method show()
     public function show()
     {
         $id = $_GET['id'] ?? 0;
 
-        // Lấy thông tin đặt tour
-        $dat_tour = $this->datTourModel->getDatTourById($id);
-
-        if (!$dat_tour) {
-            $_SESSION['error'] = "Không tìm thấy đặt tour!";
+        if (empty($id) || !is_numeric($id)) {
+            $_SESSION['error'] = "ID đặt tour không hợp lệ!";
             header('Location: index.php?act=dat-tour');
-            return;
+            exit();
         }
 
-        // Lấy tất cả khách hàng thuộc phiếu đặt tour này
-        $all_khach_hang = $this->datTourModel->getAllKhachHangByPhieuDatTour($id);
+        try {
+            // 1. Lấy thông tin đặt tour (có hình ảnh)
+            $dat_tour = $this->datTourModel->getDatTourById($id);
 
-        // Lấy khách hàng chính
-        $khach_hang_chinh = $this->datTourModel->getKhachHangChinh($id);
+            if (!$dat_tour) {
+                $_SESSION['error'] = "Không tìm thấy đặt tour với ID: $id";
+                header('Location: index.php?act=dat-tour');
+                exit();
+            }
 
-        // Lấy lịch trình tour
-        $lich_trinh_tour = $this->datTourModel->getLichTrinhByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
+            // DEBUG: Kiểm tra dữ liệu
+            // echo "<pre>"; print_r($dat_tour); echo "</pre>"; exit();
 
-        // Lấy thông tin nhà cung cấp
-        $nha_cung_cap = $this->datTourModel->getNhaCungCapByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
+            // 2. Nếu không có ảnh từ query chính, lấy riêng
+            if (empty($dat_tour['hinh_anh'])) {
+                $tourImage = $this->datTourModel->getTourImageByDatTour($id);
+                if ($tourImage) {
+                    $dat_tour['hinh_anh'] = $tourImage['hinh_anh'] ?? '';
+                    $dat_tour['hinh_anh_full'] = $tourImage['hinh_anh_full'] ?? '';
+                    $dat_tour['ten_tour'] = $tourImage['ten_tour'] ?? $dat_tour['ten_tour'];
+                }
+            }
 
-        require_once 'views/dattour/detailDatTour.php';
+            // 3. Đảm bảo có đường dẫn ảnh đầy đủ
+            if (empty($dat_tour['hinh_anh_full']) && !empty($dat_tour['hinh_anh'])) {
+                // Xử lý đường dẫn ảnh
+                $image_path = $dat_tour['hinh_anh'];
+                if (
+                    filter_var($image_path, FILTER_VALIDATE_URL) ||
+                    strpos($image_path, 'http') === 0 ||
+                    strpos($image_path, '//') === 0
+                ) {
+                    $dat_tour['hinh_anh_full'] = $image_path;
+                } else {
+                    $dat_tour['hinh_anh_full'] = 'uploads/tours/' . $image_path;
+                }
+            }
+
+            // 4. Nếu vẫn không có ảnh, dùng placeholder
+            if (empty($dat_tour['hinh_anh_full'])) {
+                $dat_tour['hinh_anh_full'] = 'https://via.placeholder.com/600x400?text=Tour+' . urlencode($dat_tour['ten_tour'] ?? 'Chưa có ảnh');
+            }
+
+            // 5. Lấy các dữ liệu khác
+            $all_khach_hang = $this->datTourModel->getAllKhachHangByPhieuDatTour($id);
+            $khach_hang_chinh = $this->datTourModel->getKhachHangChinh($id);
+            $lich_trinh_tour = $this->datTourModel->getLichTrinhByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
+            $nha_cung_cap = $this->datTourModel->getNhaCungCapByLichKhoiHanh($dat_tour['lich_khoi_hanh_id']);
+
+            // 6. Truyền dữ liệu ra view
+            require_once 'views/dattour/detailDatTour.php';
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Lỗi khi tải chi tiết đặt tour: " . $e->getMessage();
+            error_log("Lỗi trong show(): " . $e->getMessage());
+            header('Location: index.php?act=dat-tour');
+            exit();
+        }
     }
 
     // Form sửa đặt tour
