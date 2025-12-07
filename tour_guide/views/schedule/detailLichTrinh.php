@@ -483,152 +483,268 @@ $tour = array_merge([
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
 }
+
+/* Đảm bảo tất cả chữ đều đủ đậm và dễ đọc */
+body {
+    color: #333 !important;
+}
+
+/* Tiêu đề */
+.page-title {
+    color: #2c3e50 !important;
+    font-weight: 700;
+}
+
+/* Card content */
+.card-body {
+    color: #333 !important;
+}
+
+.card-body p, .card-body li, .card-body span:not(.badge) {
+    color: #333 !important;
+}
+
+.card-body strong {
+    color: #2c3e50 !important;
+}
+
+/* Timeline */
+.timeline-header h5 {
+    color: #2c3e50 !important;
+}
+
+.timeline-content p {
+    color: #333 !important;
+}
+
+/* Info box */
+.info-box {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.info-box h6 {
+    color: #2c3e50 !important;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.info-box p {
+    color: #333 !important;
+    line-height: 1.5;
+}
+
+/* Table */
+.table th {
+    color: #2c3e50 !important;
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table td {
+    color: #333 !important;
+    vertical-align: middle;
+}
+
+/* Alert */
+.alert {
+    color: #333 !important;
+}
+
+.alert h6 {
+    color: #2c3e50 !important;
+    font-weight: 600;
+}
+
+/* Checklist */
+.checklist-item {
+    background: #fff;
+    border: 1px solid #e9ecef;
+}
+
+.checklist-item h6 {
+    color: #2c3e50 !important;
+    font-weight: 600;
+}
+
+.checklist-item.text-success {
+    color: #28a745 !important;
+}
+
+/* Badge improvements */
+.badge {
+    font-weight: 600;
+}
+
+.badge-primary {
+    background-color: #3498db !important;
+    color: white !important;
+}
+
+.badge-success {
+    background-color: #28a745 !important;
+    color: white !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge-secondary {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+/* Breadcrumb */
+.breadcrumb-item a {
+    color: #3498db !important;
+    font-weight: 500;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d !important;
+    font-weight: 500;
+}
+
+/* Button text */
+.btn {
+    font-weight: 500;
+}
+
+.btn-outline-secondary {
+    color: #6c757d !important;
+    border-color: #6c757d;
+}
+
+/* Timeline day */
+.timeline-day {
+    background: #3498db !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Chính sách tour */
+.chinh-sach-item h6 {
+    color: #2c3e50 !important;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.chinh-sach-item p {
+    color: #333 !important;
+    line-height: 1.5;
+}
+
+/* Text muted nhưng vẫn đọc được */
+.text-muted {
+    color: #6c757d !important;
+    opacity: 0.9;
+}
+
+/* Card headers */
+.card-header {
+    font-weight: 600;
+}
+
+.bg-primary.text-white .mb-0,
+.bg-success.text-white .mb-0,
+.bg-info.text-white .mb-0,
+.bg-warning.text-dark .mb-0,
+.bg-dark.text-white .mb-0 {
+    color: white !important;
+}
+
+.bg-warning.text-dark .mb-0 {
+    color: #212529 !important;
+}
 </style>
 
 <script>
-// Xử lý checkbox checklist
+// Xử lý checkbox checklist - Phiên bản đơn giản và hiệu quả
 document.addEventListener('DOMContentLoaded', function() {
-    const checkboxes = document.querySelectorAll('.checklist-checkbox');
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checklistId = this.dataset.id;
-            const isChecked = this.checked ? 1 : 0;
-            
-            console.log('Sending AJAX:', {
-                checklistId: checklistId,
-                isChecked: isChecked
-            });
-            
-            // Hiển thị loading
-            const originalHTML = this.parentElement.innerHTML;
-            this.parentElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            // Gửi yêu cầu AJAX
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '<?= BASE_URL_GUIDE ?>?act=update-checklist-guide');
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            
-            xhr.onload = function() {
-                console.log('AJAX Response:', xhr.responseText);
-                
-                // Khôi phục checkbox
-                checkbox.parentElement.innerHTML = originalHTML;
-                checkbox.checked = isChecked;
-                
-                // Lắng nghe lại sự kiện
-                const newCheckbox = document.querySelector(`[data-id="${checklistId}"]`);
-                if (newCheckbox) {
-                    newCheckbox.addEventListener('change', checkboxHandler);
-                }
-                
-                if (xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            // Cập nhật giao diện
-                            const item = document.querySelector(`.checklist-item input[data-id="${checklistId}"]`).closest('.checklist-item');
-                            const text = item.querySelector('h6');
-                            
-                            if (isChecked) {
-                                text.classList.add('text-success', 'text-decoration-line-through');
-                                
-                                // Thêm thời gian hoàn thành
-                                let timeSpan = item.querySelector('.completion-time');
-                                if (!timeSpan) {
-                                    timeSpan = document.createElement('small');
-                                    timeSpan.className = 'text-muted completion-time d-block mt-1';
-                                    timeSpan.innerHTML = `<i class="fas fa-check-circle text-success mr-1"></i> Hoàn thành: ${new Date().toLocaleString('vi-VN')}`;
-                                    text.parentElement.appendChild(timeSpan);
-                                }
-                            } else {
-                                text.classList.remove('text-success', 'text-decoration-line-through');
-                                
-                                // Xóa thời gian hoàn thành
-                                const timeSpan = item.querySelector('.completion-time');
-                                if (timeSpan) {
-                                    timeSpan.remove();
-                                }
-                            }
-                            
-                            showToast('success', response.message);
-                        } else {
-                            showToast('error', response.message);
-                            // Rollback trạng thái checkbox
-                            checkbox.checked = !isChecked;
-                        }
-                    } catch (e) {
-                        console.error('JSON Parse Error:', e);
-                        showToast('error', 'Lỗi xử lý dữ liệu');
-                        checkbox.checked = !isChecked;
-                    }
-                } else {
-                    showToast('error', 'Lỗi kết nối: ' + xhr.status);
-                    checkbox.checked = !isChecked;
-                }
-            };
-            
-            xhr.onerror = function() {
-                console.error('AJAX Error');
-                // Khôi phục checkbox
-                checkbox.parentElement.innerHTML = originalHTML;
-                checkbox.checked = !isChecked;
-                showToast('error', 'Có lỗi xảy ra khi kết nối server');
-            };
-            
-            xhr.send(`id=${checklistId}&hoan_thanh=${isChecked}`);
-        });
+    // Sử dụng event delegation để xử lý sự kiện
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('checklist-checkbox')) {
+            handleChecklistChange(e.target);
+        }
     });
 });
 
-// Hàm xử lý checkbox
-function checkboxHandler() {
-    const checklistId = this.dataset.id;
-    const isChecked = this.checked ? 1 : 0;
+// Hàm xử lý thay đổi checkbox
+async function handleChecklistChange(checkbox) {
+    const checklistId = checkbox.dataset.id;
+    const isChecked = checkbox.checked;
+    const item = checkbox.closest('.checklist-item');
+    const text = item.querySelector('h6');
     
-    // Gửi AJAX request
-    $.ajax({
-        url: '<?= BASE_URL_GUIDE ?>?act=update-checklist-guide',
-        type: 'POST',
-        data: {
-            id: checklistId,
-            hoan_thanh: isChecked
-        },
-        success: function(response) {
-            const result = JSON.parse(response);
-            if (result.success) {
-                // Cập nhật giao diện
-                const item = $(`input[data-id="${checklistId}"]`).closest('.checklist-item');
-                const text = item.find('h6');
+    // Lưu trạng thái cũ để rollback nếu cần
+    const oldChecked = checkbox.checked;
+    
+    // Hiển thị loading indicator nhỏ
+    const originalHTML = text.innerHTML;
+    text.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang cập nhật...';
+    
+    try {
+        // Gửi request AJAX
+        const response = await fetch('<?= BASE_URL_GUIDE ?>?act=update-checklist-guide', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `id=${checklistId}&hoan_thanh=${isChecked ? '1' : '0'}`
+        });
+        
+        const result = await response.json();
+        
+        // Khôi phục nội dung
+        text.innerHTML = originalHTML;
+        
+        if (result.success) {
+            // Cập nhật UI dựa trên kết quả từ server
+            if (isChecked) {
+                text.classList.add('text-success', 'text-decoration-line-through');
                 
-                if (isChecked) {
-                    text.addClass('text-success text-decoration-line-through');
-                    
-                    // Thêm thời gian hoàn thành
-                    if (!item.find('.completion-time').length) {
-                        const timeHtml = `<small class="text-muted completion-time d-block mt-1">
-                                            <i class="fas fa-check-circle text-success mr-1"></i>
-                                            Hoàn thành: ${new Date().toLocaleString('vi-VN')}
-                                          </small>`;
-                        text.after(timeHtml);
-                    }
-                } else {
-                    text.removeClass('text-success text-decoration-line-through');
-                    item.find('.completion-time').remove();
+                // Thêm thời gian hoàn thành
+                let timeSpan = item.querySelector('.completion-time');
+                if (!timeSpan) {
+                    timeSpan = document.createElement('small');
+                    timeSpan.className = 'text-muted completion-time d-block mt-1';
+                    const now = new Date();
+                    const formattedTime = now.getDate().toString().padStart(2, '0') + '/' + 
+                                         (now.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                                         now.getFullYear() + ' ' + 
+                                         now.getHours().toString().padStart(2, '0') + ':' + 
+                                         now.getMinutes().toString().padStart(2, '0');
+                    timeSpan.innerHTML = `<i class="fas fa-check-circle text-success mr-1"></i> Hoàn thành: ${formattedTime}`;
+                    text.parentElement.appendChild(timeSpan);
                 }
-                
-                showToast('success', result.message);
             } else {
-                showToast('error', result.message);
-                // Rollback checkbox state
-                $(`input[data-id="${checklistId}"]`).prop('checked', !isChecked);
+                text.classList.remove('text-success', 'text-decoration-line-through');
+                
+                // Xóa thời gian hoàn thành
+                const timeSpan = item.querySelector('.completion-time');
+                if (timeSpan) {
+                    timeSpan.remove();
+                }
             }
-        },
-        error: function() {
-            showToast('error', 'Lỗi kết nối server');
-            $(`input[data-id="${checklistId}"]`).prop('checked', !isChecked);
+            
+            showToast('success', 'Cập nhật thành công');
+        } else {
+            // Rollback nếu server trả về lỗi
+            checkbox.checked = !isChecked;
+            showToast('error', result.message || 'Có lỗi xảy ra');
         }
-    });
+    } catch (error) {
+        // Rollback nếu có lỗi kết nối
+        checkbox.checked = !isChecked;
+        text.innerHTML = originalHTML;
+        showToast('error', 'Lỗi kết nối server');
+        console.error('Error:', error);
+    }
 }
 
 // Đặt lại tất cả checklist
@@ -637,13 +753,26 @@ function resetAllChecklists() {
         return;
     }
     
-    const checkboxes = document.querySelectorAll('.checklist-checkbox');
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            checkbox.checked = false;
-            checkbox.dispatchEvent(new Event('change'));
-        }
+    const checkboxes = document.querySelectorAll('.checklist-checkbox:checked');
+    
+    // Tạo mảng các promises
+    const resetPromises = Array.from(checkboxes).map(async (checkbox, index) => {
+        // Thêm delay nhỏ để tránh gửi quá nhiều request cùng lúc
+        await new Promise(resolve => setTimeout(resolve, index * 100));
+        checkbox.checked = false;
+        
+        // Kích hoạt sự kiện change
+        const event = new Event('change', { bubbles: true });
+        checkbox.dispatchEvent(event);
     });
+    
+    // Thực hiện tuần tự
+    (async () => {
+        for (let promise of resetPromises) {
+            await promise;
+        }
+        showToast('success', 'Đã đặt lại tất cả checklist');
+    })();
 }
 
 // Hiển thị thông báo
@@ -677,13 +806,6 @@ function showToast(type, message) {
     toast.addEventListener('hidden.bs.toast', function() {
         toast.remove();
     });
-}
-
-// Thêm jQuery nếu chưa có
-if (typeof jQuery == 'undefined') {
-    var script = document.createElement('script');
-    script.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
-    document.head.appendChild(script);
 }
 </script>
 
