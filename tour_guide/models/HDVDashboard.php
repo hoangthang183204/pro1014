@@ -10,6 +10,8 @@ class HDVDashboard
         $this->conn->exec("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
     }
 
+    // === CÁC PHƯƠNG THỨC CŨ (GIỮ NGUYÊN) ===
+
     /**
      * Lấy thông tin hướng dẫn viên từ nguoi_dung_id
      */
@@ -71,7 +73,7 @@ class HDVDashboard
     }
 
     /**
-     * Lấy sự cố cần xử lý (30 ngày gần nhất) - ĐÃ SỬA: thay created_at bằng thoi_gian_bao_cao
+     * Lấy sự cố cần xử lý (30 ngày gần nhất) - VẪN GIỮ NHƯNG CONTROLLER KHÔNG GỌI
      */
     public function getSuCoCanXuLy($hdvId)
     {
@@ -359,7 +361,7 @@ class HDVDashboard
     }
 
     /**
-     * Lấy checklist chưa hoàn thành
+     * Lấy checklist chưa hoàn thành - VẪN GIỮ NHƯNG CONTROLLER KHÔNG GỌI
      */
     public function getChecklistChuaHoanThanh($hdvId)
     {
@@ -491,7 +493,7 @@ class HDVDashboard
     }
 
     /**
-     * Lấy thông báo mới cho HDV - ĐÃ SỬA: thay created_at bằng thoi_gian_bao_cao
+     * Lấy thông báo mới cho HDV
      */
     public function getThongBaoMoi($hdvId)
     {
@@ -523,6 +525,238 @@ class HDVDashboard
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$hdvId, $hdvId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // === CÁC PHƯƠNG THỨC MỚI (CHO CALENDAR) ===
+
+    /**
+     * Lấy lịch làm việc của hướng dẫn viên
+     */
+    public function getLichLamViec($hdvId, $startDate = null, $endDate = null)
+    {
+        if (!$startDate) $startDate = date('Y-m-01');
+        if (!$endDate) $endDate = date('Y-m-t');
+        
+        $sql = "SELECT 
+                    ngay,
+                    loai_lich,
+                    ghi_chu,
+                    created_at
+                FROM lich_lam_viec 
+                WHERE huong_dan_vien_id = :hdv_id 
+                AND ngay BETWEEN :start_date AND :end_date
+                ORDER BY ngay ASC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':hdv_id' => $hdvId,
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
+        ]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy danh sách lịch trình tour
+     */
+    public function getLichTrinhTours($hdvId)
+    {
+        $sql = "SELECT 
+                    DISTINCT lkh.id as lich_khoi_hanh_id,
+                    t.ma_tour,
+                    t.ten_tour,
+                    lkh.ngay_bat_dau,
+                    lkh.ngay_ket_thuc,
+                    lkh.trang_thai as trang_thai_lich,
+                    pc.trang_thai_xac_nhan
+                FROM phan_cong pc
+                JOIN lich_khoi_hanh lkh ON pc.lich_khoi_hanh_id = lkh.id
+                JOIN tour t ON lkh.tour_id = t.id
+                WHERE pc.huong_dan_vien_id = :hdv_id
+                AND pc.loai_phan_cong = 'hướng dẫn viên'
+                AND lkh.trang_thai IN ('đã lên lịch', 'đang đi', 'đã hoàn thành')
+                ORDER BY lkh.ngay_bat_dau DESC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':hdv_id' => $hdvId]);
+        
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Thêm số khách cho mỗi tour
+        foreach ($results as &$tour) {
+            $sqlCount = "SELECT COUNT(DISTINCT kh.id) as so_khach
+                        FROM phieu_dat_tour pdt
+                        JOIN khach_hang kh ON pdt.id = kh.phieu_dat_tour_id
+                        WHERE pdt.lich_khoi_hanh_id = :lich_id
+                        AND pdt.trang_thai IN ('giữ chỗ', 'đã thanh toán')";
+            
+            $stmtCount = $this->conn->prepare($sqlCount);
+            $stmtCount->execute([':lich_id' => $tour['lich_khoi_hanh_id']]);
+            $count = $stmtCount->fetch(PDO::FETCH_ASSOC);
+            $tour['so_khach'] = $count['so_khach'] ?? 0;
+        }
+        
+        return $results;
+    }
+
+    /**
+     * Lấy sự kiện sắp tới trong N ngày
+     */
+    public function getUpcomingEvents($hdvId, $days = 7)
+    {
+        $startDate = date('Y-m-d');
+        $endDate = date('Y-m-d', strtotime("+{$days} days"));
+        
+        $events = [];
+        
+        // 1. Lấy lịch làm việc sắp tới
+        $sqlLichLamViec = "SELECT 
+                            ngay,
+                            loai_lich,
+                            ghi_chu
+                        FROM lich_lam_viec 
+                        WHERE huong_dan_vien_id = :hdv_id 
+                        AND ngay BETWEEN :start_date AND :end_date
+                        ORDER BY ngay ASC";
+        
+        $stmt1 = $this->conn->prepare($sqlLichLamViec);
+        $stmt1->execute([
+            ':hdv_id' => $hdvId,
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
+        ]);
+        
+        $lichLamViec = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($lichLamViec as $item) {
+            $daysUntil = floor((strtotime($item['ngay']) - strtotime($startDate)) / (60 * 60 * 24));
+            $eventTitle = $this->getEventTitle($item['loai_lich'], $item['ghi_chu']);
+            
+            $events[] = [
+                'date' => $item['ngay'],
+                'type' => $item['loai_lich'],
+                'title' => $eventTitle,
+                'ghi_chu' => $item['ghi_chu'],
+                'days_until' => $daysUntil
+            ];
+        }
+        
+        // 2. Lấy tour sắp khởi hành trong khoảng thời gian
+        $sqlTour = "SELECT 
+                        DISTINCT lkh.id as lich_khoi_hanh_id,
+                        t.ma_tour,
+                        t.ten_tour,
+                        lkh.ngay_bat_dau,
+                        lkh.ngay_ket_thuc,
+                        pc.trang_thai_xac_nhan
+                    FROM phan_cong pc
+                    JOIN lich_khoi_hanh lkh ON pc.lich_khoi_hanh_id = lkh.id
+                    JOIN tour t ON lkh.tour_id = t.id
+                    WHERE pc.huong_dan_vien_id = :hdv_id
+                    AND pc.loai_phan_cong = 'hướng dẫn viên'
+                    AND lkh.ngay_bat_dau BETWEEN :start_date AND :end_date
+                    AND lkh.trang_thai IN ('đã lên lịch', 'đang đi')
+                    ORDER BY lkh.ngay_bat_dau ASC";
+        
+        $stmt2 = $this->conn->prepare($sqlTour);
+        $stmt2->execute([
+            ':hdv_id' => $hdvId,
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
+        ]);
+        
+        $tours = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($tours as $tour) {
+            $daysUntil = floor((strtotime($tour['ngay_bat_dau']) - strtotime($startDate)) / (60 * 60 * 24));
+            
+            // Thêm số khách
+            $sqlKhach = "SELECT COUNT(DISTINCT kh.id) as so_khach
+                        FROM phieu_dat_tour pdt
+                        JOIN khach_hang kh ON pdt.id = kh.phieu_dat_tour_id
+                        WHERE pdt.lich_khoi_hanh_id = :lich_id
+                        AND pdt.trang_thai IN ('giữ chỗ', 'đã thanh toán')";
+            
+            $stmtKhach = $this->conn->prepare($sqlKhach);
+            $stmtKhach->execute([':lich_id' => $tour['lich_khoi_hanh_id']]);
+            $khach = $stmtKhach->fetch(PDO::FETCH_ASSOC);
+            
+            $events[] = [
+                'date' => $tour['ngay_bat_dau'],
+                'type' => 'tour',
+                'title' => 'Tour: ' . $tour['ten_tour'],
+                'ghi_chu' => 'Khởi hành tour ' . $tour['ma_tour'],
+                'days_until' => $daysUntil,
+                'tour_data' => [
+                    'ten_tour' => $tour['ten_tour'],
+                    'ma_tour' => $tour['ma_tour'],
+                    'so_khach' => $khach['so_khach'] ?? 0,
+                    'trang_thai_xac_nhan' => $tour['trang_thai_xac_nhan']
+                ]
+            ];
+        }
+        
+        // Sắp xếp theo ngày
+        usort($events, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+        
+        return $events;
+    }
+
+    /**
+     * Lấy thống kê calendar
+     */
+    public function getCalendarStats($hdvId)
+    {
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+        $startDate = date('Y-m-01');
+        $endDate = date('Y-m-t');
+        
+        $sql = "SELECT 
+                    SUM(CASE WHEN loai_lich = 'đã phân công' THEN 1 ELSE 0 END) as tour_days,
+                    SUM(CASE WHEN loai_lich = 'bận' THEN 1 ELSE 0 END) as busy_days,
+                    SUM(CASE WHEN loai_lich = 'nghỉ' THEN 1 ELSE 0 END) as off_days
+                FROM lich_lam_viec 
+                WHERE huong_dan_vien_id = :hdv_id 
+                AND ngay BETWEEN :start_date AND :end_date";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':hdv_id' => $hdvId,
+            ':start_date' => $startDate,
+            ':end_date' => $endDate
+        ]);
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return [
+            'tour_days' => (int)($result['tour_days'] ?? 0),
+            'busy_days' => (int)($result['busy_days'] ?? 0),
+            'off_days' => (int)($result['off_days'] ?? 0)
+        ];
+    }
+
+    /**
+     * Helper function: Tạo tiêu đề sự kiện
+     */
+    private function getEventTitle($loaiLich, $ghiChu)
+    {
+        $titles = [
+            'đã phân công' => 'Có tour',
+            'bận' => 'Bận',
+            'nghỉ' => 'Nghỉ',
+            'có thể làm' => 'Có thể làm'
+        ];
+        
+        $title = $titles[$loaiLich] ?? $loaiLich;
+        if ($ghiChu && strlen($ghiChu) > 0) {
+            $title .= ': ' . $ghiChu;
+        }
+        
+        return $title;
     }
 }
 ?>
