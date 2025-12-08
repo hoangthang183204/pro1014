@@ -942,4 +942,5 @@ function changeCalendarMonth(direction) {
     
     window.location.href = `<?= BASE_URL_GUIDE ?>?act=dashboard&month=${newMonth}&year=${newYear}`;
 }
+// 
 </script>
