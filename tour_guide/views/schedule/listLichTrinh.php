@@ -5,386 +5,751 @@ include __DIR__ . '/../layout/sidebar.php';
 
 <main class="main-content">
     <div class="container-fluid">
-        <!-- Tiêu đề -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="page-title">📅 Lịch Trình Tour Của Tôi</h1>
-            <div class="thong-ke">
-                <span class="badge badge-primary" style="color: green">Chờ lịch: <?= $thongKe['cho_len_lich'] ?></span>
-                <span class="badge badge-success" style="color: green">Đang diễn ra: <?= $thongKe['dang_dien_ra'] ?></span>
-                <span class="badge badge-secondary" style="color: green">Đã hoàn thành: <?= $thongKe['da_hoan_thanh'] ?></span>
+        <!-- Tiêu đề chính -->
+        <div class="page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div>
+                    <h1 class="page-title mb-2">📅 Lịch Trình Tour Của Tôi</h1>
+                    <p class="text-muted mb-0">Quản lý và theo dõi các tour bạn được phân công</p>
+                </div>
+                
+                <div class="d-flex flex-wrap gap-2 mt-3 mt-md-0">
+                    <a href="<?= BASE_URL_GUIDE ?>?act=lich-lam-viec" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar-alt mr-2"></i> Lịch làm việc
+                    </a>
+                    <button class="btn btn-light border" onclick="printPage()">
+                        <i class="fas fa-print mr-2"></i> In
+                    </button>
+                </div>
             </div>
-            <a href="<?= BASE_URL_GUIDE ?>?act=lich-lam-viec" class="btn btn-outline-info btn-sm">
-            <i class="fas fa-calendar-alt mr-1"></i> Lịch làm việc
-        </a>
+        </div>
+
+        <!-- Thống kê nhanh -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stats-card bg-gradient-primary">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="stats-value"><?= $thongKe['cho_len_lich'] ?></h3>
+                            <p class="stats-label mb-0">Tour chờ lịch</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card bg-gradient-success">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="stats-value"><?= $thongKe['dang_dien_ra'] ?></h3>
+                            <p class="stats-label mb-0">Tour đang diễn ra</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card bg-gradient-secondary">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="stats-value"><?= $thongKe['da_hoan_thanh'] ?></h3>
+                            <p class="stats-label mb-0">Tour đã hoàn thành</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <?= $_SESSION['error'] ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success"><?= $_SESSION['success'] ?></div>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle mr-2"></i>
+                <?= $_SESSION['success'] ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <?php unset($_SESSION['success']); ?>
         <?php endif; ?>
 
-        <!-- Danh sách lịch trình -->
-        <div class="row">
-            <?php if (empty($lichTrinhList)): ?>
-                <div class="col-12">
-                    <div class="empty-state">
-                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h3>Chưa có lịch trình nào</h3>
-                        <p>Bạn chưa được phân công tour nào sắp tới.</p>
+        <!-- Bộ lọc và tìm kiếm -->
+<div class="card filter-card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-filter mr-2"></i> Tìm kiếm & Lọc tour
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="search-box">
+                    <div class="search-icon">
+                        <i class="fas fa-search"></i>
                     </div>
+                    <input type="text" 
+                           class="form-control search-input" 
+                           placeholder="Tìm kiếm tour theo tên, mã tour..." 
+                           id="searchTours">
+                    <button class="search-clear" type="button" id="clearSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-            <?php else: ?>
-                <?php foreach ($lichTrinhList as $tour): ?>
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card lich-trinh-card h-100"
-                             data-end-date="<?= $tour['ngay_ket_thuc'] ?>">
-                            <!-- Header card -->
-                            <div class="card-header d-flex justify-content-between align-items-center"
-                                 style="background: linear-gradient(135deg, <?= $tour['trang_thai_lich'] == 'đang diễn ra' ? '#4CAF50' : '#2196F3' ?>, <?= $tour['trang_thai_lich'] == 'đang diễn ra' ? '#8BC34A' : '#03A9F4' ?>);">
-                                <span class="badge badge-light">
-                                    <?= strtoupper($tour['trang_thai_lich']) ?>
-                                </span>
-                                <span class="badge badge-<?= $tour['trang_thai_xac_nhan'] == 'đã xác nhận' ? 'success' : 'warning' ?>">
-                                    <?= $tour['trang_thai_xac_nhan'] ?>
-                                </span>
-                            </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="filter-dropdown">
+                    <div class="filter-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <select class="form-control filter-select" id="filterStatus">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="cho_len_lich">📅 Tour chờ lịch</option>
+                        <option value="dang_dien_ra">▶️ Tour đang diễn ra</option>
+                        <option value="da_hoan_thanh">✅ Tour đã hoàn thành</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <button class="btn btn-outline-secondary btn-filter w-100" id="resetFilter">
+                    <i class="fas fa-redo mr-1"></i> Đặt lại
+                </button>
+            </div>
+        </div>
+        
+        <!-- Bộ lọc nâng cao (tùy chọn) -->
+        <div class="advanced-filters mt-3" id="advancedFilters" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Thời gian</label>
+                    <select class="form-control" id="filterDate">
+                        <option value="">Tất cả thời gian</option>
+                        <option value="today">Hôm nay</option>
+                        <option value="week">Tuần này</option>
+                        <option value="month">Tháng này</option>
+                        <option value="upcoming">Sắp diễn ra</option>
+                        <option value="past">Đã qua</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Danh mục</label>
+                    <select class="form-control" id="filterCategory">
+                        <option value="">Tất cả danh mục</option>
+                        <!-- Các option danh mục sẽ được thêm bằng JavaScript nếu cần -->
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Sắp xếp</label>
+                    <select class="form-control" id="sortBy">
+                        <option value="date_asc">Ngày bắt đầu (cũ nhất)</option>
+                        <option value="date_desc">Ngày bắt đầu (mới nhất)</option>
+                        <option value="name_asc">Tên tour (A-Z)</option>
+                        <option value="name_desc">Tên tour (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nút hiển thị bộ lọc nâng cao -->
+        <div class="text-center mt-3">
+            <a href="#" class="text-decoration-none" id="toggleAdvancedFilters">
+                <i class="fas fa-cogs mr-1"></i>
+                <span>Bộ lọc nâng cao</span>
+                <i class="fas fa-chevron-down ml-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
 
-                            <!-- Nội dung -->
-                            <div class="card-body">
-                                <h5 class="card-title"><?= htmlspecialchars($tour['ten_tour']) ?></h5>
-                                <p class="card-text text-muted">
-                                    <i class="fas fa-tag mr-1"></i> <?= $tour['ten_danh_muc'] ?>
-                                </p>
-                                
-                                <div class="tour-info">
-                                    <p><i class="fas fa-calendar-alt mr-2"></i> 
-                                        <strong>Từ:</strong> <?= date('d/m/Y', strtotime($tour['ngay_bat_dau'])) ?>
-                                        <br><span class="ml-4"><strong>Đến:</strong> <?= date('d/m/Y', strtotime($tour['ngay_ket_thuc'])) ?></span>
-                                    </p>
-                                    
-                                    <p><i class="fas fa-clock mr-2"></i> 
-                                        <strong>Giờ tập trung:</strong> <?= date('H:i', strtotime($tour['gio_tap_trung'])) ?>
-                                    </p>
-                                    
-                                    <p><i class="fas fa-map-marker-alt mr-2"></i> 
-                                        <strong>Điểm tập trung:</strong> <?= htmlspecialchars($tour['diem_tap_trung']) ?>
-                                    </p>
-                                    
-                                    <p><i class="fas fa-users mr-2"></i> 
-                                        <strong>Số chỗ:</strong> <?= $tour['so_cho_con_lai'] ?>/<?= $tour['so_cho_toi_da'] ?>
-                                    </p>
+        <!-- Danh sách lịch trình -->
+        <div class="section-title mb-3">
+            <h4 class="mb-0">
+                <i class="fas fa-list-alt mr-2 text-primary"></i>
+                Danh sách tour
+                <span class="badge badge-light ml-2" id="tourCount"><?= count($lichTrinhList) ?></span>
+            </h4>
+        </div>
+
+        <?php if (empty($lichTrinhList)): ?>
+            <div class="empty-state-card">
+                <div class="empty-state-icon">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <h3 class="empty-state-title">Chưa có lịch trình nào</h3>
+                <p class="empty-state-text mb-4">Bạn chưa được phân công tour nào sắp tới.</p>
+                <a href="<?= BASE_URL_GUIDE ?>?act=profile" class="btn btn-primary">
+                    <i class="fas fa-user-edit mr-2"></i> Cập nhật hồ sơ để nhận tour
+                </a>
+            </div>
+        <?php else: ?>
+            <div class="row" id="tourList">
+                <?php foreach ($lichTrinhList as $tour): ?>
+                    <?php
+                    // Xác định màu sắc dựa trên trạng thái
+                    $statusClass = '';
+                    $statusIcon = '';
+                    $statusColor = '';
+                    
+                    switch(strtolower($tour['trang_thai_lich'])) {
+                        case 'đang diễn ra':
+                            $statusClass = 'status-active';
+                            $statusIcon = 'play-circle';
+                            $statusColor = '#10b981';
+                            break;
+                        case 'đã hoàn thành':
+                            $statusClass = 'status-completed';
+                            $statusIcon = 'check-circle';
+                            $statusColor = '#6b7280';
+                            break;
+                        default:
+                            $statusClass = 'status-pending';
+                            $statusIcon = 'clock';
+                            $statusColor = '#3b82f6';
+                    }
+                    ?>
+                    
+                    <div class="col-md-6 col-xl-4 mb-4 tour-item" 
+                         data-status="<?= strtolower($tour['trang_thai_lich']) ?>"
+                         data-name="<?= strtolower($tour['ten_tour']) ?>">
+                        <div class="tour-card h-100">
+                            <!-- Header với status indicator -->
+                            <div class="tour-card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="tour-status-indicator <?= $statusClass ?>">
+                                        <i class="fas fa-<?= $statusIcon ?> mr-2"></i>
+                                        <span class="status-text"><?= strtoupper($tour['trang_thai_lich']) ?></span>
+                                    </div>
+                                    <span class="confirmation-badge badge-<?= $tour['trang_thai_xac_nhan'] == 'đã xác nhận' ? 'confirmed' : 'pending' ?>">
+                                        <?= $tour['trang_thai_xac_nhan'] ?>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Nội dung chính -->
+                            <div class="tour-card-body">
+                                <!-- Mã tour và tên -->
+                                <div class="tour-code mb-2">
+                                    <span class="code-badge"><?= $tour['ma_tour'] ?></span>
+                                    <span class="tour-category"><?= $tour['ten_danh_muc'] ?></span>
                                 </div>
                                 
+                                <h5 class="tour-title"><?= htmlspecialchars($tour['ten_tour']) ?></h5>
+                                
+                                <!-- Thông tin chi tiết -->
+                                <div class="tour-details">
+                                    <div class="detail-item">
+                                        <i class="far fa-calendar-alt text-primary"></i>
+                                        <div>
+                                            <span class="detail-label">Thời gian</span>
+                                            <span class="detail-value">
+                                                <?= date('d/m/Y', strtotime($tour['ngay_bat_dau'])) ?> 
+                                                - <?= date('d/m/Y', strtotime($tour['ngay_ket_thuc'])) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <i class="far fa-clock text-primary"></i>
+                                        <div>
+                                            <span class="detail-label">Giờ tập trung</span>
+                                            <span class="detail-value">
+                                                <?= !empty($tour['gio_tap_trung']) ? date('H:i', strtotime($tour['gio_tap_trung'])) : 'Chưa cập nhật' ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt text-primary"></i>
+                                        <div>
+                                            <span class="detail-label">Điểm tập trung</span>
+                                            <span class="detail-value">
+                                                <?= !empty($tour['diem_tap_trung']) ? htmlspecialchars($tour['diem_tap_trung']) : 'Chưa cập nhật' ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="detail-item">
+                                        <i class="fas fa-users text-primary"></i>
+                                        <div>
+                                            <span class="detail-label">Số khách</span>
+                                            <span class="detail-value">
+                                                <?= $tour['so_cho_con_lai'] ?>/<?= $tour['so_cho_toi_da'] ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Ghi chú phân công (nếu có) -->
                                 <?php if (!empty($tour['ghi_chu_phan_cong'])): ?>
-                                    <div class="alert alert-info p-2 mt-2">
-                                        <small><i class="fas fa-sticky-note mr-1"></i> <?= htmlspecialchars($tour['ghi_chu_phan_cong']) ?></small>
+                                    <div class="assignment-note">
+                                        <div class="note-header">
+                                            <i class="fas fa-sticky-note text-info"></i>
+                                            <span>Ghi chú phân công</span>
+                                        </div>
+                                        <p class="note-text"><?= htmlspecialchars($tour['ghi_chu_phan_cong']) ?></p>
                                     </div>
                                 <?php endif; ?>
                             </div>
-
-                            <!-- Footer card -->
-                            <div class="card-footer bg-white">
-                                <div class="d-flex justify-content-between">
+                            
+                            <!-- Footer với button action -->
+                            <div class="tour-card-footer">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="tour-duration">
+                                        <?php
+                                        $start = new DateTime($tour['ngay_bat_dau']);
+                                        $end = new DateTime($tour['ngay_ket_thuc']);
+                                        $diff = $start->diff($end);
+                                        echo ($diff->days + 1) . ' ngày ' . $diff->days . ' đêm';
+                                        ?>
+                                    </div>
                                     <a href="<?= BASE_URL_GUIDE ?>?act=lich-trinh-detail&id=<?= $tour['lich_khoi_hanh_id'] ?>" 
                                        class="btn btn-primary btn-sm">
-                                        <i class="fas fa-eye mr-1"></i> Xem chi tiết
+                                        <i class="fas fa-eye mr-1"></i> Chi tiết
                                     </a>
-                                    <span class="text-muted align-self-center">
-                                        Mã: <?= $tour['ma_tour'] ?>
-                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     </div>
 </main>
 
 <style>
-/* ===== TYPOGRAPHY & BASE ===== */
+/* ===== BASE & TYPOGRAPHY ===== */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8fafc;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f7fa;
+    color: #1e293b;
+}
+
+.main-content {
+    padding: 20px;
+}
+
+.page-header {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    border-left: 4px solid #3b82f6;
 }
 
 .page-title {
-    color: #1a365d !important;
+    color: #1e293b !important;
     font-weight: 700;
-    font-size: 1.8rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 3px solid #4299e1;
-    display: inline-block;
-    margin-bottom: 1.5rem;
+    font-size: 28px;
+    margin: 0;
+    line-height: 1.3;
 }
 
-/* ===== HEADER SECTION ===== */
-.d-flex.justify-content-between.align-items-center.mb-4 {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1.5rem;
+.page-header .text-muted {
+    color: #64748b !important;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+/* ===== STATS CARDS ===== */
+.stats-card {
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem !important;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    height: 100%;
 }
 
-.thong-ke {
+.stats-card:hover {
+    transform: translateY(-4px);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.bg-gradient-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+.stats-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
 }
 
-.badge {
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+.stats-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+
+.stats-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+/* ===== FILTER CARD ===== */
+.filter-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-card .input-group-text {
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+}
+
+.filter-card .form-control {
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+}
+
+.filter-card .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+    padding: 16px 0;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.section-title h4 {
+    color: #1e293b !important;
     font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-}
-
-.badge-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-    border: none;
-}
-
-.badge-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: white !important;
-    border: none;
-}
-
-.badge-secondary {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
-    color: white !important;
-    border: none;
-}
-
-.badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    font-size: 18px;
 }
 
 /* ===== TOUR CARDS ===== */
-.lich-trinh-card {
+.tour-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
     height: 100%;
-    background: white;
-    position: relative;
-}
-
-.lich-trinh-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
-
-.lich-trinh-card:hover {
-    transform: translateY(-8px) scale(1.01);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-/* Card header với gradient đẹp */
-.card-header {
-    border: none;
-    padding: 1rem 1.25rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.card-header::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-}
-
-/* ===== CARD CONTENT ===== */
-.card-body {
-    padding: 1.5rem;
-}
-
-.card-title {
-    color: #1a365d !important;
-    font-weight: 700;
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
-}
-
-.card-text.text-muted {
-    color: #6b7280 !important;
-    font-size: 0.9rem;
     display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
+    flex-direction: column;
 }
 
-.card-text.text-muted i {
-    color: #667eea;
-    margin-right: 8px;
+.tour-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    border-color: #cbd5e1;
 }
 
-/* ===== TOUR INFO ===== */
-.tour-info {
+.tour-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
     background: #f8fafc;
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 1rem 0;
 }
 
-.tour-info p {
-    margin-bottom: 0.75rem;
-    font-size: 0.9rem;
-    color: #4a5568 !important;
-    display: flex;
-    align-items: flex-start;
-    line-height: 1.5;
-}
-
-.tour-info p i {
-    color: #667eea;
-    margin-right: 10px;
-    margin-top: 2px;
-    min-width: 20px;
-    text-align: center;
-}
-
-.tour-info strong {
-    color: #2d3748 !important;
-    font-weight: 600;
-    min-width: 110px;
-    display: inline-block;
-}
-
-/* ===== ALERT BOX ===== */
-.alert {
-    border: none;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-}
-
-.alert-info {
-    background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);
-    border-left: 4px solid #4299e1;
-    color: #2c5282 !important;
-}
-
-/* ===== CARD FOOTER ===== */
-.card-footer {
-    background: white !important;
-    border-top: 1px solid #e2e8f0 !important;
-    padding: 1rem 1.5rem;
-    border-radius: 0 0 16px 16px !important;
-}
-
-.btn {
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    border: none;
-    box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
-}
-
-/* ===== EMPTY STATE ===== */
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin: 2rem 0;
-}
-
-.empty-state i {
-    color: #cbd5e0;
-    margin-bottom: 1.5rem;
-    font-size: 4rem;
-}
-
-.empty-state h3 {
-    color: #2d3748 !important;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.empty-state p {
-    color: #718096 !important;
-    font-size: 1.1rem;
-}
-
-/* ===== BADGE ENHANCEMENT ===== */
-.card-header .badge {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.75rem;
+.tour-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.badge-light {
-    background: rgba(255, 255, 255, 0.9) !important;
-    color: #2d3748 !important;
-    backdrop-filter: blur(10px);
+.status-active {
+    background: #d1fae5;
+    color: #059669;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+.status-pending {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.status-completed {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.confirmation-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-confirmed {
+    background: #d1fae5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-pending {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.tour-card-body {
+    padding: 20px;
+    flex: 1;
+}
+
+.tour-code {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.code-badge {
+    background: #e0e7ff;
+    color: #4f46e5;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+.tour-category {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.tour-title {
+    color: #1e293b !important;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    min-height: 50px;
+}
+
+.tour-details {
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.detail-item i {
+    margin-top: 2px;
+    margin-right: 12px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.detail-label {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.detail-value {
+    display: block;
+    color: #1e293b !important;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.assignment-note {
+    background: #f0f9ff;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 16px;
+    border-left: 3px solid #0ea5e9;
+}
+
+.note-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.note-header i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.note-header span {
+    color: #0c4a6e;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.note-text {
+    color: #1e293b !important;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.tour-card-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+.tour-duration {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state-card {
+    background: white;
+    border-radius: 16px;
+    padding: 60px 40px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 40px 0;
+    border: 2px dashed #e2e8f0;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    color: #cbd5e1;
+    margin-bottom: 24px;
+}
+
+.empty-state-title {
+    color: #1e293b !important;
+    font-weight: 600;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.empty-state-text {
+    color: #64748b !important;
+    font-size: 16px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ===== ALERTS ===== */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    color: #991b1b;
+    border-left: 4px solid #dc2626;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+    color: #065f46;
+    border-left: 4px solid #059669;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .d-flex.justify-content-between.align-items-center.mb-4 {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
+    .page-title {
+        font-size: 24px;
     }
     
-    .thong-ke {
-        justify-content: center;
+    .stats-card {
+        padding: 16px;
     }
     
-    .tour-info p {
-        flex-direction: column;
-        align-items: flex-start;
+    .stats-value {
+        font-size: 24px;
     }
     
-    .tour-info strong {
-        margin-bottom: 4px;
+    .tour-card-header,
+    .tour-card-body,
+    .tour-card-footer {
+        padding: 16px;
+    }
+    
+    .tour-title {
+        font-size: 16px;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .btn,
+    .filter-card,
+    .stats-card,
+    .section-title {
+        display: none !important;
+    }
+    
+    .tour-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
     }
 }
 
 /* ===== ANIMATIONS ===== */
-@keyframes fadeIn {
+.tour-item {
+    animation: slideUp 0.4s ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -392,119 +757,433 @@ body {
     }
 }
 
-.col-md-6.col-lg-4.mb-4 {
-    animation: fadeIn 0.5s ease forwards;
+/* Tạo delay cho animation */
+.tour-item:nth-child(1) { animation-delay: 0.1s; }
+.tour-item:nth-child(2) { animation-delay: 0.2s; }
+.tour-item:nth-child(3) { animation-delay: 0.3s; }
+.tour-item:nth-child(4) { animation-delay: 0.4s; }
+.tour-item:nth-child(5) { animation-delay: 0.5s; }
+.tour-item:nth-child(6) { animation-delay: 0.6s; }
+
+.filter-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
 }
 
-.col-md-6.col-lg-4.mb-4:nth-child(1) { animation-delay: 0.1s; }
-.col-md-6.col-lg-4.mb-4:nth-child(2) { animation-delay: 0.2s; }
-.col-md-6.col-lg-4.mb-4:nth-child(3) { animation-delay: 0.3s; }
-.col-md-6.col-lg-4.mb-4:nth-child(4) { animation-delay: 0.4s; }
-.col-md-6.col-lg-4.mb-4:nth-child(5) { animation-delay: 0.5s; }
-.col-md-6.col-lg-4.mb-4:nth-child(6) { animation-delay: 0.6s; }
-
-/* ===== STATUS INDICATORS ===== */
-/* Thêm indicator nhỏ cho trạng thái tour */
-.lich-trinh-card::after {
-    content: '';
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #48bb78; /* Mặc định xanh (đang diễn ra) */
+.filter-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.lich-trinh-card[data-end-date]::after {
-    background: #4299e1; /* Xanh dương (chờ lịch) */
-}
-
-/* Override bằng JavaScript cho tour đã hoàn thành */
-.lich-trinh-card.completed::after {
-    background: #a0aec0; /* Xám (đã hoàn thành) */
-}
-
-/* ===== CUSTOM SCROLLBAR ===== */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
+.filter-card .card-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 4px;
+    color: white;
+    border-bottom: none;
+    padding: 16px 24px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-}
-
-/* ===== BUTTON ENHANCEMENT ===== */
-.btn-outline-info {
-    color: #0c4a6e !important;
-    border: 2px solid #0ea5e9;
-    background: transparent;
-    font-weight: 600;
-}
-
-.btn-outline-info:hover {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+.filter-card .card-header h5 {
     color: white !important;
-    border-color: transparent;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.3);
+    font-weight: 600;
+    margin: 0;
 }
 
-/* ===== TOUR CODE STYLING ===== */
-.text-muted.align-self-center {
-    color: #718096 !important;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.25rem 0.5rem;
-    background: #f7fafc;
-    border-radius: 6px;
+.filter-card .card-header i {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.filter-card .card-body {
+    padding: 24px;
+}
+
+/* ===== SEARCH BOX ===== */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.search-box:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-icon {
+    padding: 0 16px;
+    color: #94a3b8;
+    font-size: 16px;
+}
+
+.search-input {
+    border: none !important;
+    padding: 12px 0;
+    font-size: 15px;
+    color: #1e293b;
+    background: transparent;
+    flex: 1;
+    outline: none;
+    box-shadow: none !important;
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s;
+}
+
+.search-clear:hover {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.search-input:not(:placeholder-shown) ~ .search-clear {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===== FILTER DROPDOWN ===== */
+.filter-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.filter-dropdown:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-icon {
+    padding: 0 16px;
+    color: #94a3b8;
+    font-size: 16px;
+    background: #f8fafc;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-right: 2px solid #e2e8f0;
+}
+
+.filter-select {
+    border: none !important;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: #1e293b;
+    background: transparent;
+    flex: 1;
+    outline: none;
+    box-shadow: none !important;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+}
+
+.filter-select option {
+    padding: 8px;
+    font-size: 14px;
+}
+
+/* ===== FILTER BUTTONS ===== */
+.btn-filter {
+    height: 100%;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-weight: 500;
+    color: #64748b;
+    background: white;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-filter:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+/* ===== ADVANCED FILTERS ===== */
+.advanced-filters {
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 10px;
     border: 1px solid #e2e8f0;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.advanced-filters .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.advanced-filters .form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #1e293b;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.advanced-filters .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ===== TOGGLE ADVANCED FILTERS ===== */
+#toggleAdvancedFilters {
+    color: #3b82f6;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+#toggleAdvancedFilters:hover {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+#toggleAdvancedFilters i {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+#toggleAdvancedFilters.active i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* ===== ACTIVE FILTER BADGES ===== */
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    display: none;
+}
+
+.filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+}
+
+.filter-badge .badge-remove {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-badge .badge-remove:hover {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .filter-card .card-body {
+        padding: 16px;
+    }
+    
+    .search-box,
+    .filter-dropdown,
+    .btn-filter {
+        height: 48px;
+    }
+    
+    .search-input,
+    .filter-select {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .search-icon,
+    .filter-icon {
+        padding: 0 12px;
+    }
+    
+    .advanced-filters {
+        padding: 16px;
+    }
+    
+    .advanced-filters .form-control {
+        padding: 8px 12px;
+    }
+}
+
+/* ===== LOADING STATE ===== */
+.filter-loading {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    color: #3b82f6;
+    font-size: 14px;
+    display: none;
+}
+
+.filter-loading.active {
+    display: block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* ===== PLACEHOLDER TEXT ===== */
+.search-input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: #94a3b8;
+    font-weight: 400;
+}
+.search-input::-moz-placeholder { /* Firefox 19+ */
+    color: #94a3b8;
+    font-weight: 400;
+}
+.search-input:-ms-input-placeholder { /* IE 10+ */
+    color: #94a3b8;
+    font-weight: 400;
+}
+.search-input:-moz-placeholder { /* Firefox 18- */
+    color: #94a3b8;
+    font-weight: 400;
 }
 </style>
 
-
 <script>
-// Hàm format ngày
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-}
-
-// Cập nhật trạng thái tự động
-function updateTourStatus() {
-    const cards = document.querySelectorAll('.lich-trinh-card');
-    const now = new Date();
+// Lọc và tìm kiếm tour
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchTours');
+    const filterSelect = document.getElementById('filterStatus');
+    const tourItems = document.querySelectorAll('.tour-item');
+    const tourCount = document.getElementById('tourCount');
     
-    cards.forEach(card => {
-        const endDate = new Date(card.dataset.endDate);
-        if (endDate < now) {
-            const badge = card.querySelector('.badge-light');
-            if (badge) {
-                badge.textContent = 'ĐÃ HOÀN THÀNH';
-                badge.className = 'badge badge-secondary';
+    function filterTours() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filterValue = filterSelect.value;
+        let visibleCount = 0;
+        
+        tourItems.forEach(item => {
+            const tourName = item.dataset.name;
+            const tourStatus = item.dataset.status;
+            const matchSearch = tourName.includes(searchTerm);
+            const matchFilter = !filterValue || tourStatus === filterValue;
+            
+            if (matchSearch && matchFilter) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
             }
-        }
+        });
+        
+        tourCount.textContent = visibleCount;
+    }
+    
+    searchInput.addEventListener('input', filterTours);
+    filterSelect.addEventListener('change', filterTours);
+    
+    // Tính toán thời gian còn lại cho các tour sắp diễn ra
+    updateTourTimeRemaining();
+});
+
+function updateTourTimeRemaining() {
+    const now = new Date();
+    const tourItems = document.querySelectorAll('.tour-item[data-status="cho lịch"], .tour-item[data-status="chờ lịch"]');
+    
+    tourItems.forEach(item => {
+        // Có thể thêm logic hiển thị thời gian đếm ngược nếu cần
     });
 }
 
-// Chạy khi trang load
-document.addEventListener('DOMContentLoaded', function() {
-    updateTourStatus();
-});
+function printPage() {
+    window.print();
+}
+
+// Auto-refresh cho tour đang diễn ra
+setInterval(() => {
+    const activeTours = document.querySelectorAll('.tour-item[data-status="đang diễn ra"]');
+    if (activeTours.length > 0) {
+        // Có thể thêm logic refresh thông tin real-time
+        console.log('Auto-refresh cho tour đang diễn ra');
+    }
+}, 300000); // 5 phút
 </script>
 
 <?php
