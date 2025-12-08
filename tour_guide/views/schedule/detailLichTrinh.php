@@ -75,8 +75,8 @@ $tour = array_merge([
         </div>
 
         <div class="row">
-            <!-- Cột trái: Thông tin chính - ĐÃ SỬA THÀNH col-12 -->
-            <div class="col-12">
+            <!-- Cột trái: Thông tin chính -->
+            <div class="col-lg-8">
                 <!-- Thông tin cơ bản -->
                 <div class="card info-card mb-4">
                     <div class="card-header">
@@ -247,9 +247,108 @@ $tour = array_merge([
                         <?php endif; ?>
                     </div>
                 </div>
+            </div>
 
-                <!-- Danh sách khách hàng -->
-                <div class="card mb-4">
+            <!-- Cột phải: Checklist & Thông tin khác -->
+            <div class="col-lg-4">
+                <!-- Checklist công việc -->
+                <div class="card checklist-card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="fas fa-clipboard-list mr-2"></i> Checklist Công Việc</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($checklist)): ?>
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard"></i>
+                                <p>Chưa có checklist công việc</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="checklist-items">
+                                <?php foreach ($checklist as $item): ?>
+                                    <div class="checklist-item <?= isset($item['hoan_thanh']) && $item['hoan_thanh'] ? 'completed' : '' ?>">
+                                        <div class="checklist-content">
+                                            <div class="custom-checkbox">
+                                                <input type="checkbox" 
+                                                       class="checklist-checkbox" 
+                                                       id="checklist_<?= $item['id'] ?>"
+                                                       data-id="<?= $item['id'] ?>"
+                                                       data-lich-id="<?= $tour['lich_khoi_hanh_id'] ?>"
+                                                       <?= isset($item['hoan_thanh']) && $item['hoan_thanh'] ? 'checked' : '' ?>>
+                                                <label for="checklist_<?= $item['id'] ?>"></label>
+                                            </div>
+                                            <div class="checklist-text">
+                                                <div class="task-title"><?= isset($item['cong_viec']) ? htmlspecialchars($item['cong_viec']) : 'Không có tên công việc' ?></div>
+                                                <?php if (isset($item['hoan_thanh']) && $item['hoan_thanh'] && !empty($item['thoi_gian_hoan_thanh'])): ?>
+                                                    <div class="completion-time">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        Hoàn thành: <?= date('d/m/Y H:i', strtotime($item['thoi_gian_hoan_thanh'])) ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="checklist-actions">
+                                <button class="btn btn-reset" onclick="resetAllChecklists()">
+                                    <i class="fas fa-redo mr-1"></i> Đặt lại tất cả
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Chính sách tour -->
+                <div class="card policy-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0"><i class="fas fa-file-contract mr-2"></i> Chính Sách Tour</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (empty($tour['quy_dinh_huy_doi'])): ?>
+                            <div class="empty-state">
+                                <i class="fas fa-file"></i>
+                                <p>Không có chính sách</p>
+                            </div>
+                        <?php else: ?>
+                            <div class="policy-section">
+                                <div class="policy-title">Quy định hủy/đổi</div>
+                                <div class="policy-content">
+                                    <?= nl2br(htmlspecialchars($tour['quy_dinh_huy_doi'])) ?>
+                                </div>
+                            </div>
+                            
+                            <?php if (!empty($tour['luu_y_suc_khoe'])): ?>
+                                <div class="policy-section">
+                                    <div class="policy-title">Lưu ý sức khỏe</div>
+                                    <div class="policy-content">
+                                        <?= nl2br(htmlspecialchars($tour['luu_y_suc_khoe'])) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($tour['luu_y_hanh_ly'])): ?>
+                                <div class="policy-section">
+                                    <div class="policy-title">Lưu ý hành lý</div>
+                                    <div class="policy-content">
+                                        <?= nl2br(htmlspecialchars($tour['luu_y_hanh_ly'])) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($tour['luu_y_khac'])): ?>
+                                <div class="policy-section">
+                                    <div class="policy-title">Lưu ý khác</div>
+                                    <div class="policy-content">
+                                        <?= nl2br(htmlspecialchars($tour['luu_y_khac'])) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+<div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-users mr-2"></i> Danh Sách Khách Hàng Đã Đặt Tour
@@ -398,12 +497,6 @@ $tour = array_merge([
                                             <div class="summary-value"><?= count($danhSachKhach) ?></div>
                                         </div>
                                         <div class="summary-item">
-                                            <div class="summary-label">Tổng người</div>
-                                            <div class="summary-value">
-                                                <?= array_sum(array_column($danhSachKhach, 'so_luong_khach')) ?>
-                                            </div>
-                                        </div>
-                                        <div class="summary-item">
                                             <div class="summary-label">Đã phân phòng</div>
                                             <div class="summary-value">
                                                 <?= count(array_filter($danhSachKhach, fn($k) => !empty($k['ten_khach_san']))) ?> /
@@ -434,162 +527,24 @@ $tour = array_merge([
                         <?php endif; ?>
                     </div>
                 </div>
-            </div>
-
-            <!-- Cột phải: Checklist & Thông tin khác - ĐÃ SỬA THÀNH col-12 -->
-            <div class="col-12">
-                <div class="row">
-                    <!-- Checklist công việc -->
-                    <div class="col-md-6">
-                        <div class="card checklist-card mb-4">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0"><i class="fas fa-clipboard-list mr-2"></i> Checklist Công Việc</h5>
-                            </div>
-                            <div class="card-body">
-                                <?php if (empty($checklist)): ?>
-                                    <div class="empty-state">
-                                        <i class="fas fa-clipboard"></i>
-                                        <p>Chưa có checklist công việc</p>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="checklist-items">
-                                        <?php foreach ($checklist as $item): ?>
-                                            <div class="checklist-item <?= isset($item['hoan_thanh']) && $item['hoan_thanh'] ? 'completed' : '' ?>">
-                                                <div class="checklist-content">
-                                                    <div class="custom-checkbox">
-                                                        <input type="checkbox" 
-                                                               class="checklist-checkbox" 
-                                                               id="checklist_<?= $item['id'] ?>"
-                                                               data-id="<?= $item['id'] ?>"
-                                                               data-lich-id="<?= $tour['lich_khoi_hanh_id'] ?>"
-                                                               <?= isset($item['hoan_thanh']) && $item['hoan_thanh'] ? 'checked' : '' ?>>
-                                                        <label for="checklist_<?= $item['id'] ?>"></label>
-                                                    </div>
-                                                    <div class="checklist-text">
-                                                        <div class="task-title"><?= isset($item['cong_viec']) ? htmlspecialchars($item['cong_viec']) : 'Không có tên công việc' ?></div>
-                                                        <?php if (isset($item['hoan_thanh']) && $item['hoan_thanh'] && !empty($item['thoi_gian_hoan_thanh'])): ?>
-                                                            <div class="completion-time">
-                                                                <i class="fas fa-check-circle"></i>
-                                                                Hoàn thành: <?= date('d/m/Y H:i', strtotime($item['thoi_gian_hoan_thanh'])) ?>
-                                                            </div>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                    <div class="checklist-actions">
-                                        <button class="btn btn-reset" onclick="resetAllChecklists()">
-                                            <i class="fas fa-redo mr-1"></i> Đặt lại tất cả
-                                        </button>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Chính sách tour -->
-                    <div class="col-md-6">
-                        <div class="card policy-card mb-4">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0"><i class="fas fa-file-contract mr-2"></i> Chính Sách Tour</h5>
-                            </div>
-                            <div class="card-body">
-                                <?php if (empty($tour['quy_dinh_huy_doi'])): ?>
-                                    <div class="empty-state">
-                                        <i class="fas fa-file"></i>
-                                        <p>Không có chính sách</p>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="policy-section">
-                                        <div class="policy-title">Quy định hủy/đổi</div>
-                                        <div class="policy-content">
-                                            <?= nl2br(htmlspecialchars($tour['quy_dinh_huy_doi'])) ?>
-                                        </div>
-                                    </div>
-                                    
-                                    <?php if (!empty($tour['luu_y_suc_khoe'])): ?>
-                                        <div class="policy-section">
-                                            <div class="policy-title">Lưu ý sức khỏe</div>
-                                            <div class="policy-content">
-                                                <?= nl2br(htmlspecialchars($tour['luu_y_suc_khoe'])) ?>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <?php if (!empty($tour['luu_y_hanh_ly'])): ?>
-                                        <div class="policy-section">
-                                            <div class="policy-title">Lưu ý hành lý</div>
-                                            <div class="policy-content">
-                                                <?= nl2br(htmlspecialchars($tour['luu_y_hanh_ly'])) ?>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <?php if (!empty($tour['luu_y_khac'])): ?>
-                                        <div class="policy-section">
-                                            <div class="policy-title">Lưu ý khác</div>
-                                            <div class="policy-content">
-                                                <?= nl2br(htmlspecialchars($tour['luu_y_khac'])) ?>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
         </div>
+
     </div>
 </main>
 
 <style>
-/* ===== COLOR PALETTE ===== */
-:root {
-    --primary: #2d9cdb;      /* Xanh ngọc sáng */
-    --primary-dark: #1a7bb9; /* Xanh ngọc đậm */
-    --primary-light: #4db6e6; /* Xanh ngọc nhạt */
-    --secondary: #9b59b6;    /* Tím nhẹ */
-    --secondary-light: #b480d3;
-    --success: #27ae60;      /* Xanh lá cây */
-    --warning: #f39c12;      /* Cam vàng */
-    --danger: #e74c3c;       /* Đỏ cam */
-    --info: #3498db;         /* Xanh dương */
-    --light: #f5f7fa;        /* Xám nhạt */
-    --dark: #2c3e50;         /* Xám đen */
-    --gray-100: #f8f9fa;
-    --gray-200: #e9ecef;
-    --gray-300: #dee2e6;
-    --gray-400: #ced4da;
-    --gray-500: #adb5bd;
-    --gray-600: #6c757d;
-    --gray-700: #495057;
-    --gray-800: #343a40;
-    --gray-900: #212529;
-    --border-radius: 12px;
-    --box-shadow: 0 4px 20px rgba(45, 156, 219, 0.08);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* ===== BASE STYLES ===== */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 14px;
-    line-height: 1.6;
-    color: var(--gray-800);
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9f2ff 100%);
-    min-height: 100vh;
+    line-height: 1.5;
+    color: #1e293b;
+    background-color: #f8fafc;
 }
 
 .main-content {
     padding: 20px;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== BREADCRUMB ===== */
@@ -604,142 +559,101 @@ body {
 }
 
 .custom-breadcrumb .breadcrumb-item a {
-    color: var(--primary);
+    color: #3b82f6;
     text-decoration: none;
     font-weight: 500;
-    transition: var(--transition);
-}
-
-.custom-breadcrumb .breadcrumb-item a:hover {
-    color: var(--primary-dark);
-    text-decoration: underline;
 }
 
 .custom-breadcrumb .breadcrumb-item.active {
-    color: var(--secondary);
-    font-weight: 600;
+    color: #64748b;
+    font-weight: 500;
 }
 
 .custom-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
     content: "›";
-    color: var(--gray-500);
-    font-weight: bold;
+    color: #94a3b8;
 }
 
 /* ===== PAGE HEADER ===== */
 .page-header {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-    border-radius: var(--border-radius);
-    padding: 28px;
-    box-shadow: var(--box-shadow);
-    margin-bottom: 30px;
-    border-left: 5px solid var(--primary);
-    position: relative;
-    overflow: hidden;
-}
-
-.page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 150px;
-    height: 150px;
-    background: linear-gradient(135deg, rgba(155, 89, 182, 0.05) 0%, rgba(45, 156, 219, 0.05) 100%);
-    border-radius: 0 0 0 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    border-left: 4px solid #3b82f6;
 }
 
 .page-title {
-    color: var(--dark) !important;
+    color: #1e293b !important;
     font-weight: 700;
-    font-size: 32px;
+    font-size: 28px;
     margin: 0;
     line-height: 1.3;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .status-badge {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
-    border-radius: 25px;
-    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
     text-transform: capitalize;
-    transition: var(--transition);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .status-đang-diễn-ra,
 .status-dang-dien-ra {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    color: white;
-    border: 2px solid #27ae60;
+    background: #d1fae5;
+    color: #059669;
 }
 
 .status-chờ-lịch,
 .status-cho-lich {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: white;
-    border: 2px solid var(--primary);
+    background: #dbeafe;
+    color: #3b82f6;
 }
 
 .status-đã-hoàn-thành,
 .status-da-hoan-thanh {
-    background: linear-gradient(135deg, #95a5a6 0%, #bdc3c7 100%);
-    color: white;
-    border: 2px solid #95a5a6;
+    background: #f1f5f9;
+    color: #64748b;
 }
 
 .confirmation-badge {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
-    border-radius: 25px;
-    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 500;
-    transition: var(--transition);
 }
 
 .confirmation-confirmed {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    color: white;
-    border: 2px solid #27ae60;
-    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
+    background: #d1fae5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
 }
 
 .confirmation-pending {
-    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
-    color: white;
-    border: 2px solid #f39c12;
-    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.2);
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
 }
 
 .date-badge {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 8px;
-    color: var(--gray-700);
-    font-size: 14px;
+    padding: 6px 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    color: #64748b;
+    font-size: 13px;
     font-weight: 500;
-    border: 2px solid var(--gray-200);
-    transition: var(--transition);
 }
 
 .date-badge i {
-    color: var(--primary);
-    margin-right: 8px;
-}
-
-.date-badge:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(45, 156, 219, 0.1);
+    color: #94a3b8;
 }
 
 .action-buttons {
@@ -748,108 +662,57 @@ body {
 }
 
 .btn {
-    font-weight: 600;
+    font-weight: 500;
     border-radius: 8px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     font-size: 14px;
-    transition: var(--transition);
-    border: none;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: 0.5s;
-}
-
-.btn:hover::before {
-    left: 100%;
+    transition: all 0.2s;
 }
 
 .btn-success {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-}
-
-.btn-success:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
 }
 
 .btn-outline-secondary {
+    color: #64748b !important;
+    border: 2px solid #e2e8f0;
     background: transparent;
-    color: var(--gray-700) !important;
-    border: 2px solid var(--gray-300);
-    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.1);
 }
 
+.btn-success:hover,
 .btn-outline-secondary:hover {
-    background: var(--gray-100);
-    border-color: var(--primary);
-    color: var(--primary) !important;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(45, 156, 219, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== CARD STYLES ===== */
 .card {
     border: none;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 24px;
-    background: white;
-    transition: var(--transition);
-    overflow: hidden;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(45, 156, 219, 0.15);
 }
 
 .card-header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-bottom: none;
-    padding: 20px 24px;
-    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
-    position: relative;
-    overflow: hidden;
-}
-
-.card-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-    border-radius: 0 0 0 100%;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px 12px 0 0 !important;
 }
 
 .card-title {
-    color: white !important;
+    color: #1e293b !important;
     font-weight: 600;
     font-size: 18px;
     margin: 0;
     display: flex;
     align-items: center;
-    position: relative;
-    z-index: 1;
 }
 
 .card-title i {
-    color: rgba(255, 255, 255, 0.9);
-    margin-right: 12px;
-    font-size: 20px;
+    color: #3b82f6;
+    margin-right: 8px;
 }
 
 .card-body {
@@ -860,162 +723,93 @@ body {
 .info-card .info-item {
     display: flex;
     flex-direction: column;
-    margin-bottom: 18px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.info-card .info-item:hover {
-    border-bottom-color: var(--primary);
-    transform: translateX(5px);
-}
-
-.info-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
+    margin-bottom: 16px;
 }
 
 .info-label {
-    color: var(--gray-600);
+    color: #64748b;
     font-size: 13px;
     font-weight: 500;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     display: flex;
     align-items: center;
 }
 
 .info-label i {
-    color: var(--primary);
+    color: #3b82f6;
     width: 20px;
-    margin-right: 10px;
-    font-size: 16px;
+    margin-right: 8px;
 }
 
 .info-value {
-    color: var(--dark) !important;
+    color: #1e293b !important;
     font-size: 15px;
-    font-weight: 600;
-    line-height: 1.4;
+    font-weight: 500;
 }
 
 .note-card {
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: var(--transition);
-}
-
-.note-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
 }
 
 .note-warning {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-    border-left: 5px solid #f39c12;
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
 }
 
 .note-info {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    border-left: 5px solid var(--primary);
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
 }
 
 .note-header {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
-    color: var(--dark);
+    margin-bottom: 8px;
+    color: #1e293b;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .note-header i {
-    margin-right: 10px;
-    font-size: 18px;
-}
-
-.note-warning .note-header i {
-    color: #f39c12;
-}
-
-.note-info .note-header i {
-    color: var(--primary);
+    margin-right: 8px;
 }
 
 .note-content {
-    color: var(--gray-800);
-    line-height: 1.7;
+    color: #1e293b;
+    line-height: 1.6;
     font-size: 14px;
 }
 
 /* ===== TIMELINE ===== */
-.timeline {
-    position: relative;
-    padding-left: 40px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 20px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--primary) 0%, var(--secondary) 100%);
-}
-
 .timeline-day {
     background: white;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 24px;
-    margin-bottom: 24px;
-    border: 2px solid var(--gray-200);
-    position: relative;
-    transition: var(--transition);
-}
-
-.timeline-day:hover {
-    border-color: var(--primary);
-    box-shadow: 0 8px 25px rgba(45, 156, 219, 0.15);
-}
-
-.timeline-day::before {
-    content: '';
-    position: absolute;
-    left: -41px;
-    top: 30px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--primary);
-    border: 3px solid white;
-    box-shadow: 0 0 0 3px var(--primary-light);
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
 }
 
 .day-header {
     display: flex;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .day-number {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    background: #3b82f6;
     color: white;
-    width: 90px;
-    height: 60px;
-    border-radius: 10px;
+    width: 80px;
+    height: 50px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 16px;
-    margin-right: 20px;
+    font-size: 14px;
+    margin-right: 16px;
     flex-shrink: 0;
-    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
 }
 
 .day-info {
@@ -1023,358 +817,246 @@ body {
 }
 
 .day-title {
-    color: var(--dark) !important;
+    color: #1e293b !important;
     font-weight: 600;
-    font-size: 20px;
-    margin: 0 0 6px 0;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 18px;
+    margin: 0 0 4px 0;
 }
 
 .day-date {
-    color: var(--gray-600);
-    font-size: 14px;
+    color: #64748b;
+    font-size: 13px;
     font-weight: 500;
-    display: flex;
-    align-items: center;
-}
-
-.day-date i {
-    margin-right: 6px;
-    color: var(--primary);
 }
 
 .activity-card {
     display: flex;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    border: 2px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.activity-card:hover {
-    border-color: var(--primary);
-    transform: translateX(5px);
-    box-shadow: 0 6px 20px rgba(45, 156, 219, 0.1);
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
 }
 
 .activity-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 16px;
+    margin-right: 12px;
     flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(45, 156, 219, 0.2);
+    border: 1px solid #e2e8f0;
 }
 
 .activity-icon i {
-    color: white;
-    font-size: 20px;
+    color: #3b82f6;
+    font-size: 16px;
 }
 
 .activity-content h6 {
-    color: var(--dark) !important;
+    color: #1e293b !important;
     font-weight: 600;
-    font-size: 15px;
-    margin: 0 0 8px 0;
-    display: flex;
-    align-items: center;
+    font-size: 14px;
+    margin: 0 0 6px 0;
 }
 
 .activity-content p {
-    color: var(--gray-700);
-    font-size: 14px;
-    line-height: 1.6;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
     margin: 0;
 }
 
 .guide-note {
-    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 24px;
-    border-left: 5px solid #f39c12;
-    position: relative;
-    overflow: hidden;
-}
-
-.guide-note::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(243, 156, 18, 0) 100%);
-    border-radius: 0 0 0 100%;
+    background: #fffbeb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    border-left: 4px solid #f59e0b;
 }
 
 /* ===== TABLE STYLES ===== */
 .table-container {
     overflow-x: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .custom-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border-radius: 10px;
-    overflow: hidden;
 }
 
 .custom-table thead {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: #f8fafc;
 }
 
 .custom-table th {
-    color: white !important;
+    color: rgba(255, 255, 255, 1)ff !important;
     font-weight: 600;
-    font-size: 14px;
-    padding: 18px;
+    font-size: 13px;
+    padding: 16px;
     text-align: left;
-    border-bottom: none;
+    border-bottom: 2px solid #e2e8f0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    position: relative;
-}
-
-.custom-table th::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 20%;
-    height: 60%;
-    width: 1px;
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.custom-table th:last-child::after {
-    display: none;
 }
 
 .custom-table td {
-    color: var(--gray-800) !important;
-    padding: 18px;
-    border-bottom: 1px solid var(--gray-200);
+    color: #1e293b !important;
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
     font-size: 14px;
-    font-weight: 500;
-    transition: var(--transition);
-}
-
-.custom-table tbody tr {
-    transition: var(--transition);
 }
 
 .custom-table tbody tr:hover {
-    background: linear-gradient(135deg, rgba(45, 156, 219, 0.05) 0%, rgba(155, 89, 182, 0.05) 100%);
-}
-
-.custom-table tbody tr:hover td {
-    transform: translateX(5px);
+    background: #f8fafc;
 }
 
 .booking-code {
-    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-    color: var(--primary-dark);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
+    background: #e0e7ff;
+    color: #4f46e5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
     font-weight: 600;
     font-family: 'Courier New', monospace;
-    border: 1px solid var(--primary-light);
 }
 
 .email-link {
-    color: var(--primary);
+    color: #3b82f6;
     text-decoration: none;
-    font-weight: 500;
-    transition: var(--transition);
 }
 
 .email-link:hover {
-    color: var(--primary-dark);
     text-decoration: underline;
 }
 
 .hotel-info {
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .hotel-name {
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 6px;
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 4px;
 }
 
 .room-details {
-    color: var(--gray-600);
-    font-size: 13px;
-    font-weight: 500;
+    color: #64748b;
+    font-size: 12px;
 }
 
 .stay-dates {
-    color: var(--gray-500);
-    font-size: 12px;
-    margin-top: 4px;
-    font-weight: 500;
+    color: #94a3b8;
+    font-size: 11px;
+    margin-top: 2px;
 }
 
 .no-room {
-    color: #f39c12;
+    color: #f59e0b;
     font-style: italic;
-    font-weight: 500;
-    padding: 6px 12px;
-    background: rgba(243, 156, 18, 0.1);
-    border-radius: 6px;
-    display: inline-block;
 }
 
 /* ===== SUMMARY CARD ===== */
 .summary-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-    border-radius: 12px;
-    padding: 24px;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 20px;
     margin-top: 24px;
-    border: 2px solid var(--gray-200);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .summary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .summary-item {
     text-align: center;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    border: 2px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.summary-item:hover {
-    border-color: var(--primary);
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(45, 156, 219, 0.15);
 }
 
 .summary-label {
-    color: var(--gray-600);
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 8px;
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 4px;
 }
 
 .summary-value {
-    color: var(--primary-dark) !important;
+    color: #1e293b !important;
     font-weight: 700;
-    font-size: 24px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 20px;
 }
 
 .status-summary {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
-    padding-top: 20px;
-    border-top: 2px solid var(--gray-200);
 }
 
 .status-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 6px;
+    font-size: 13px;
     font-weight: 500;
-    padding: 10px 20px;
-    background: white;
-    border-radius: 25px;
-    border: 2px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.status-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .status-dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    box-shadow: 0 0 10px currentColor;
 }
 
 .status-paid .status-dot {
-    background: #27ae60;
-    color: #27ae60;
+    background: #10b981;
 }
 
 .status-unpaid .status-dot {
-    background: var(--gray-500);
-    color: var(--gray-500);
+    background: #94a3b8;
 }
 
 .status-hold .status-dot {
-    background: #f39c12;
-    color: #f39c12;
+    background: #f59e0b;
 }
 
 .status-cancelled .status-dot {
-    background: #e74c3c;
-    color: #e74c3c;
+    background: #ef4444;
 }
 
 /* ===== CHECKLIST ===== */
 .checklist-item {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
-    border: 2px solid var(--gray-200);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 15px;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
 }
 
 .checklist-item:hover {
-    border-color: var(--primary);
-    transform: translateX(5px);
-    box-shadow: 0 6px 20px rgba(45, 156, 219, 0.1);
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .checklist-item.completed {
-    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-    border-color: #27ae60;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
 }
 
 .checklist-content {
     display: flex;
     align-items: flex-start;
-    gap: 15px;
+    gap: 12px;
 }
 
 .custom-checkbox {
     position: relative;
-    margin-top: 3px;
+    margin-top: 2px;
 }
 
 .custom-checkbox input[type="checkbox"] {
@@ -1385,15 +1067,14 @@ body {
 }
 
 .custom-checkbox label {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--gray-400);
-    border-radius: 6px;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
     cursor: pointer;
     display: block;
     position: relative;
-    transition: var(--transition);
-    background: white;
+    transition: all 0.2s;
 }
 
 .custom-checkbox label::after {
@@ -1402,17 +1083,15 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    width: 14px;
-    height: 14px;
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    border-radius: 3px;
-    transition: var(--transition);
+    width: 10px;
+    height: 10px;
+    background: #10b981;
+    border-radius: 2px;
+    transition: all 0.2s;
 }
 
 .custom-checkbox input[type="checkbox"]:checked + label {
-    border-color: #27ae60;
-    background: white;
-    box-shadow: 0 0 15px rgba(39, 174, 96, 0.3);
+    border-color: #10b981;
 }
 
 .custom-checkbox input[type="checkbox"]:checked + label::after {
@@ -1424,70 +1103,57 @@ body {
 }
 
 .task-title {
-    color: var(--dark) !important;
-    font-weight: 600;
-    font-size: 15px;
-    line-height: 1.5;
-    margin-bottom: 6px;
+    color: #1e293b !important;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 4px;
 }
 
 .checklist-item.completed .task-title {
-    color: #27ae60 !important;
+    color: #64748b !important;
     text-decoration: line-through;
-    font-weight: 500;
 }
 
 .completion-time {
-    color: var(--gray-600);
-    font-size: 13px;
+    color: #64748b;
+    font-size: 12px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-weight: 500;
+    gap: 4px;
 }
 
 .completion-time i {
-    color: #27ae60;
-    font-size: 12px;
+    color: #10b981;
+    font-size: 10px;
 }
 
 .checklist-actions {
     text-align: center;
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 2px solid var(--gray-200);
+    margin-top: 20px;
 }
 
 .btn-reset {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 2px solid var(--gray-300);
-    color: var(--gray-700);
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 14px;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
     cursor: pointer;
-    transition: var(--transition);
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    transition: all 0.2s;
 }
 
 .btn-reset:hover {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border-color: var(--primary);
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(45, 156, 219, 0.3);
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 /* ===== POLICY CARD ===== */
 .policy-section {
-    margin-bottom: 24px;
-    padding-bottom: 24px;
-    border-bottom: 2px solid var(--gray-200);
-    position: relative;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .policy-section:last-child {
@@ -1496,92 +1162,57 @@ body {
     border-bottom: none;
 }
 
-.policy-section::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -2px;
-    width: 50px;
-    height: 2px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    transition: var(--transition);
-}
-
-.policy-section:hover::before {
-    width: 100%;
-}
-
 .policy-title {
-    color: var(--dark) !important;
+    color: #1e293b !important;
     font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.policy-title::before {
-    content: '✓';
-    color: var(--primary);
     font-size: 14px;
-    font-weight: bold;
+    margin-bottom: 8px;
 }
 
 .policy-content {
-    color: var(--gray-700);
-    font-size: 14px;
-    line-height: 1.7;
-    padding-left: 24px;
-    border-left: 3px solid var(--gray-300);
-    padding-left: 15px;
-    margin-left: 5px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
 /* ===== EMPTY STATE ===== */
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
-    color: var(--gray-500);
+    padding: 40px 20px;
+    color: #94a3b8;
 }
 
 .empty-state i {
-    font-size: 64px;
-    margin-bottom: 20px;
+    font-size: 48px;
+    margin-bottom: 16px;
     opacity: 0.5;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .empty-state p {
-    color: var(--gray-600);
+    color: #64748b;
     margin: 0;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 14px;
 }
 
 /* ===== BADGE COUNT ===== */
 .badge-count {
-    background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+    background: #3b82f6;
     color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
     font-weight: 600;
-    margin-left: 10px;
-    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.3);
+    margin-left: 8px;
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .page-header {
-        padding: 20px;
+        padding: 16px;
     }
     
     .page-title {
-        font-size: 24px;
+        font-size: 22px;
     }
     
     .action-buttons {
@@ -1600,95 +1231,11 @@ body {
     }
     
     .day-number {
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
     
     .summary-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .status-summary {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .timeline {
-        padding-left: 30px;
-    }
-    
-    .timeline::before {
-        left: 15px;
-    }
-    
-    .timeline-day::before {
-        left: -31px;
-    }
-}
-
-/* ===== SCROLLBAR STYLING ===== */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--gray-100);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-light) 100%);
-}
-
-/* ===== PRINT STYLES ===== */
-@media print {
-    .btn,
-    .action-buttons,
-    .checklist-actions {
-        display: none !important;
-    }
-    
-    .card {
-        box-shadow: none !important;
-        border: 1px solid #ddd !important;
-    }
-    
-    .page-header {
-        border: 1px solid #ddd !important;
-    }
-}
-
-/* ===== COL-12 SPECIFIC STYLES ===== */
-.col-12 .row {
-    margin-left: 0;
-    margin-right: 0;
-}
-
-.col-12 .col-md-6 {
-    padding-left: 0;
-    padding-right: 0;
-}
-
-@media (min-width: 768px) {
-    .col-12 .col-md-6:first-child {
-        padding-right: 12px;
-    }
-    
-    .col-12 .col-md-6:last-child {
-        padding-left: 12px;
-    }
-}
-
-/* Ensure cards stack nicely on mobile */
-@media (max-width: 767px) {
-    .col-12 .col-md-6 {
-        width: 100%;
-        margin-bottom: 20px;
     }
 }
 </style>
@@ -1701,49 +1248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             handleChecklistChange(e.target);
         }
     });
-    
-    // Add ripple effect to buttons
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            const ripple = document.createElement('span');
-            const rect = this.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            ripple.style.cssText = `
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.7);
-                transform: scale(0);
-                animation: ripple 0.6s linear;
-                width: ${size}px;
-                height: ${size}px;
-                top: ${y}px;
-                left: ${x}px;
-            `;
-            
-            this.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        });
-    });
 });
-
-// Add ripple animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
 
 async function handleChecklistChange(checkbox) {
     const checklistId = checkbox.dataset.id;
@@ -1752,11 +1257,7 @@ async function handleChecklistChange(checkbox) {
     const taskTitle = item.querySelector('.task-title');
     
     const originalText = taskTitle.textContent;
-    taskTitle.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Đang cập nhật...';
-    
-    // Add loading animation
-    item.style.opacity = '0.7';
-    item.style.pointerEvents = 'none';
+    taskTitle.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Đang cập nhật...';
     
     try {
         const response = await fetch('<?= BASE_URL_GUIDE ?>?act=update-checklist-guide', {
@@ -1772,12 +1273,6 @@ async function handleChecklistChange(checkbox) {
         if (result.success) {
             if (isChecked) {
                 item.classList.add('completed');
-                
-                // Add success animation
-                item.style.animation = 'none';
-                setTimeout(() => {
-                    item.style.animation = 'pulse 0.6s';
-                }, 10);
                 
                 let completionTime = item.querySelector('.completion-time');
                 if (!completionTime) {
@@ -1800,20 +1295,17 @@ async function handleChecklistChange(checkbox) {
                 }
             }
             
-            showToast('success', 'Cập nhật checklist thành công!');
+            showToast('success', 'Cập nhật thành công');
         } else {
             checkbox.checked = !isChecked;
-            showToast('error', result.message || 'Có lỗi xảy ra khi cập nhật');
+            showToast('error', result.message || 'Có lỗi xảy ra');
         }
     } catch (error) {
         checkbox.checked = !isChecked;
-        showToast('error', 'Lỗi kết nối server. Vui lòng thử lại.');
+        showToast('error', 'Lỗi kết nối server');
         console.error('Error:', error);
     } finally {
         taskTitle.textContent = originalText;
-        item.style.opacity = '1';
-        item.style.pointerEvents = 'auto';
-        item.style.animation = '';
     }
 }
 
@@ -1824,31 +1316,16 @@ function resetAllChecklists() {
     
     const checkboxes = document.querySelectorAll('.checklist-checkbox:checked');
     
-    if (checkboxes.length === 0) {
-        showToast('info', 'Không có checklist nào để đặt lại');
-        return;
-    }
-    
-    // Add reset animation
-    const checklistItems = document.querySelectorAll('.checklist-item.completed');
-    checklistItems.forEach(item => {
-        item.style.animation = 'shake 0.5s';
-    });
-    
     checkboxes.forEach((checkbox, index) => {
         setTimeout(() => {
             checkbox.checked = false;
-            const event = new Event('change', { bubbles: true });
-            checkbox.dispatchEvent(event);
-        }, index * 150);
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }, index * 100);
     });
     
     setTimeout(() => {
-        checklistItems.forEach(item => {
-            item.style.animation = '';
-        });
-        showToast('success', `Đã đặt lại ${checkboxes.length} checklist`);
-    }, checkboxes.length * 150 + 500);
+        showToast('success', 'Đã đặt lại tất cả checklist');
+    }, checkboxes.length * 100 + 500);
 }
 
 function showToast(type, message) {
@@ -1856,58 +1333,31 @@ function showToast(type, message) {
     if (!container) {
         container = document.createElement('div');
         container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        container.style.zIndex = '9999';
+        container.style.zIndex = '1050';
         document.body.appendChild(container);
     }
     
     const toast = document.createElement('div');
-    const icon = type === 'success' ? 'check-circle' : 
-                type === 'error' ? 'exclamation-circle' : 
-                'info-circle';
-    const color = type === 'success' ? '#27ae60' : 
-                 type === 'error' ? '#e74c3c' : 
-                 '#3498db';
-    
-    toast.className = `toast align-items-center text-white bg-${type} border-0`;
-    toast.style.background = `linear-gradient(135deg, ${color} 0%, ${color}80 100%)`;
+    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
     toast.setAttribute('role', 'alert');
     toast.innerHTML = `
-        <div class="d-flex align-items-center p-3">
-            <i class="fas fa-${icon} fa-lg me-3"></i>
-            <div class="toast-body" style="font-weight: 500;">${message}</div>
-            <button type="button" class="btn-close btn-close-white ms-auto me-2" data-bs-dismiss="toast"></button>
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
     
     container.appendChild(toast);
     
-    const bsToast = new bootstrap.Toast(toast, { 
-        delay: 3000,
-        animation: true 
-    });
+    const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
     bsToast.show();
     
     toast.addEventListener('hidden.bs.toast', function() {
         toast.remove();
     });
 }
-
-// Add shake animation for reset
-const shakeStyle = document.createElement('style');
-shakeStyle.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-`;
-document.head.appendChild(shakeStyle);
 </script>
 
 <?php
