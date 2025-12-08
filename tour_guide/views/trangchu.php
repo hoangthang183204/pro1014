@@ -473,7 +473,7 @@
     text-align: left; /* Thay đổi từ center thành left */
     color: #2c3e50;
     font-size: 1.8rem; /* Giảm kích thước font */
-    margin-bottom: 20px; /* Giảm margin */
+    margin-bottom: 5px; /* Giảm margin */
     padding-bottom: 10px;
     border-bottom: 2px solid #e0e0e0;
     position: relative;
@@ -507,7 +507,7 @@
     background: white;
     border-radius: 10px; /* Giảm border-radius */
     box-shadow: 0 3px 10px rgba(0,0,0,0.06); /* Giảm shadow */
-    margin-bottom: 20px; /* Giảm margin */
+    margin-bottom: 5%; /* Giảm margin */
     border: none;
     overflow: hidden;
     transition: transform 0.3s, box-shadow 0.3s;
@@ -557,70 +557,198 @@
 /* CALENDAR - GỌN GÀNG HƠN */
 .calendar-header {
     background: linear-gradient(to right, #f8f9fa, #e9ecef);
-    border-radius: 8px; /* Giảm border-radius */
-    padding: 12px 15px; /* Giảm padding */
-    margin: 15px 0; /* Giảm margin */
-    text-align: left; /* Thay đổi từ center thành left */
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    text-align: left;
 }
 
 .calendar-header-day {
-    padding: 8px 5px; /* Giảm padding */
+    padding: 6px 4px;
     font-weight: 600;
     color: #495057;
     text-align: center;
-    font-size: 0.9rem; /* Giảm kích thước font */
+    font-size: 0.85rem;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px; /* Giảm gap */
-    min-height: 500px; /* Giảm chiều cao */
-    margin: 15px 0; /* Giảm margin */
+    gap: 8px;
+    min-height: 100px; /* Giảm từ 500px xuống 400px */
+    margin: 10px 0;
 }
 
 .calendar-day {
     border: 1px solid #e0e0e0;
-    border-radius: 8px; /* Giảm border-radius */
-    padding: 10px; /* Giảm padding */
+    border-radius: 6px;
+    padding: 8px;
     cursor: pointer;
     transition: all 0.3s;
     display: flex;
     flex-direction: column;
-    min-height: 120px; /* Giảm chiều cao */
+    min-height: 20px; /* Giảm từ 120px xuống 90px */
     background-color: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.04); /* Giảm shadow */
-    text-align: left; /* Thay đổi từ center thành left */
-}
-
-.calendar-day:hover {
-    background-color: #f8f9fa;
-    transform: translateY(-2px); /* Giảm hiệu ứng hover */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    text-align: left;
 }
 
 .day-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px; /* Giảm margin */
-    padding-bottom: 6px; /* Giảm padding */
+    margin-bottom: 6px;
+    padding-bottom: 4px;
     border-bottom: 1px solid #eee;
 }
 
 .day-number {
-    font-size: 1.1rem; /* Giảm kích thước font */
+    font-size: 1rem;
     font-weight: bold;
     color: #495057;
 }
 
 .today-badge {
-    font-size: 0.7rem; /* Giảm kích thước font */
-    padding: 2px 6px; /* Giảm padding */
+    font-size: 0.65rem;
+    padding: 2px 5px;
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
-    border-radius: 10px; /* Giảm border-radius */
+    border-radius: 8px;
     font-weight: 500;
+}
+
+.day-events {
+    flex: 1;
+    overflow: hidden;
+}
+
+.event-item {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    margin-bottom: 3px;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.event-dot {
+    font-size: 0.5rem;
+    flex-shrink: 0;
+}
+
+.event-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-more {
+    font-size: 0.7rem;
+    padding: 2px 0;
+    text-align: center;
+    background-color: #f8f9fa;
+    border-radius: 3px;
+    margin-top: 3px;
+}
+
+/* Giảm kích thước card header */
+.card-header {
+    padding: 12px 15px;
+}
+
+.card-header h5 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Giảm padding trong card-body */
+.card-body {
+    padding: 15px;
+}
+
+/* Legend nhỏ hơn */
+.calendar-legend {
+    margin-top: 15px;
+    font-size: 0.85rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot.tour { background-color: #28a745; }
+.legend-dot.busy { background-color: #ffc107; }
+.legend-dot.off { background-color: #dc3545; }
+.legend-dot.today { background-color: #007bff; }
+
+.calendar-stats {
+    font-size: 0.8rem;
+}
+
+/* Nút trong calendar header nhỏ hơn */
+.card-header .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+    .calendar-grid {
+        grid-template-columns: repeat(1, 1fr);
+        min-height: auto;
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: auto;
+        padding: 6px;
+    }
+    
+    .calendar-header {
+        padding: 8px 10px;
+    }
+    
+    .calendar-header-day {
+        font-size: 0.8rem;
+        padding: 4px 2px;
+    }
+}
+
+/* For tablets */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .calendar-grid {
+        grid-template-columns: repeat(4, 1fr);
+        min-height: 350px;
+    }
+}
+
+/* Thêm style cho các event type */
+.event-tour {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left: 2px solid #28a745;
+}
+
+.event-busy {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 2px solid #ffc107;
+}
+
+.event-off {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 2px solid #dc3545;
 }
 
 /* ROW VÀ COLUMN - SÁT HƠN */
@@ -814,4 +942,5 @@ function changeCalendarMonth(direction) {
     
     window.location.href = `<?= BASE_URL_GUIDE ?>?act=dashboard&month=${newMonth}&year=${newYear}`;
 }
+// 
 </script>
