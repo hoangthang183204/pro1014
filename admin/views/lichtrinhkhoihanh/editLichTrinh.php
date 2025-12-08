@@ -89,7 +89,7 @@
                                         <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                         <select name="trang_thai" class="form-select" required>
                                             <option value="đã lên lịch" <?php echo $lich_khoi_hanh['trang_thai'] == 'đã lên lịch' ? 'selected' : ''; ?>>Đã lên lịch</option>
-                                            <option value="đang diễn ra" <?php echo $lich_khoi_hanh['trang_thai'] == 'đang diễn ra' ? 'selected' : ''; ?>>Đang diễn ra</option>
+                                            <option value="đang đi" <?php echo $lich_khoi_hanh['trang_thai'] == 'đang đi' ? 'selected' : ''; ?>>Đang đi</option>
                                             <option value="đã hoàn thành" <?php echo $lich_khoi_hanh['trang_thai'] == 'đã hoàn thành' ? 'selected' : ''; ?>>Đã hoàn thành</option>
                                             <option value="đã hủy" <?php echo $lich_khoi_hanh['trang_thai'] == 'đã hủy' ? 'selected' : ''; ?>>Đã hủy</option>
                                         </select>

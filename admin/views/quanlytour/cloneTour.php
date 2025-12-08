@@ -247,7 +247,7 @@
                     <?php endif; ?>
 
                     <!-- Thống kê -->
-                    <div class="card card-warning">
+                    <!-- <div class="card card-warning">
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="fas fa-chart-pie me-2"></i>
@@ -282,7 +282,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Quick Clone -->
                     <div class="card card-success">
