@@ -32,8 +32,6 @@
                         $has_image = false;
                     }
                 ?>
-
-
                     <div class="row">
                         <div class="col-lg-8">
 
@@ -280,14 +278,14 @@
                                             onclick="openImageModal('<?php echo htmlspecialchars($image_url); ?>', '<?php echo htmlspecialchars($dat_tour['ten_tour']); ?>')">
 
                                         <div class="d-grid gap-2">
-                                            <button class="btn btn-outline-primary btn-sm"
+                                            <!-- <button class="btn btn-outline-primary btn-sm"
                                                 onclick="openImageModal('<?php echo htmlspecialchars($image_url); ?>', '<?php echo htmlspecialchars($dat_tour['ten_tour']); ?>')">
                                                 <i class="fas fa-expand me-1"></i> Xem ảnh lớn
-                                            </button>
-                                            <button class="btn btn-outline-secondary btn-sm"
+                                            </button> -->
+                                            <!-- <button class="btn btn-outline-secondary btn-sm"
                                                 onclick="downloadImage('<?php echo htmlspecialchars($image_url); ?>', '<?php echo htmlspecialchars($dat_tour['ten_tour']); ?>')">
                                                 <i class="fas fa-download me-1"></i> Tải ảnh
-                                            </button>
+                                            </button> -->
                                         </div>
                                     <?php else: ?>
                                         <div class="no-image-container bg-light rounded p-5 mb-3">

@@ -50,7 +50,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-2">
+                            <!-- <div class="col-md-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-user-friends text-info me-2"></i>
                                     <div>
@@ -58,7 +58,7 @@
                                         <span class="badge bg-primary fs-6"><?php echo $tong_so_khach; ?></span>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="col-md-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-check-circle text-success me-2"></i>
@@ -276,7 +276,7 @@
                                                     </div>
                                                     <button class="btn btn-primary btn-sm ms-2" 
                                                             onclick="themPhanPhongNhanh(<?php echo $khach['id']; ?>, '<?php echo htmlspecialchars(addslashes($khach['ho_ten'])); ?>')"
-                                                            data-bs-toggle="tooltip" title="Đặt phòng cho khách này">
+                                                            data-bs-toggle="tooltip">
                                                         <i class="fas fa-plus"></i>
                                                     </button>
                                                 </div>

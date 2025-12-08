@@ -14,9 +14,9 @@
                         Quản Lý Khách Hàng
                     </a>
                     <div>
-                        <a href="?act=khach-hang-thong-ke" class="btn btn-info me-2">
+                        <!-- <a href="?act=khach-hang-thong-ke" class="btn btn-info me-2">
                             <i class="fas fa-chart-bar me-1"></i> Thống kê
-                        </a>
+                        </a> -->
                         <a href="?act=khach-hang-export" class="btn btn-success">
                             <i class="fas fa-download me-1"></i> Export
                         </a>
