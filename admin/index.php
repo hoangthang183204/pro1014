@@ -74,13 +74,13 @@ match ($act) {
     'tour-update' => (new AdminTourController())->update(),
     'tour-delete' => (new AdminTourController())->delete(),
 
-    // Quản lý Lịch trình Tour
-    'tour-lich-trinh' => (new AdminTourController())->lichTrinh(),
-    'lich-trinh-create' => (new AdminTourController())->createLichTrinh(),
-    'lich-trinh-store' => (new AdminTourController())->storeLichTrinh(),
-    'lich-trinh-edit' => (new AdminTourController())->editLichTrinh(),
-    'lich-trinh-update' => (new AdminTourController())->updateLichTrinh(),
-    'lich-trinh-delete' => (new AdminTourController())->deleteLichTrinh(),
+    // THÊM MỚI: Quản lý Lịch trình theo Lịch khởi hành
+    'lich-khoi-hanh-lich-trinh' => (new AdminLichKhoiHanhController())->lichTrinh(),
+    'lich-khoi-hanh-lich-trinh-create' => (new AdminLichKhoiHanhController())->createLichTrinh(),
+    'lich-khoi-hanh-lich-trinh-store' => (new AdminLichKhoiHanhController())->storeLichTrinh(),
+    'lich-khoi-hanh-lich-trinh-edit' => (new AdminLichKhoiHanhController())->editLichTrinh(),
+    'lich-khoi-hanh-lich-trinh-update' => (new AdminLichKhoiHanhController())->updateLichTrinh(),
+    'lich-khoi-hanh-lich-trinh-delete' => (new AdminLichKhoiHanhController())->deleteLichTrinh(),
 
     // Quản lý Phiên bản Tour
     'tour-phien-ban' => (new AdminTourController())->phienBan(),

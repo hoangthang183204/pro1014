@@ -2,10 +2,12 @@
 class AdminLichKhoiHanhController
 {
     public $lichKhoiHanhModel;
+    public $tourModel;
 
     public function __construct()
     {
         $this->lichKhoiHanhModel = new AdminLichKhoiHanh();
+        $this->tourModel = new AdminTour();
     }
 
     // Danh sách lịch khởi hành
@@ -26,7 +28,7 @@ class AdminLichKhoiHanhController
     {
         $tours = $this->lichKhoiHanhModel->getAllToursActive();
 
-        require_once './views/lichtrinhkhoihanh/addLichTrinh.php';
+        require_once './views/lichtrinhkhoihanh/addLichKhoiHanh.php';
     }
 
     // Xử lý tạo lịch khởi hành mới
@@ -74,7 +76,7 @@ class AdminLichKhoiHanhController
 
         $tours = $this->lichKhoiHanhModel->getAllToursActive();
 
-        require_once './views/lichtrinhkhoihanh/editLichTrinh.php';
+        require_once './views/lichtrinhkhoihanh/editLichKhoiHanh.php';
     }
 
     // Xử lý cập nhật lịch khởi hành
@@ -400,5 +402,176 @@ class AdminLichKhoiHanhController
 
             header('Location: ?act=tram-dung-chan&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
         }
+    }
+
+    // Hiển thị danh sách lịch trình của một lịch khởi hành
+    public function lichTrinh()
+    {
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
+
+        if (!$lich_khoi_hanh) {
+            $_SESSION['error'] = 'Lịch khởi hành không tồn tại!';
+            header('Location: ?act=lich-khoi-hanh');
+            exit();
+        }
+
+        // Lấy thông tin tour
+        $tour = $this->tourModel->getTourById($lich_khoi_hanh['tour_id']);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại!';
+            header('Location: ?act=lich-khoi-hanh');
+            exit();
+        }
+
+        // Lấy lịch trình
+        $lich_trinh = $this->lichKhoiHanhModel->getLichTrinhByLichKhoiHanh($lich_khoi_hanh_id);
+
+        require_once './views/lichtrinhkhoihanh/lichTrinhTour.php';
+    }
+
+    public function storeLichTrinh()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
+
+            try {
+                $data = [
+                    'so_thu_tu_ngay' => $_POST['so_ngay'],
+                    'so_ngay' => $_POST['so_ngay'],
+                    'tieu_de' => $_POST['tieu_de'],
+                    'mo_ta_hoat_dong' => $_POST['mo_ta_hoat_dong'],
+                    'cho_o' => $_POST['cho_o'],
+                    'bua_an' => $_POST['bua_an'],
+                    'phuong_tien' => $_POST['phuong_tien'],
+                    'ghi_chu_hdv' => $_POST['ghi_chu_hdv'] ?? '',
+                    'thu_tu_sap_xep' => $_POST['thu_tu_sap_xep'] ?? 0
+                ];
+
+                $result = $this->lichKhoiHanhModel->createLichTrinh($lich_khoi_hanh_id, $data);
+
+                if ($result) {
+                    $_SESSION['success'] = 'Thêm lịch trình thành công!';
+                } else {
+                    $_SESSION['error'] = 'Không thể thêm lịch trình!';
+                }
+            } catch (Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
+            }
+
+            header('Location: ?act=lich-khoi-hanh-lich-trinh&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+            exit();
+        }
+    }
+
+    // Form thêm lịch trình mới - ĐÃ SỬA
+    public function createLichTrinh()
+    {
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
+
+        if (!$lich_khoi_hanh) {
+            $_SESSION['error'] = 'Lịch khởi hành không tồn tại!';
+            header('Location: ?act=lich-khoi-hanh');
+            exit();
+        }
+
+        // Lấy thông tin tour
+        $tour = $this->tourModel->getTourById($lich_khoi_hanh['tour_id']);
+
+        if (!$tour) {
+            $_SESSION['error'] = 'Tour không tồn tại!';
+            header('Location: ?act=lich-khoi-hanh');
+            exit();
+        }
+
+        // Lấy max số thứ tự ngày hiện tại
+        $max_so_thu_tu = 0;
+        $lich_trinh = $this->lichKhoiHanhModel->getLichTrinhByLichKhoiHanh($lich_khoi_hanh_id);
+        if (!empty($lich_trinh)) {
+            $max_so_thu_tu = max(array_column($lich_trinh, 'so_thu_tu_ngay'));
+        }
+
+        require_once './views/lichtrinhkhoihanh/addLichTrinh.php';
+    }
+
+    // Form sửa lịch trình
+    public function editLichTrinh()
+    {
+        $id = $_GET['id'] ?? 0;
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+
+        $lich_trinh = $this->lichKhoiHanhModel->getLichTrinhById($id);
+        $lich_khoi_hanh = $this->lichKhoiHanhModel->getLichKhoiHanhById($lich_khoi_hanh_id);
+
+        if (!$lich_trinh || !$lich_khoi_hanh) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin!';
+            header('Location: ?act=lich-khoi-hanh');
+            exit();
+        }
+
+        // Lấy thông tin tour
+        $tour = $this->tourModel->getTourById($lich_khoi_hanh['tour_id']);
+
+        require_once './views/lichtrinhkhoihanh/editLichTrinh.php';
+    }
+
+    // Xử lý cập nhật lịch trình
+    public function updateLichTrinh()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'] ?? 0;
+            $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
+
+            try {
+                $data = [
+                    'so_thu_tu_ngay' => $_POST['so_ngay'],
+                    'so_ngay' => $_POST['so_ngay'],
+                    'tieu_de' => $_POST['tieu_de'],
+                    'mo_ta_hoat_dong' => $_POST['mo_ta_hoat_dong'],
+                    'cho_o' => $_POST['cho_o'],
+                    'bua_an' => $_POST['bua_an'],
+                    'phuong_tien' => $_POST['phuong_tien'],
+                    'ghi_chu_hdv' => $_POST['ghi_chu_hdv'] ?? '',
+                    'thu_tu_sap_xep' => $_POST['thu_tu_sap_xep'] ?? 0
+                ];
+
+                $result = $this->lichKhoiHanhModel->updateLichTrinh($id, $data);
+
+                if ($result) {
+                    $_SESSION['success'] = 'Cập nhật lịch trình thành công!';
+                } else {
+                    $_SESSION['error'] = 'Không thể cập nhật lịch trình!';
+                }
+            } catch (Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
+            }
+
+            header('Location: ?act=lich-khoi-hanh-lich-trinh&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+            exit();
+        }
+    }
+
+    // Xóa lịch trình
+    public function deleteLichTrinh()
+    {
+        $id = $_GET['id'] ?? 0;
+        $lich_khoi_hanh_id = $_GET['lich_khoi_hanh_id'] ?? 0;
+
+        try {
+            $result = $this->lichKhoiHanhModel->deleteLichTrinh($id);
+
+            if ($result) {
+                $_SESSION['success'] = 'Xóa lịch trình thành công!';
+            } else {
+                $_SESSION['error'] = 'Không thể xóa lịch trình!';
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+        }
+
+        header('Location: ?act=lich-khoi-hanh-lich-trinh&lich_khoi_hanh_id=' . $lich_khoi_hanh_id);
+        exit();
     }
 }

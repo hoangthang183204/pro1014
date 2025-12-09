@@ -162,28 +162,19 @@
                                                             class="btn btn-primary" title="Sửa tour">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-
-                                                        <!-- Nút Lịch trình -->
-                                                        <a href="?act=tour-lich-trinh&tour_id=<?php echo $tour['id']; ?>"
-                                                            class="btn btn-info" title="Lịch trình">
-                                                            <i class="fas fa-route"></i>
-                                                        </a>
-
                                                         <!-- Nút Phiên bản -->
                                                         <a href="?act=tour-phien-ban&tour_id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-secondary" title="Quản lý phiên bản">
                                                             <i class="fas fa-code-branch"></i>
                                                         </a>
-                                                    </div>
-
-                                                    <!-- Hàng 2 -->
-                                                    <div class="btn-group btn-group-sm">
                                                         <!-- Nút Clone -->
                                                         <a href="index.php?act=tour-clone&id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-outline-success" title="Clone tour">
                                                             <i class="fas fa-copy"></i>
                                                         </a>
-
+                                                    </div>
+                                                    <!-- Hàng 2 -->
+                                                    <div class="btn-group btn-group-sm">
                                                         <!-- Nút Lịch sử Clone -->
                                                         <a href="index.php?act=tour-clone-history&id=<?php echo $tour['id']; ?>"
                                                             class="btn btn-outline-info" title="Lịch sử clone">

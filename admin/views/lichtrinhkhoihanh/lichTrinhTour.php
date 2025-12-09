@@ -1,4 +1,4 @@
-<?php require './views/layout/header.php'; ?>
+<?php include './views/layout/header.php'; ?>
 <?php include './views/layout/navbar.php'; ?>
 <?php include './views/layout/sidebar.php'; ?>
 
@@ -8,15 +8,15 @@
             <!-- Header -->
             <nav class="navbar navbar-dark bg-dark">
                 <div class="container-fluid">
-                    <a class="navbar-brand" href="?act=/">
+                    <a class="navbar-brand" href="?act=lich-khoi-hanh">
                         <i class="fas fa-route me-2"></i>
                         Lịch Trình: <?php echo htmlspecialchars($tour['ten_tour']); ?>
                     </a>
                     <div>
-                        <a href="?act=tour" class="btn btn-outline-light me-2">
-                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        <a href="?act=lich-khoi-hanh" class="btn btn-outline-light me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại Lịch Khởi Hành
                         </a>
-                        <a href="?act=lich-trinh-create&tour_id=<?php echo $tour['id']; ?>" class="btn btn-success">
+                        <a href="?act=lich-khoi-hanh-lich-trinh-create&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i> Thêm Ngày Mới
                         </a>
                     </div>
@@ -24,14 +24,16 @@
             </nav>
 
             <div class="container mt-4">
-                 <!-- Thông báo -->
-                  <?php if (isset($_GET['success'])): ?>
-                      <div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
-                  <?php endif; ?>
+                <!-- Thông báo -->
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['success']);
+                                                        unset($_SESSION['success']); ?></div>
+                <?php endif; ?>
 
-                  <?php if (isset($_GET['error'])): ?>
-                      <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
-                  <?php endif; ?>
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="alert alert-danger"><?php echo htmlspecialchars($_SESSION['error']);
+                                                    unset($_SESSION['error']); ?></div>
+                <?php endif; ?>
 
                 <!-- Thông tin tour -->
                 <div class="card mb-4">
@@ -41,16 +43,7 @@
                                 <strong>Mã Tour:</strong> <?php echo htmlspecialchars($tour['ma_tour']); ?>
                             </div>
                             <div class="col-md-4">
-                                <strong>Tổng số ngày:</strong>
-                                <span class="badge bg-primary">
-                                    <?php
-                                    $max_ngay = 0;
-                                    if (!empty($lich_trinh)) {
-                                        $max_ngay = max(array_column($lich_trinh, 'so_ngay'));
-                                    }
-                                    echo $max_ngay . ' ngày';
-                                    ?>
-                                </span>
+                                <strong>Ngày khởi hành:</strong> <?php echo date('d/m/Y', strtotime($lich_khoi_hanh['ngay_bat_dau'])); ?>
                             </div>
                             <div class="col-md-4">
                                 <strong>Số lịch trình:</strong>
@@ -80,11 +73,11 @@
                                                     <strong class="ms-2"><?php echo htmlspecialchars($item['tieu_de']); ?></strong>
                                                 </div>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="?act=lich-trinh-edit&id=<?php echo $item['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
+                                                    <a href="?act=lich-khoi-hanh-lich-trinh-edit&id=<?php echo $item['id']; ?>&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>"
                                                         class="btn btn-outline-primary" title="Sửa">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="?act=lich-trinh-delete&id=<?php echo $item['id']; ?>&tour_id=<?php echo $tour['id']; ?>"
+                                                    <a href="?act=lich-khoi-hanh-lich-trinh-delete&id=<?php echo $item['id']; ?>&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>"
                                                         class="btn btn-outline-danger delete-lich-trinh"
                                                         data-so-ngay="<?php echo $item['so_ngay']; ?>"
                                                         data-tieu-de="<?php echo htmlspecialchars($item['tieu_de']); ?>"
@@ -131,15 +124,14 @@
                             <div class="text-center py-4">
                                 <i class="fas fa-route fa-3x text-muted mb-3"></i>
                                 <h5 class="text-muted">Chưa có lịch trình nào</h5>
-                                <p class="text-muted">Hãy thêm lịch trình cho tour này</p>
-                                <a href="?act=lich-trinh-create&tour_id=<?php echo $tour['id']; ?>" class="btn btn-primary">
+                                <p class="text-muted">Hãy thêm lịch trình cho lịch khởi hành này</p>
+                                <a href="?act=lich-khoi-hanh-lich-trinh-create&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>" class="btn btn-primary">
                                     <i class="fas fa-plus me-1"></i> Thêm Lịch Trình Đầu Tiên
                                 </a>
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
-
                 <!-- Tóm tắt lịch trình -->
                 <?php if (!empty($lich_trinh)): ?>
                     <div class="card mt-4">
@@ -178,76 +170,24 @@
 <?php include './views/layout/footer.php'; ?>
 
 <script>
-$(document).ready(function() {
-    // Tự động ẩn thông báo sau 5 giây
-    setTimeout(function() {
-        $('.alert').fadeOut(300, function() {
-            $(this).remove();
+    $(document).ready(function() {
+        // Tự động ẩn thông báo sau 5 giây
+        setTimeout(function() {
+            $('.alert').fadeOut(300, function() {
+                $(this).remove();
+            });
+        }, 5000);
+
+        // Xác nhận xóa lịch trình
+        $('.delete-lich-trinh').on('click', function(e) {
+            e.preventDefault();
+            var deleteUrl = $(this).attr('href');
+            var soNgay = $(this).data('so-ngay');
+            var tieuDe = $(this).data('tieu-de');
+
+            if (confirm('Bạn có chắc muốn xóa lịch trình Ngày ' + soNgay + ': "' + tieuDe + '"?')) {
+                window.location.href = deleteUrl;
+            }
         });
-    }, 5000);
-
-    // Xác nhận xóa lịch trình
-    $('.delete-lich-trinh').on('click', function(e) {
-        e.preventDefault();
-        var deleteUrl = $(this).attr('href');
-        var soNgay = $(this).data('so-ngay');
-        var tieuDe = $(this).data('tieu-de');
-        
-        if (confirm('Bạn có chắc muốn xóa lịch trình Ngày ' + soNgay + ': "' + tieuDe + '"?')) {
-            window.location.href = deleteUrl;
-        }
     });
-
-    // Xóa parameter success/error từ URL
-    if (window.history.replaceState && (window.location.search.includes('success=') || window.location.search.includes('error='))) {
-        var urlParams = new URLSearchParams(window.location.search);
-        urlParams.delete('success');
-        urlParams.delete('error');
-        var newUrl = window.location.pathname + '?' + urlParams.toString();
-        window.history.replaceState({}, document.title, newUrl);
-    }
-});
 </script>
-
-<style>
-.alert {
-    border-radius: 8px;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    border-left: 4px solid transparent;
-}
-
-.alert-success {
-    background: linear-gradient(135deg, #d4edda, #c3e6cb);
-    color: #155724;
-    border-left-color: #28a745;
-}
-
-.alert-danger {
-    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-    color: #721c24;
-    border-left-color: #dc3545;
-}
-
-.day-badge {
-    font-size: 0.9em;
-    padding: 0.4em 0.8em;
-}
-
-.timeline-item {
-    position: relative;
-}
-
-.timeline-item:before {
-    content: '';
-    position: absolute;
-    left: -20px;
-    top: 20px;
-    width: 12px;
-    height: 12px;
-    background: #007bff;
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 0 0 3px #007bff;
-}
-</style>

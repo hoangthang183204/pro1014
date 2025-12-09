@@ -1,206 +1,204 @@
-<!-- Header -->
-<?php require './views/layout/header.php'; ?>
-<!-- Navbar -->
-<?php include './views/layout/navbar.php'; ?>
-<!-- /.navbar -->
+  <?php require './views/layout/header.php'; ?>
+  <?php include './views/layout/navbar.php'; ?>
+  <?php include './views/layout/sidebar.php'; ?>
 
-<!-- Main Sidebar Container -->
-<?php include './views/layout/sidebar.php'; ?>
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <!-- <section class="content-header">
-    </section> -->
+  <div class="content-wrapper">
+      <section class="content">
+          <div class="container-fluid p-0">
+              <!-- Header -->
+              <nav class="navbar navbar-dark bg-dark">
+                  <div class="container-fluid">
+                      <a class="navbar-brand" href="?act=lich-khoi-hanh">
+                          <i class="fas fa-edit me-2"></i>
+                          Sửa Lịch Trình: Ngày <?php echo $lich_trinh['so_ngay']; ?>
+                      </a>
+                      <div>
+                          <a href="?act=lich-khoi-hanh-lich-trinh&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>" class="btn btn-outline-light">
+                              <i class="fas fa-arrow-left me-1"></i> Quay lại
+                          </a>
+                      </div>
+                  </div>
+              </nav>
 
-    <!-- Main content -->
-    <section class="content">
-        <div class="container-fluid p-0">
-            <!-- Header -->
-            <nav class="navbar navbar-dark bg-dark">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="?act=/">
-                        <i class="fas fa-edit me-2"></i>
-                        Sửa Lịch Khởi Hành
-                    </a>
-                    <div>
-                        <a href="?act=lich-khoi-hanh" class="btn btn-outline-light">
-                            <i class="fas fa-arrow-left me-1"></i> Quay lại
-                        </a>
-                    </div>
-                </div>
-            </nav>
+              <div class="container mt-4">
+                  <!-- Thông báo -->
+                  <?php if (isset($_SESSION['success'])): ?>
+                      <div class="alert alert-success alert-dismissible fade show" role="alert">
+                          <div class="d-flex align-items-center">
+                              <i class="fas fa-check-circle text-success me-2"></i>
+                              <strong><?php echo $_SESSION['success'];
+                                        unset($_SESSION['success']); ?></strong>
+                          </div>
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                  <?php endif; ?>
 
-            <div class="container mt-4">
-                <!-- Thông báo -->
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
-                <?php endif; ?>
+                  <?php if (isset($_SESSION['error'])): ?>
+                      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                          <div class="d-flex align-items-center">
+                              <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                              <strong><?php echo $_SESSION['error'];
+                                        unset($_SESSION['error']); ?></strong>
+                          </div>
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
+                  <?php endif; ?>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh sửa thông tin lịch khởi hành</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="?act=lich-khoi-hanh-update">
-                            <input type="hidden" name="id" value="<?php echo $lich_khoi_hanh['id']; ?>">
+                  <!-- Thông tin tour và lịch khởi hành -->
+                  <div class="card mb-4">
+                      <div class="card-body">
+                          <h5 class="card-title">Tour: <?php echo htmlspecialchars($tour['ma_tour'] . ' - ' . $tour['ten_tour']); ?></h5>
+                          <p class="card-text mb-0">
+                              <i class="fas fa-calendar-alt me-1"></i>
+                              Ngày khởi hành: <?php echo date('d/m/Y', strtotime($lich_khoi_hanh['ngay_bat_dau'])); ?>
+                          </p>
+                      </div>
+                  </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Tour <span class="text-danger">*</span></label>
-                                        <select name="tour_id" class="form-select" required>
-                                            <option value="">Chọn tour</option>
-                                            <?php foreach ($tours as $tour): ?>
-                                                <option value="<?php echo $tour['id']; ?>"
-                                                    <?php echo $lich_khoi_hanh['tour_id'] == $tour['id'] ? 'selected' : ''; ?>>
-                                                    <?php echo htmlspecialchars($tour['ma_tour'] . ' - ' . $tour['ten_tour']); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                  <div class="card">
+                      <div class="card-header">
+                          <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh sửa lịch trình</h5>
+                      </div>
+                      <div class="card-body">
+                          <form method="POST" action="?act=lich-khoi-hanh-lich-trinh-update">
+                              <input type="hidden" name="id" value="<?php echo $lich_trinh['id']; ?>">
+                              <input type="hidden" name="lich_khoi_hanh_id" value="<?php echo $lich_khoi_hanh['id']; ?>">
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                                        <input type="date" name="ngay_bat_dau" class="form-control" required
-                                            value="<?php echo $lich_khoi_hanh['ngay_bat_dau']; ?>">
-                                    </div>
+                              <div class="row">
+                                  <div class="col-md-6">
+                                      <div class="mb-3">
+                                          <label class="form-label">Số ngày <span class="text-danger">*</span></label>
+                                          <input type="number" name="so_ngay" class="form-control" required
+                                              min="1" max="30"
+                                              value="<?php echo htmlspecialchars($lich_trinh['so_ngay']); ?>">
+                                          <small class="text-muted">Số thứ tự ngày trong tour</small>
+                                      </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-                                        <input type="date" name="ngay_ket_thuc" class="form-control" required
-                                            value="<?php echo $lich_khoi_hanh['ngay_ket_thuc']; ?>">
-                                    </div>
-                                </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Tiêu đề ngày <span class="text-danger">*</span></label>
+                                          <input type="text" name="tieu_de" class="form-control" required
+                                              value="<?php echo htmlspecialchars($lich_trinh['tieu_de']); ?>">
+                                          <small class="text-muted">VD: Khám phá Đà Lạt, Tận hưởng biển Nha Trang...</small>
+                                      </div>
 
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Giờ tập trung</label>
-                                        <input type="time" name="gio_tap_trung" class="form-control"
-                                            value="<?php echo $lich_khoi_hanh['gio_tap_trung']; ?>">
-                                    </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Thứ tự sắp xếp</label>
+                                          <input type="number" name="thu_tu_sap_xep" class="form-control"
+                                              min="0" value="<?php echo htmlspecialchars($lich_trinh['thu_tu_sap_xep']); ?>">
+                                          <small class="text-muted">Số nhỏ hiển thị trước</small>
+                                      </div>
+                                  </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Điểm tập trung</label>
-                                        <textarea name="diem_tap_trung" class="form-control" rows="3"
-                                            placeholder="Địa điểm cụ thể..."><?php echo htmlspecialchars($lich_khoi_hanh['diem_tap_trung']); ?></textarea>
-                                    </div>
+                                  <div class="col-md-6">
+                                      <div class="mb-3">
+                                          <label class="form-label">Chỗ ở</label>
+                                          <input type="text" name="cho_o" class="form-control"
+                                              value="<?php echo htmlspecialchars($lich_trinh['cho_o']); ?>">
+                                          <small class="text-muted">VD: Khách sạn 3 sao, Homestay...</small>
+                                      </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                                        <select name="trang_thai" class="form-select" required>
-                                            <option value="đã lên lịch" <?php echo $lich_khoi_hanh['trang_thai'] == 'đã lên lịch' ? 'selected' : ''; ?>>Đã lên lịch</option>
-                                            <option value="đang đi" <?php echo $lich_khoi_hanh['trang_thai'] == 'đang đi' ? 'selected' : ''; ?>>Đang đi</option>
-                                            <option value="đã hoàn thành" <?php echo $lich_khoi_hanh['trang_thai'] == 'đã hoàn thành' ? 'selected' : ''; ?>>Đã hoàn thành</option>
-                                            <option value="đã hủy" <?php echo $lich_khoi_hanh['trang_thai'] == 'đã hủy' ? 'selected' : ''; ?>>Đã hủy</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Bữa ăn</label>
+                                          <input type="text" name="bua_an" class="form-control"
+                                              value="<?php echo htmlspecialchars($lich_trinh['bua_an']); ?>">
+                                          <small class="text-muted">VD: Sáng: buffet, Trưa: nhà hàng...</small>
+                                      </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Số chỗ tối đa <span class="text-danger">*</span></label>
-                                        <input type="number" name="so_cho_toi_da" class="form-control" required
-                                            value="<?php echo $lich_khoi_hanh['so_cho_toi_da']; ?>"
-                                            min="1" max="100">
-                                        <small class="text-muted">Số lượng khách tối đa cho lịch này</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label">Số chỗ còn lại</label>
-                                        <input type="number" class="form-control" 
-                                            value="<?php echo $lich_khoi_hanh['so_cho_con_lai']; ?>" 
-                                            readonly disabled
-                                            style="background-color: #f8f9fa;">
-                                        <small class="text-muted">Tự động tính: (Số chỗ tối đa - Số chỗ đã đặt)</small>
-                                    </div>
-                                </div>
-                            </div>
+                                      <div class="mb-3">
+                                          <label class="form-label">Phương tiện</label>
+                                          <input type="text" name="phuong_tien" class="form-control"
+                                              value="<?php echo htmlspecialchars($lich_trinh['phuong_tien']); ?>">
+                                          <small class="text-muted">VD: Xe ô tô 16 chỗ, Máy bay...</small>
+                                      </div>
+                                  </div>
+                              </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Ghi chú vận hành</label>
-                                <textarea name="ghi_chu_van_hanh" class="form-control" rows="4"
-                                    placeholder="Ghi chú đặc biệt cho đội vận hành..."><?php echo htmlspecialchars($lich_khoi_hanh['ghi_chu_van_hanh']); ?></textarea>
-                            </div>
+                              <div class="mb-3">
+                                  <label class="form-label">Mô tả hoạt động chi tiết <span class="text-danger">*</span></label>
+                                  <textarea name="mo_ta_hoat_dong" class="form-control" rows="6" required
+                                      placeholder="Mô tả chi tiết các hoạt động trong ngày, lịch trình giờ giấc cụ thể..."><?php echo htmlspecialchars($lich_trinh['mo_ta_hoat_dong']); ?></textarea>
+                                  <small class="text-muted">Mô tả càng chi tiết càng tốt để khách hàng nắm rõ lịch trình</small>
+                              </div>
 
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Thông tin:</strong> 
-                                <ul class="mb-0 mt-2">
-                                    <li>Số chỗ còn lại: <strong><?php echo $lich_khoi_hanh['so_cho_con_lai']; ?></strong>/<strong><?php echo $lich_khoi_hanh['so_cho_toi_da']; ?></strong></li>
-                                    <li>Đã đặt: <strong><?php echo $lich_khoi_hanh['so_cho_toi_da'] - $lich_khoi_hanh['so_cho_con_lai']; ?></strong> chỗ</li>
-                                    <li>Tỷ lệ đặt: <strong><?php 
-                                        $ty_le_dat = $lich_khoi_hanh['so_cho_toi_da'] > 0 ? 
-                                            round((($lich_khoi_hanh['so_cho_toi_da'] - $lich_khoi_hanh['so_cho_con_lai']) / $lich_khoi_hanh['so_cho_toi_da']) * 100, 1) : 0;
-                                        echo $ty_le_dat; 
-                                    ?>%</strong></li>
-                                    <?php if ($lich_khoi_hanh['nguoi_tao']): ?>
-                                        <li>Người tạo: User ID <?php echo $lich_khoi_hanh['nguoi_tao']; ?></li>
-                                    <?php endif; ?>
-                                </ul>
-                            </div>
+                              <div class="mb-3">
+                                  <label class="form-label">Ghi chú cho HDV</label>
+                                  <textarea name="ghi_chu_hdv" class="form-control" rows="3"
+                                      placeholder="Các lưu ý đặc biệt cho hướng dẫn viên..."><?php echo htmlspecialchars($lich_trinh['ghi_chu_hdv']); ?></textarea>
+                                  <small class="text-muted">Chỉ HDV mới nhìn thấy mục này</small>
+                              </div>
 
-                            <div class="d-flex justify-content-between">
-                                <a href="?act=lich-khoi-hanh" class="btn btn-secondary">
-                                    <i class="fas fa-times me-1"></i> Hủy
-                                </a>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-save me-1"></i> Cập nhật
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- /.content -->
-</div>
-<!-- /.content-wrapper -->
+                              <div class="d-flex justify-content-between">
+                                  <a href="?act=lich-khoi-hanh-lich-trinh&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>" class="btn btn-secondary">
+                                      <i class="fas fa-times me-1"></i> Hủy
+                                  </a>
+                                  <button type="submit" class="btn btn-success">
+                                      <i class="fas fa-save me-1"></i> Cập nhật
+                                  </button>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
+  </div>
+  <?php include './views/layout/footer.php'; ?>
 
-<!-- Footer -->
-<?php include './views/layout/footer.php'; ?>
-<!-- End Footer -->
+  <script>
+      $(document).ready(function() {
+          // Tự động ẩn thông báo sau 5 giây
+          setTimeout(function() {
+              $('.alert').fadeOut(300, function() {
+                  $(this).remove();
+              });
+          }, 5000);
 
-<script>
-    $(function() {
-        // Validate date range
-        $('form').on('submit', function(e) {
-            const ngayBatDau = $('input[name="ngay_bat_dau"]').val();
-            const ngayKetThuc = $('input[name="ngay_ket_thuc"]').val();
-            
-            if (ngayBatDau && ngayKetThuc) {
-                if (new Date(ngayBatDau) > new Date(ngayKetThuc)) {
-                    alert('Ngày kết thúc phải sau ngày bắt đầu!');
-                    e.preventDefault();
-                    return false;
-                }
-            }
-        });
+          // Xóa tham số success/error từ URL
+          if (window.history.replaceState) {
+              var urlParams = new URLSearchParams(window.location.search);
+              if (urlParams.has('success') || urlParams.has('error')) {
+                  urlParams.delete('success');
+                  urlParams.delete('error');
+                  var newUrl = window.location.pathname + '?' + urlParams.toString();
+                  window.history.replaceState({}, document.title, newUrl);
+              }
+          }
+      });
+  </script>
 
-        // Auto set min date for end date based on start date
-        $('input[name="ngay_bat_dau"]').on('change', function() {
-            const startDate = $(this).val();
-            if (startDate) {
-                $('input[name="ngay_ket_thuc"]').attr('min', startDate);
-            }
-        });
+  <style>
+      .alert {
+          border-radius: 8px;
+          border: none;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          border-left: 4px solid transparent;
+      }
 
-        // Hiển thị cảnh báo nếu có booking khi thay đổi số chỗ tối đa
-        $('input[name="so_cho_toi_da"]').on('change', function() {
-            const soChoToiDaMoi = parseInt($(this).val());
-            const soChoConLaiHienTai = parseInt(<?php echo $lich_khoi_hanh['so_cho_con_lai']; ?>);
-            const soChoToiDaHienTai = parseInt(<?php echo $lich_khoi_hanh['so_cho_toi_da']; ?>);
-            const soChoDaDat = soChoToiDaHienTai - soChoConLaiHienTai;
-            
-            if (soChoToiDaMoi < soChoDaDat) {
-                alert('CẢNH BÁO: Số chỗ tối đa mới (' + soChoToiDaMoi + ') nhỏ hơn số chỗ đã đặt (' + soChoDaDat + '). Điều này có thể gây lỗi hệ thống!');
-            }
-        });
-    });
-</script>
-</body>
+      .alert-success {
+          background: linear-gradient(135deg, #d4edda, #c3e6cb);
+          color: #155724;
+          border-left-color: #28a745;
+      }
 
-</html>
+      .alert-danger {
+          background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+          color: #721c24;
+          border-left-color: #dc3545;
+      }
+
+      .form-label {
+          font-weight: 600;
+          color: #495057;
+      }
+
+      .form-control {
+          border-radius: 6px;
+          border: 1px solid #ced4da;
+          padding: 0.5rem 0.75rem;
+      }
+
+      .form-control:focus {
+          border-color: #80bdff;
+          box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      }
+  </style>

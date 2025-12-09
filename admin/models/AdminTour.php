@@ -53,6 +53,68 @@ class AdminTour
         }
     }
 
+    // Sửa phương thức createLichTrinh
+    public function createLichTrinh($data)
+    {
+        try {
+            // Xác định lich_khoi_hanh_id từ tour_id
+            $lich_khoi_hanh_id = $this->getDefaultLichKhoiHanhByTour($data['tour_id']);
+
+            if (!$lich_khoi_hanh_id) {
+                throw new Exception("Không tìm thấy lịch khởi hành cho tour này");
+            }
+
+            $query = "INSERT INTO lich_trinh_tour 
+                      (lich_khoi_hanh_id, so_thu_tu_ngay, so_ngay, tieu_de, mo_ta_hoat_dong, 
+                       cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep) 
+                      VALUES (:lich_khoi_hanh_id, :so_thu_tu_ngay, :so_ngay, :tieu_de, :mo_ta_hoat_dong, 
+                      :cho_o, :bua_an, :phuong_tien, :ghi_chu_hdv, :thu_tu_sap_xep)";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':so_thu_tu_ngay' => $data['so_thu_tu_ngay'] ?? 1,
+                ':so_ngay' => $data['so_ngay'],
+                ':tieu_de' => $data['tieu_de'],
+                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
+                ':cho_o' => $data['cho_o'],
+                ':bua_an' => $data['bua_an'],
+                ':phuong_tien' => $data['phuong_tien'],
+                ':ghi_chu_hdv' => $data['ghi_chu_hdv'],
+                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep'] ?? 0
+            ]);
+
+            return $this->conn->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Lỗi createLichTrinh: " . $e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            error_log("Lỗi createLichTrinh: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // Phương thức phụ: Lấy lịch khởi hành mặc định của tour
+    private function getDefaultLichKhoiHanhByTour($tour_id)
+    {
+        try {
+            $query = "SELECT id FROM lich_khoi_hanh 
+                      WHERE tour_id = :tour_id 
+                      ORDER BY ngay_bat_dau ASC 
+                      LIMIT 1";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ? $result['id'] : null;
+        } catch (PDOException $e) {
+            error_log("Lỗi getDefaultLichKhoiHanhByTour: " . $e->getMessage());
+            return null;
+        }
+    }
+
+   
 
     // Tạo tour mới
     public function createTour($data)
@@ -142,9 +204,6 @@ class AdminTour
             // Xóa media
             $this->deleteAllMediaByTour($id);
 
-            // Xóa lịch trình
-            $this->deleteAllLichTrinhByTour($id);
-
             // Xóa phiên bản
             $this->deleteAllPhienBanByTour($id);
 
@@ -162,14 +221,10 @@ class AdminTour
         }
     }
 
-    // Thêm các phương thức sau vào TourModel.php
-
-    // Lấy lịch trình theo phiên bản (nếu có lưu riêng)
     public function getLichTrinhByPhienBan($phien_ban_id)
     {
         try {
-            // Nếu bạn có bảng lưu lịch trình riêng cho phiên bản
-            // Nếu không, lấy từ lịch trình tour hiện tại
+           
             $query = "SELECT ltt.* FROM lich_trinh_tour ltt
                   JOIN phien_ban_tour pbt ON ltt.tour_id = pbt.tour_id
                   WHERE pbt.id = :phien_ban_id
@@ -222,77 +277,6 @@ class AdminTour
             return null;
         }
     }
-    // Lấy lịch trình theo tour
-    public function getLichTrinhByTour($tour_id)
-    {
-        try {
-            $query = "SELECT * FROM lich_trinh_tour 
-                  WHERE tour_id = :tour_id 
-                  ORDER BY thu_tu_sap_xep, so_ngay";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':tour_id' => $tour_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getLichTrinhByTour: " . $e->getMessage());
-            return [];
-        }
-    }
-
-
-
-    // Sao chép lịch trình vào phiên bản (nếu bạn muốn lưu riêng)
-    public function copyLichTrinhToPhienBan($phien_ban_id, $tour_id)
-    {
-        try {
-            // Tạo bảng lưu lịch trình phiên bản nếu chưa có
-            // Giả sử có bảng lich_trinh_phien_ban với cấu trúc tương tự lich_trinh_tour
-            $check_table = "SHOW TABLES LIKE 'lich_trinh_phien_ban'";
-            $stmt = $this->conn->query($check_table);
-
-            if (!$stmt->fetch()) {
-                // Tạo bảng mới
-                $create_table = "CREATE TABLE lich_trinh_phien_ban (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                phien_ban_id INT NOT NULL,
-                so_ngay INT NOT NULL,
-                tieu_de VARCHAR(255),
-                mo_ta_hoat_dong TEXT,
-                cho_o TEXT,
-                bua_an TEXT,
-                phuong_tien TEXT,
-                ghi_chu_hdv TEXT,
-                thu_tu_sap_xep INT DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (phien_ban_id) REFERENCES phien_ban_tour(id) ON DELETE CASCADE
-            )";
-
-                $this->conn->exec($create_table);
-            }
-
-            // Sao chép dữ liệu từ lich_trinh_tour
-            $copy_query = "INSERT INTO lich_trinh_phien_ban 
-                       (phien_ban_id, so_ngay, tieu_de, mo_ta_hoat_dong, 
-                        cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep)
-                       SELECT :phien_ban_id, so_ngay, tieu_de, mo_ta_hoat_dong,
-                              cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep
-                       FROM lich_trinh_tour 
-                       WHERE tour_id = :tour_id
-                       ORDER BY thu_tu_sap_xep, so_ngay";
-
-            $stmt = $this->conn->prepare($copy_query);
-            $stmt->execute([
-                ':phien_ban_id' => $phien_ban_id,
-                ':tour_id' => $tour_id
-            ]);
-
-            return true;
-        } catch (PDOException $e) {
-            error_log("Lỗi copyLichTrinhToPhienBan: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // ==================== UTILITY METHODS ====================
 
     // Lấy tất cả danh mục
     public function getAllDanhMuc()
@@ -321,111 +305,6 @@ class AdminTour
             return [];
         }
     }
-
-    // ==================== LỊCH TRÌNH METHODS ====================
-
-    // Lấy lịch trình theo ID
-    public function getLichTrinhById($id)
-    {
-        try {
-            $query = "SELECT * FROM lich_trinh_tour WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':id' => $id]);
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Lỗi getLichTrinhById: " . $e->getMessage());
-            return null;
-        }
-    }
-
-    // Tạo lịch trình mới
-    public function createLichTrinh($data)
-    {
-        try {
-            $query = "INSERT INTO lich_trinh_tour (tour_id, so_ngay, tieu_de, mo_ta_hoat_dong, 
-                      cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep) 
-                      VALUES (:tour_id, :so_ngay, :tieu_de, :mo_ta_hoat_dong, 
-                      :cho_o, :bua_an, :phuong_tien, :ghi_chu_hdv, :thu_tu_sap_xep)";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([
-                ':tour_id' => $data['tour_id'],
-                ':so_ngay' => $data['so_ngay'],
-                ':tieu_de' => $data['tieu_de'],
-                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
-                ':cho_o' => $data['cho_o'],
-                ':bua_an' => $data['bua_an'],
-                ':phuong_tien' => $data['phuong_tien'],
-                ':ghi_chu_hdv' => $data['ghi_chu_hdv'],
-                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep']
-            ]);
-
-            return $this->conn->lastInsertId();
-        } catch (PDOException $e) {
-            error_log("Lỗi createLichTrinh: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Cập nhật lịch trình
-    public function updateLichTrinh($id, $data)
-    {
-        try {
-            $query = "UPDATE lich_trinh_tour 
-                      SET so_ngay = :so_ngay, tieu_de = :tieu_de, mo_ta_hoat_dong = :mo_ta_hoat_dong,
-                          cho_o = :cho_o, bua_an = :bua_an, phuong_tien = :phuong_tien,
-                          ghi_chu_hdv = :ghi_chu_hdv, thu_tu_sap_xep = :thu_tu_sap_xep,
-                          updated_at = NOW()
-                      WHERE id = :id";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([
-                ':so_ngay' => $data['so_ngay'],
-                ':tieu_de' => $data['tieu_de'],
-                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
-                ':cho_o' => $data['cho_o'],
-                ':bua_an' => $data['bua_an'],
-                ':phuong_tien' => $data['phuong_tien'],
-                ':ghi_chu_hdv' => $data['ghi_chu_hdv'],
-                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep'],
-                ':id' => $id
-            ]);
-
-            return true;
-        } catch (PDOException $e) {
-            error_log("Lỗi updateLichTrinh: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Xóa lịch trình
-    public function deleteLichTrinh($id)
-    {
-        try {
-            $query = "DELETE FROM lich_trinh_tour WHERE id = :id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':id' => $id]);
-            return true;
-        } catch (PDOException $e) {
-            error_log("Lỗi deleteLichTrinh: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    // Xóa tất cả lịch trình của tour
-    private function deleteAllLichTrinhByTour($tour_id)
-    {
-        try {
-            $query = "DELETE FROM lich_trinh_tour WHERE tour_id = :tour_id";
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':tour_id' => $tour_id]);
-            return true;
-        } catch (PDOException $e) {
-            error_log("Lỗi deleteAllLichTrinhByTour: " . $e->getMessage());
-            return false;
-        }
-    }
-
     // ==================== PHIÊN BẢN METHODS ====================
 
     // Lấy giá tour hiện tại (phương thức riêng)
@@ -1024,9 +903,6 @@ class AdminTour
                 throw new Exception("Không thể tạo tour mới!");
             }
 
-            // 6. Clone lịch trình
-            $lich_trinh_cloned = $this->cloneLichTrinh($tour_id, $new_tour_id, $user_id);
-
             // 7. Clone phiên bản
             $phien_ban_cloned = $this->clonePhienBan($tour_id, $new_tour_id, $user_id);
 
@@ -1035,7 +911,6 @@ class AdminTour
 
             // 9. Ghi log clone
             $this->logCloneHistory($tour_id, $new_tour_id, $user_id, [
-                'lich_trinh_cloned' => $lich_trinh_cloned,
                 'phien_ban_cloned' => $phien_ban_cloned,
                 'media_cloned' => $media_cloned
             ]);
@@ -1047,7 +922,6 @@ class AdminTour
                 'new_tour_id' => $new_tour_id,
                 'new_tour_code' => $new_tour_code,
                 'cloned_items' => [
-                    'lich_trinh' => $lich_trinh_cloned,
                     'phien_ban' => $phien_ban_cloned,
                     'media' => $media_cloned
                 ]
@@ -1085,33 +959,6 @@ class AdminTour
             return $this->conn->lastInsertId();
         } catch (PDOException $e) {
             throw new Exception("Lỗi tạo tour mới: " . $e->getMessage());
-        }
-    }
-
-    // Clone lịch trình
-    private function cloneLichTrinh($original_tour_id, $new_tour_id, $user_id)
-    {
-        try {
-            $query = "INSERT INTO lich_trinh_tour 
-                  (tour_id, so_ngay, tieu_de, mo_ta_hoat_dong, cho_o, 
-                   bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep, nguoi_tao, created_at) 
-                  SELECT :new_tour_id, so_ngay, tieu_de, mo_ta_hoat_dong, cho_o, 
-                         bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep, :nguoi_tao, NOW()
-                  FROM lich_trinh_tour 
-                  WHERE tour_id = :original_tour_id
-                  ORDER BY thu_tu_sap_xep";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([
-                ':new_tour_id' => $new_tour_id,
-                ':original_tour_id' => $original_tour_id,
-                ':nguoi_tao' => $user_id
-            ]);
-
-            return $stmt->rowCount();
-        } catch (PDOException $e) {
-            error_log("Lỗi cloneLichTrinh: " . $e->getMessage());
-            return 0;
         }
     }
 
