@@ -17,9 +17,6 @@ include __DIR__ . '/../layout/sidebar.php';
                     <a href="<?= BASE_URL_GUIDE ?>?act=lich-lam-viec" class="btn btn-outline-primary">
                         <i class="fas fa-calendar-alt mr-2"></i> Lịch làm việc
                     </a>
-                    <button class="btn btn-light border" onclick="printPage()">
-                        <i class="fas fa-print mr-2"></i> In
-                    </button>
                 </div>
             </div>
         </div>
