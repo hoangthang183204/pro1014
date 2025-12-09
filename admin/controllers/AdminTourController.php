@@ -153,137 +153,7 @@ class AdminTourController
         header('Location: index.php?act=tour');
         exit();
     }
-
-    // ==================== QUẢN LÝ LỊCH TRÌNH TOUR ====================
-
-    // Hiển thị lịch trình tour
-    public function lichTrinh()
-    {
-        $tour_id = $_GET['tour_id'] ?? 0;
-        $tour = $this->tourModel->getTourById($tour_id);
-
-        if (!$tour) {
-            $_SESSION['error'] = 'Tour không tồn tại!';
-            header('Location: index.php?act=tour');
-            exit();
-        }
-
-        $lich_trinh = $this->tourModel->getLichTrinhByTour($tour_id);
-
-        require_once 'views/quanlytour/lichTrinhTour.php';
-    }
-
-    // Hiển thị form thêm lịch trình
-    public function createLichTrinh()
-    {
-        $tour_id = $_GET['tour_id'] ?? 0;
-        $tour = $this->tourModel->getTourById($tour_id);
-
-        if (!$tour) {
-            $_SESSION['error'] = 'Tour không tồn tại!';
-            header('Location: index.php?act=tour');
-            exit();
-        }
-
-        require_once 'views/quanlytour/addLichTrinh.php';
-    }
-
-    // Xử lý thêm lịch trình
-    public function storeLichTrinh()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'tour_id' => $_POST['tour_id'],
-                'so_ngay' => $_POST['so_ngay'],
-                'tieu_de' => $_POST['tieu_de'],
-                'mo_ta_hoat_dong' => $_POST['mo_ta_hoat_dong'],
-                'cho_o' => $_POST['cho_o'],
-                'bua_an' => $_POST['bua_an'],
-                'phuong_tien' => $_POST['phuong_tien'],
-                'ghi_chu_hdv' => $_POST['ghi_chu_hdv'],
-                'thu_tu_sap_xep' => $_POST['thu_tu_sap_xep'] ?? 0
-            ];
-
-            $result = $this->tourModel->createLichTrinh($data);
-
-            if ($result) {
-                $_SESSION['success'] = 'Thêm lịch trình thành công!';
-            } else {
-                $_SESSION['error'] = 'Có lỗi xảy ra khi thêm lịch trình!';
-            }
-
-            header('Location: index.php?act=tour-lich-trinh&tour_id=' . $data['tour_id']);
-            exit();
-        }
-    }
-
-    // Hiển thị form sửa lịch trình
-    public function editLichTrinh()
-    {
-        $id = $_GET['id'] ?? 0;
-        $lich_trinh = $this->tourModel->getLichTrinhById($id);
-
-        if (!$lich_trinh) {
-            $_SESSION['error'] = 'Lịch trình không tồn tại!';
-            header('Location: index.php?act=tour');
-            exit();
-        }
-
-        $tour = $this->tourModel->getTourById($lich_trinh['tour_id']);
-
-        require_once 'views/quanlytour/editLichTrinh.php';
-    }
-
-    // Xử lý cập nhật lịch trình
-    public function updateLichTrinh()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['id'];
-
-            $data = [
-                'so_ngay' => $_POST['so_ngay'],
-                'tieu_de' => $_POST['tieu_de'],
-                'mo_ta_hoat_dong' => $_POST['mo_ta_hoat_dong'],
-                'cho_o' => $_POST['cho_o'],
-                'bua_an' => $_POST['bua_an'],
-                'phuong_tien' => $_POST['phuong_tien'],
-                'ghi_chu_hdv' => $_POST['ghi_chu_hdv'],
-                'thu_tu_sap_xep' => $_POST['thu_tu_sap_xep'] ?? 0
-            ];
-
-            $result = $this->tourModel->updateLichTrinh($id, $data);
-
-            if ($result) {
-                $_SESSION['success'] = 'Cập nhật lịch trình thành công!';
-            } else {
-                $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật lịch trình!';
-            }
-
-            header('Location: index.php?act=tour-lich-trinh&tour_id=' . $_POST['tour_id']);
-            exit();
-        }
-    }
-
-    // Xóa lịch trình
-    public function deleteLichTrinh()
-    {
-        $id = $_GET['id'] ?? 0;
-        $tour_id = $_GET['tour_id'] ?? 0;
-
-        $result = $this->tourModel->deleteLichTrinh($id);
-
-        if ($result) {
-            $_SESSION['success'] = 'Xóa lịch trình thành công!';
-        } else {
-            $_SESSION['error'] = 'Có lỗi xảy ra khi xóa lịch trình!';
-        }
-
-        header('Location: index.php?act=tour-lich-trinh&tour_id=' . $tour_id);
-        exit();
-    }
-
     // ==================== QUẢN LÝ PHIÊN BẢN TOUR ====================
-    // Hiển thị danh sách phiên bản (Sửa lại)
     public function phienBan()
     {
         $tour_id = $_GET['tour_id'] ?? 0;
@@ -296,12 +166,8 @@ class AdminTourController
         }
 
         $phien_ban_list = $this->tourModel->getPhienBanByTour($tour_id);
-
-        // Debug: In ra danh sách phiên bản tìm được
         error_log("Tour ID: " . $tour_id);
         error_log("Phien ban list: " . print_r($phien_ban_list, true));
-
-        // Thống kê theo loại
         $stats = [
             'mua' => 0,
             'khuyen_mai' => 0,
@@ -325,8 +191,6 @@ class AdminTourController
                     $stats['dac_biet']++;
                     break;
             }
-
-            // Xác định phiên bản hiện hành
             if ($pb['thoi_gian_bat_dau'] <= $now && $pb['thoi_gian_ket_thuc'] >= $now) {
                 $stats['hien_hanh'] = $pb['id'];
             }
@@ -334,8 +198,6 @@ class AdminTourController
 
         require_once 'views/quanlytour/phienBanTour.php';
     }
-
-    // Xem chi tiết phiên bản (Sửa lại với debug)
     public function xemPhienBan()
     {
         $id = $_GET['id'] ?? 0;
@@ -366,8 +228,7 @@ class AdminTourController
         // Đảm bảo tour có giá trị
         $tour['gia_tour'] = $tour['gia_tour'] ?? 0;
 
-        // Lấy lịch trình của tour
-        $lich_trinh = $this->tourModel->getLichTrinhByTour($phien_ban['tour_id']);
+    
 
         // Lấy các lịch khởi hành trong thời gian phiên bản hiệu lực
         $lich_khoi_hanh = $this->tourModel->getLichKhoiHanhTrongPhienBan(
@@ -384,7 +245,6 @@ class AdminTourController
 
         // Debug: In ra tất cả dữ liệu
         error_log("Tour data: " . print_r($tour, true));
-        error_log("Lich trinh count: " . count($lich_trinh));
         error_log("Lich khoi hanh count: " . count($lich_khoi_hanh));
 
         require_once 'views/quanlytour/detailPhienBanTour.php';

@@ -175,7 +175,7 @@
                                     <small class="form-text text-muted">Có thể chỉnh sửa mô tả tour mới</small>
                                 </div>
 
-                                <div class="callout callout-info">
+                                <!-- <div class="callout callout-info">
                                     <h5><i class="fas fa-info-circle me-2"></i>Thành phần sẽ được sao chép:</h5>
                                     <ul class="mb-0">
                                         <li>Tất cả lịch trình tour</li>
@@ -184,7 +184,7 @@
                                         <li>Cấu hình cơ bản của tour</li>
                                     </ul>
                                     <p class="mt-2 mb-0"><small><i class="fas fa-exclamation-triangle me-1"></i>Lưu ý: Các lịch khởi hành, booking, đánh giá sẽ không được sao chép.</small></p>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="card-footer">
                                 <div class="d-flex justify-content-between">

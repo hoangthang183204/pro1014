@@ -249,9 +249,12 @@
                                                             class="btn btn-warning" title="Checklist">
                                                             <i class="fas fa-tasks"></i>
                                                         </a>
-
+                                                        <!-- Thêm nút Lịch trình -->
+                                                        <a href="?act=lich-khoi-hanh-lich-trinh&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
+                                                            class="btn btn-info" title="Lịch trình">
+                                                            <i class="fas fa-route"></i>
+                                                        </a>
                                                     </div>
-
                                                     <!-- Hàng 2 -->
                                                     <div class="btn-group btn-group-sm">
 
@@ -272,7 +275,6 @@
                                                             class="btn btn-success" title="Trạm dừng chân">
                                                             <i class="fas fa-map-marker-alt"></i>
                                                         </a>
-
                                                         <!-- Xóa -->
                                                         <?php if ($cho_phep_xoa): ?>
                                                             <a href="?act=lich-khoi-hanh-delete&id=<?php echo $lich['id']; ?>"

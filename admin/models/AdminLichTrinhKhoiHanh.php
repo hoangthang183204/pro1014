@@ -140,6 +140,149 @@ class AdminLichKhoiHanh
         }
     }
 
+    // Thêm phương thức quản lý lịch trình
+    public function getLichTrinhTour($lich_khoi_hanh_id)
+    {
+        try {
+            $query = "SELECT * FROM lich_trinh_tour 
+                      WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                      ORDER BY so_thu_tu_ngay, thu_tu_sap_xep";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichTrinhTour: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Tạo lịch trình mới cho lịch khởi hành
+    public function themLichTrinh($lich_khoi_hanh_id, $data)
+    {
+        try {
+            $query = "INSERT INTO lich_trinh_tour 
+                      (lich_khoi_hanh_id, so_thu_tu_ngay, so_ngay, tieu_de, mo_ta_hoat_dong, 
+                       cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep) 
+                      VALUES (:lich_khoi_hanh_id, :so_thu_tu_ngay, :so_ngay, :tieu_de, :mo_ta_hoat_dong, 
+                      :cho_o, :bua_an, :phuong_tien, :ghi_chu_hdv, :thu_tu_sap_xep)";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':so_thu_tu_ngay' => $data['so_thu_tu_ngay'] ?? 1,
+                ':so_ngay' => $data['so_ngay'],
+                ':tieu_de' => $data['tieu_de'],
+                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
+                ':cho_o' => $data['cho_o'],
+                ':bua_an' => $data['bua_an'],
+                ':phuong_tien' => $data['phuong_tien'],
+                ':ghi_chu_hdv' => $data['ghi_chu_hdv'],
+                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep'] ?? 0
+            ]);
+
+            return ['success' => true, 'message' => 'Thêm lịch trình thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi themLichTrinh: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+    // Sửa lịch trình
+    public function suaLichTrinh($id, $data)
+    {
+        try {
+            $query = "UPDATE lich_trinh_tour 
+                      SET so_thu_tu_ngay = :so_thu_tu_ngay,
+                          so_ngay = :so_ngay,
+                          tieu_de = :tieu_de,
+                          mo_ta_hoat_dong = :mo_ta_hoat_dong,
+                          cho_o = :cho_o,
+                          bua_an = :bua_an,
+                          phuong_tien = :phuong_tien,
+                          ghi_chu_hdv = :ghi_chu_hdv,
+                          thu_tu_sap_xep = :thu_tu_sap_xep,
+                          updated_at = NOW()
+                      WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':so_thu_tu_ngay' => $data['so_thu_tu_ngay'],
+                ':so_ngay' => $data['so_ngay'],
+                ':tieu_de' => $data['tieu_de'],
+                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
+                ':cho_o' => $data['cho_o'],
+                ':bua_an' => $data['bua_an'],
+                ':phuong_tien' => $data['phuong_tien'],
+                ':ghi_chu_hdv' => $data['ghi_chu_hdv'],
+                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep'],
+                ':id' => $id
+            ]);
+
+            return ['success' => true, 'message' => 'Cập nhật lịch trình thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi suaLichTrinh: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+    // Xóa lịch trình
+    public function xoaLichTrinh($id)
+    {
+        try {
+            $query = "DELETE FROM lich_trinh_tour WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+
+            return ['success' => true, 'message' => 'Xóa lịch trình thành công'];
+        } catch (PDOException $e) {
+            error_log("Lỗi xoaLichTrinh: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+    // Sao chép lịch trình từ tour khác
+    public function copyLichTrinhFromTour($lich_khoi_hanh_id, $from_tour_id)
+    {
+        try {
+            // Lấy lịch trình từ tour gốc
+            $query = "SELECT so_ngay, tieu_de, mo_ta_hoat_dong, cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep 
+                      FROM lich_trinh_tour ltt
+                      JOIN lich_khoi_hanh lkh ON ltt.lich_khoi_hanh_id = lkh.id
+                      WHERE lkh.tour_id = :from_tour_id
+                      ORDER BY ltt.thu_tu_sap_xep";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':from_tour_id' => $from_tour_id]);
+            $lich_trinh_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $count = 0;
+            foreach ($lich_trinh_list as $index => $lich_trinh) {
+                $data = [
+                    'so_thu_tu_ngay' => $index + 1,
+                    'so_ngay' => $lich_trinh['so_ngay'],
+                    'tieu_de' => $lich_trinh['tieu_de'],
+                    'mo_ta_hoat_dong' => $lich_trinh['mo_ta_hoat_dong'],
+                    'cho_o' => $lich_trinh['cho_o'],
+                    'bua_an' => $lich_trinh['bua_an'],
+                    'phuong_tien' => $lich_trinh['phuong_tien'],
+                    'ghi_chu_hdv' => $lich_trinh['ghi_chu_hdv'],
+                    'thu_tu_sap_xep' => $lich_trinh['thu_tu_sap_xep'] ?? 0
+                ];
+
+                $this->themLichTrinh($lich_khoi_hanh_id, $data);
+                $count++;
+            }
+
+            return ['success' => true, 'message' => "Sao chép thành công {$count} lịch trình"];
+        } catch (PDOException $e) {
+            error_log("Lỗi copyLichTrinhFromTour: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()];
+        }
+    }
+
+
+
     // Kiểm tra trùng lịch HDV
     public function kiemTraTrungLich($huong_dan_vien_id, $lich_khoi_hanh_id, $ngay_bat_dau, $ngay_ket_thuc)
     {
@@ -721,6 +864,202 @@ class AdminLichKhoiHanh
         } catch (PDOException $e) {
             error_log("Lỗi getTramById: " . $e->getMessage());
             return null;
+        }
+    }
+
+    // Lấy danh sách lịch khởi hành của một tour
+    public function getLichKhoiHanhByTour($tour_id)
+    {
+        try {
+            $query = "SELECT * FROM lich_khoi_hanh 
+                      WHERE tour_id = :tour_id 
+                      ORDER BY ngay_bat_dau DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':tour_id' => $tour_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichKhoiHanhByTour: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Tính số ngày của tour từ lịch trình
+    public function tinhSoNgayTour($lich_khoi_hanh_id)
+    {
+        try {
+            $query = "SELECT MAX(so_thu_tu_ngay) as so_ngay 
+                      FROM lich_trinh_tour 
+                      WHERE lich_khoi_hanh_id = :lich_khoi_hanh_id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ? $result['so_ngay'] : 0;
+        } catch (PDOException $e) {
+            error_log("Lỗi tinhSoNgayTour: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function getLichTrinhByLichKhoiHanh($lich_khoi_hanh_id)
+    {
+        try {
+            $query = "SELECT ltt.*, lkh.tour_id, t.ma_tour, t.ten_tour
+                      FROM lich_trinh_tour ltt
+                      JOIN lich_khoi_hanh lkh ON ltt.lich_khoi_hanh_id = lkh.id
+                      JOIN tour t ON lkh.tour_id = t.id
+                      WHERE ltt.lich_khoi_hanh_id = :lich_khoi_hanh_id 
+                      ORDER BY ltt.so_thu_tu_ngay, ltt.thu_tu_sap_xep";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':lich_khoi_hanh_id' => $lich_khoi_hanh_id]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichTrinhByLichKhoiHanh: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // Lấy chi tiết một lịch trình
+    public function getLichTrinhById($id)
+    {
+        try {
+            $query = "SELECT ltt.*, lkh.tour_id, lkh.id as lich_khoi_hanh_id
+                      FROM lich_trinh_tour ltt
+                      JOIN lich_khoi_hanh lkh ON ltt.lich_khoi_hanh_id = lkh.id
+                      WHERE ltt.id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Lỗi getLichTrinhById: " . $e->getMessage());
+            return null;
+        }
+    }
+    // Trong class AdminLichKhoiHanh
+
+    // Tạo lịch trình mới - ĐÃ SỬA
+    public function createLichTrinh($lich_khoi_hanh_id, $data)
+    {
+        try {
+            // Lấy thông tin lịch khởi hành để lấy tour_id
+            $lich_khoi_hanh = $this->getLichKhoiHanhById($lich_khoi_hanh_id);
+            if (!$lich_khoi_hanh) {
+                throw new Exception("Lịch khởi hành không tồn tại!");
+            }
+
+            // Kiểm tra tour đã hoàn thành chưa
+            if ($lich_khoi_hanh['trang_thai'] === 'đã hoàn thành' || $lich_khoi_hanh['trang_thai'] === 'đã hủy') {
+                throw new Exception("Không thể thêm lịch trình cho tour đã hoàn thành hoặc đã hủy!");
+            }
+
+            // Query ĐÚNG với cấu trúc database hiện tại
+            $query = "INSERT INTO lich_trinh_tour 
+                  (tour_id, lich_khoi_hanh_id, so_thu_tu_ngay, so_ngay, tieu_de, mo_ta_hoat_dong, 
+                   cho_o, bua_an, phuong_tien, ghi_chu_hdv, thu_tu_sap_xep) 
+                  VALUES (:tour_id, :lich_khoi_hanh_id, :so_thu_tu_ngay, :so_ngay, :tieu_de, :mo_ta_hoat_dong, 
+                          :cho_o, :bua_an, :phuong_tien, :ghi_chu_hdv, :thu_tu_sap_xep)";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':tour_id' => $lich_khoi_hanh['tour_id'], // Lấy tour_id từ lich_khoi_hanh
+                ':lich_khoi_hanh_id' => $lich_khoi_hanh_id,
+                ':so_thu_tu_ngay' => $data['so_thu_tu_ngay'] ?? 1,
+                ':so_ngay' => $data['so_ngay'],
+                ':tieu_de' => $data['tieu_de'],
+                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
+                ':cho_o' => $data['cho_o'],
+                ':bua_an' => $data['bua_an'],
+                ':phuong_tien' => $data['phuong_tien'],
+                ':ghi_chu_hdv' => $data['ghi_chu_hdv'] ?? '',
+                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep'] ?? 0
+            ]);
+
+            return $this->conn->lastInsertId();
+        } catch (Exception $e) {
+            error_log("Lỗi createLichTrinh: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+
+    // Cập nhật lịch trình
+    public function updateLichTrinh($id, $data)
+    {
+        try {
+            // Lấy thông tin lịch trình hiện tại để kiểm tra
+            $lich_trinh = $this->getLichTrinhById($id);
+            if (!$lich_trinh) {
+                throw new Exception("Lịch trình không tồn tại!");
+            }
+
+            // Kiểm tra tour đã hoàn thành chưa
+            $lich_khoi_hanh = $this->getLichKhoiHanhById($lich_trinh['lich_khoi_hanh_id']);
+            if ($lich_khoi_hanh['trang_thai'] === 'đã hoàn thành' || $lich_khoi_hanh['trang_thai'] === 'đã hủy') {
+                throw new Exception("Không thể cập nhật lịch trình cho tour đã hoàn thành hoặc đã hủy!");
+            }
+
+            $query = "UPDATE lich_trinh_tour 
+                      SET so_thu_tu_ngay = :so_thu_tu_ngay,
+                          so_ngay = :so_ngay,
+                          tieu_de = :tieu_de,
+                          mo_ta_hoat_dong = :mo_ta_hoat_dong,
+                          cho_o = :cho_o,
+                          bua_an = :bua_an,
+                          phuong_tien = :phuong_tien,
+                          ghi_chu_hdv = :ghi_chu_hdv,
+                          thu_tu_sap_xep = :thu_tu_sap_xep,
+                          updated_at = NOW()
+                      WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':so_thu_tu_ngay' => $data['so_thu_tu_ngay'],
+                ':so_ngay' => $data['so_ngay'],
+                ':tieu_de' => $data['tieu_de'],
+                ':mo_ta_hoat_dong' => $data['mo_ta_hoat_dong'],
+                ':cho_o' => $data['cho_o'],
+                ':bua_an' => $data['bua_an'],
+                ':phuong_tien' => $data['phuong_tien'],
+                ':ghi_chu_hdv' => $data['ghi_chu_hdv'],
+                ':thu_tu_sap_xep' => $data['thu_tu_sap_xep'],
+                ':id' => $id
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Lỗi updateLichTrinh: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    // Xóa lịch trình
+    public function deleteLichTrinh($id)
+    {
+        try {
+            // Lấy thông tin lịch trình để kiểm tra
+            $lich_trinh = $this->getLichTrinhById($id);
+            if (!$lich_trinh) {
+                throw new Exception("Lịch trình không tồn tại!");
+            }
+
+            // Kiểm tra tour đã hoàn thành chưa
+            $lich_khoi_hanh = $this->getLichKhoiHanhById($lich_trinh['lich_khoi_hanh_id']);
+            if ($lich_khoi_hanh['trang_thai'] === 'đã hoàn thành' || $lich_khoi_hanh['trang_thai'] === 'đã hủy') {
+                throw new Exception("Không thể xóa lịch trình cho tour đã hoàn thành hoặc đã hủy!");
+            }
+
+            $query = "DELETE FROM lich_trinh_tour WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':id' => $id]);
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Lỗi deleteLichTrinh: " . $e->getMessage());
+            throw $e;
         }
     }
 }
