@@ -47,7 +47,13 @@
                                     <td><?= date('d/m/Y', strtotime($tour['ngay_ket_thuc'])) ?></td>
                                     <td><?= $tour['so_ngay'] ?> ngày</td>
                                     <td>
-                                        <span class="badge bg-secondary"><?= $tour['loai_tour'] ?? 'Tiêu chuẩn' ?></span>
+                                        <?php if ($tour['loai_tour'] == 'trong nước'): ?>
+                                            <span class="badge bg-primary">Trong nước</span>
+                                        <?php elseif ($tour['loai_tour'] == 'quốc tế'): ?>
+                                            <span class="badge bg-success">Quốc tế</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary"><?= $tour['loai_tour'] ?? 'Tiêu chuẩn' ?></span>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($tour['da_danh_gia'] > 0): ?>
@@ -63,7 +69,7 @@
                                                 <i class="fas fa-edit me-1"></i> Đánh giá ngay
                                             </a>
                                         <?php else: ?>
-                                            <a href="?act=danh_gia_detail&id=<?= $tour['id'] ?>" 
+                                            <a href="?act=danh_gia_detail&id=<?= $tour['da_danh_gia'] ?>" 
                                                class="btn btn-sm btn-outline-info">
                                                 <i class="fas fa-eye me-1"></i> Xem đánh giá
                                             </a>

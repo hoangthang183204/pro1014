@@ -33,11 +33,11 @@ $is_home = !isset($_GET['act']);
             </a>
         </li>
 
+        <!-- Thêm vào sidebar.php trong views/layout/ -->
         <li class="nav-item">
-            <a href="<?= BASE_URL_GUIDE . '?act=danh_gia' ?>"
-                class="nav-link d-flex align-items-center <?= (isset($_GET['act']) && strpos($_GET['act'], 'danh_gia') === 0) ? 'active' : '' ?>">
-                <i class="nav-icon fas fa-star"></i>
-                <p class="m-0 pl-2">Đánh Giá Tour</p>
+            <a class="nav-link" href="?act=danh_gia">
+                <i class="fas fa-star me-2"></i>
+                <span>Đánh giá tour</span>
             </a>
         </li>
 
