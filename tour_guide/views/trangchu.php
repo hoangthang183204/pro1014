@@ -1,4 +1,3 @@
-
 <!-- TRANG 1: DASHBOARD -->
 <?php require './views/layout/header.php'; ?>
 <?php include './views/layout/sidebar.php'; ?>
@@ -9,21 +8,54 @@
         <h1 class="page-title">Dashboard - Tổng Quan Hệ Thống</h1>
         
         <!-- Thông tin HDV -->
-        <?php if (isset($guideInfo) && !empty($guideInfo)): ?>
+        <?php if (isset($guideInfo) && !empty($guideInfo)): 
+            // Hàm tạo avatar mặc định giống my_profile.php
+            function getDefaultAvatarDashboard($name) {
+                $initial = mb_substr($name, 0, 1, 'UTF-8');
+                $colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a', '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3'];
+                $colorIndex = ord($initial) % count($colors);
+                $backgroundColor = $colors[$colorIndex];
+                
+                $svg = '<svg width="70" height="70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70">
+                    <rect width="70" height="70" fill="' . $backgroundColor . '" rx="8"/>
+                    <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="30" fill="white" 
+                          text-anchor="middle" dominant-baseline="middle" font-weight="bold">' . $initial . '</text>
+                </svg>';
+                
+                return "data:image/svg+xml;base64," . base64_encode($svg);
+            }
+            
+            // Hàm lấy avatar URL giống my_profile.php
+            function getAvatarUrlDashboard($profile) {
+                if (!empty($profile['hinh_anh'])) {
+                    $imagePath = $_SERVER['DOCUMENT_ROOT'] . $profile['hinh_anh'];
+                    
+                    if (strpos($profile['hinh_anh'], '/pro1014') === 0) {
+                        $imagePath = $_SERVER['DOCUMENT_ROOT'] . $profile['hinh_anh'];
+                    } else {
+                        $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/pro1014' . $profile['hinh_anh'];
+                    }
+                    
+                    if (file_exists($imagePath) && is_file($imagePath)) {
+                        return "http://localhost" . (strpos($profile['hinh_anh'], '/pro1014') === 0 ? $profile['hinh_anh'] : '/pro1014' . $profile['hinh_anh']);
+                    }
+                }
+                
+                return getDefaultAvatarDashboard($profile['ho_ten'] ?? 'HDV');
+            }
+            
+            $avatarUrl = getAvatarUrlDashboard($guideInfo);
+        ?>
         <div class="guide-info mb-4">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <?php if (!empty($guideInfo['hinh_anh'])): ?>
-                        <img src="<?= htmlspecialchars($guideInfo['hinh_anh']) ?>" 
-                             alt="Avatar" 
-                             class="rounded-circle me-3" 
-                             style="width: 70px; height: 70px; object-fit: cover;">
-                    <?php else: ?>
-                        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" 
-                             style="width: 70px; height: 70px; background-color: var(--primary-color); color: white;">
-                            <i class="fas fa-user fa-2x"></i>
-                        </div>
-                    <?php endif; ?>
+                    <div class="avatar-container me-3">
+                        <img src="<?= $avatarUrl ?>" 
+                             alt="Avatar của <?= htmlspecialchars($guideInfo['ho_ten'] ?? 'Hướng dẫn viên') ?>"
+                             class="rounded-circle"
+                             style="width: 70px; height: 70px; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"
+                             onerror="this.onerror=null; this.src='<?= getDefaultAvatarDashboard($guideInfo['ho_ten'] ?? 'HDV') ?>'">
+                    </div>
                     <div>
                         <h4 class="mb-1">Xin chào, <?= htmlspecialchars($guideInfo['ho_ten'] ?? 'Hướng dẫn viên') ?>!</h4>
                         <p class="mb-0 text-muted">
@@ -334,8 +366,8 @@
                                                     (<?= $event['days_until'] ?? 0 ?> ngày nữa)
                                                     <?php if (!empty($event['ghi_chu'])): ?>
                                                         <br><i class="fas fa-sticky-note"></i> <?= htmlspecialchars($event['ghi_chu']) ?>
-                                                    <?php endif; ?>
-                                                </small>
+                                                    </small>
+                                                <?php endif; ?>
                                             </div>
                                             <div class="text-end">
                                                 <?php

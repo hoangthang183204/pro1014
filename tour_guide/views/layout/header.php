@@ -105,7 +105,7 @@
         </div>
         <div class="user-info">
             <!-- Ảnh đại diện có thể lấy từ DB -->
-            <img src="https://ui-avatars.com/api/?name=Nguyen+Van+A&background=random" alt="Avatar">
+            <img src="https://avatarngau.sbs/wp-content/uploads/2025/05/avatar-3d-nam-4.jpg" alt="Avatar">
             <div class="user-info">
             
             <div>
