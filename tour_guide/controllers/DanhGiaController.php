@@ -2,163 +2,195 @@
 require_once './models/DanhGiaModel.php';
 
 class DanhGiaController {
-    public $model;
-
+    private $model;
+    
     public function __construct() {
         $this->model = new DanhGiaModel();
     }
 
-    // Danh sách tour đã hoàn thành (chưa đánh giá)
+    // Hiển thị danh sách tour cần đánh giá
     public function index() {
-        if (!checkGuideLogin()) {
-            $_SESSION['error'] = "Vui lòng đăng nhập!";
-            header("Location: " . BASE_URL_GUIDE . "?act=login");
+        // SỬA: Kiểm tra session đúng cách
+        if (!isset($_SESSION['guide_id'])) {
+            header('Location: ?act=login');
             exit();
         }
 
-        $guide_id = $_SESSION['guide_id'];
-        $tours = $this->model->getToursCompletedByGuide($guide_id);
+        $huong_dan_vien_id = $_SESSION['guide_id']; // SỬA Ở ĐÂY
+        $tours = $this->model->getToursCanDanhGia($huong_dan_vien_id);
         
         require_once './views/danhgia/list_tours.php';
     }
 
-    // Form đánh giá
+    // Hiển thị form tạo đánh giá
     public function create() {
-        if (!checkGuideLogin()) {
-            $_SESSION['error'] = "Vui lòng đăng nhập!";
-            header("Location: " . BASE_URL_GUIDE . "?act=login");
+        if (!isset($_SESSION['guide_id'])) { // SỬA
+            header('Location: ?act=login');
             exit();
         }
 
-        $lich_id = $_GET['id'] ?? null;
-        if (!$lich_id) {
-            $_SESSION['error'] = "Không tìm thấy tour!";
-            header("Location: " . BASE_URL_GUIDE . "?act=danh_gia");
+        $id = $_GET['id'] ?? 0;
+        $huong_dan_vien_id = $_SESSION['guide_id']; // SỬA
+        
+        // Kiểm tra tour có tồn tại và HDV có được phân công không
+        $tourInfo = $this->model->getTourInfoForReview($id, $huong_dan_vien_id);
+        
+        if (!$tourInfo) {
+            $_SESSION['error'] = "Tour không tồn tại hoặc bạn không có quyền đánh giá tour này";
+            header('Location: ?act=danh_gia');
             exit();
         }
-
-        $guide_id = $_SESSION['guide_id'];
         
         // Kiểm tra đã đánh giá chưa
-        $daDanhGia = $this->model->checkDaDanhGia($lich_id, $guide_id);
-        if ($daDanhGia && $daDanhGia['trang_thai'] != 'draft') {
-            $_SESSION['info'] = "Bạn đã đánh giá tour này rồi!";
-            header("Location: " . BASE_URL_GUIDE . "?act=danh_gia_detail&id=" . $daDanhGia['id']);
+        if ($this->model->isAlreadyReviewed($id, $huong_dan_vien_id)) {
+            $_SESSION['error'] = "Bạn đã đánh giá tour này rồi";
+            header('Location: ?act=danh_gia');
             exit();
         }
-
-        // Lấy thông tin tour
-        $tourInfo = $this->model->getTourInfoForReview($lich_id);
-        if (!$tourInfo) {
-            $_SESSION['error'] = "Không tìm thấy thông tin tour!";
-            header("Location: " . BASE_URL_GUIDE . "?act=danh_gia");
-            exit();
-        }
-
+        
         require_once './views/danhgia/create.php';
     }
 
-    // Lưu đánh giá
+    // Xử lý lưu đánh giá
     public function store() {
-        if (!checkGuideLogin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
-            echo json_encode(['success' => false, 'message' => 'Invalid request']);
-            return;
-        }
-
-        $guide_id = $_SESSION['guide_id'];
-        $lich_id = $_POST['lich_khoi_hanh_id'] ?? null;
-
-        if (!$lich_id) {
-            echo json_encode(['success' => false, 'message' => 'Thiếu thông tin tour']);
-            return;
-        }
-
-        // Chuẩn bị data
-        $data = [
-            ':lich_id' => $lich_id,
-            ':guide_id' => $guide_id,
-            ':diem_tong_quan' => $_POST['diem_tong_quan'] ?? 5,
-            ':noi_dung_tong_quan' => $_POST['noi_dung_tong_quan'] ?? '',
-            
-            ':diem_khach_san' => $_POST['diem_khach_san'] ?? 5,
-            ':nhan_xet_khach_san' => $_POST['nhan_xet_khach_san'] ?? '',
-            
-            ':diem_nha_hang' => $_POST['diem_nha_hang'] ?? 5,
-            ':nhan_xet_nha_hang' => $_POST['nhan_xet_nha_hang'] ?? '',
-            
-            ':diem_xe_van_chuyen' => $_POST['diem_xe_van_chuyen'] ?? 5,
-            ':nhan_xet_xe_van_chuyen' => $_POST['nhan_xet_xe_van_chuyen'] ?? '',
-            
-            ':diem_dich_vu_bo_sung' => $_POST['diem_dich_vu_bo_sung'] ?? 5,
-            ':nhan_xet_dich_vu_bo_sung' => $_POST['nhan_xet_dich_vu_bo_sung'] ?? '',
-            
-            ':nha_cung_cap_khach_san' => $_POST['nha_cung_cap_khach_san'] ?? '',
-            ':nha_cung_cap_nha_hang' => $_POST['nha_cung_cap_nha_hang'] ?? '',
-            ':nha_cung_cap_xe' => $_POST['nha_cung_cap_xe'] ?? '',
-            
-            ':de_xuat_cai_thien' => $_POST['de_xuat_cai_thien'] ?? '',
-            ':de_xuat_tiep_tuc_su_dung' => $_POST['de_xuat_tiep_tuc_su_dung'] ?? 'co'
-        ];
-
-        // Kiểm tra đã đánh giá chưa (update hoặc insert)
-        $existing = $this->model->checkDaDanhGia($lich_id, $guide_id);
-        
-        if ($existing && $existing['trang_thai'] == 'draft') {
-            // Update draft
-            $result = $this->model->updateDanhGia($existing['id'], $data);
-        } else {
-            // Insert mới
-            $result = $this->model->saveDanhGia($data);
-        }
-
-        if ($result) {
-            echo json_encode(['success' => true, 'message' => 'Đã gửi đánh giá thành công!']);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Lỗi khi lưu đánh giá!']);
-        }
+    // Bật lỗi chi tiết
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    error_log("=== BẮT ĐẦU XỬ LÝ STORE ===");
+    
+    if (!isset($_SESSION['guide_id'])) {
+        error_log("Lỗi: Chưa đăng nhập");
+        echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập']);
+        exit();
     }
 
-    // Xem danh sách đánh giá đã gửi
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        error_log("Lỗi: Không phải POST request");
+        echo json_encode(['success' => false, 'message' => 'Phương thức không hợp lệ']);
+        exit();
+    }
+
+    $huong_dan_vien_id = $_SESSION['guide_id'];
+    $lich_khoi_hanh_id = $_POST['lich_khoi_hanh_id'] ?? 0;
+
+    // Debug POST data
+    error_log("POST data: " . print_r($_POST, true));
+    error_log("HDV ID: $huong_dan_vien_id, Lịch khởi hành ID: $lich_khoi_hanh_id");
+
+    // Kiểm tra đã đánh giá chưa
+    if ($this->model->isAlreadyReviewed($lich_khoi_hanh_id, $huong_dan_vien_id)) {
+        error_log("Lỗi: Đã đánh giá tour này rồi");
+        echo json_encode(['success' => false, 'message' => 'Bạn đã đánh giá tour này rồi']);
+        exit();
+    }
+
+    // Lấy phieu_dat_tour_id đầu tiên
+    $phieu_dat_tour_id = $this->model->getFirstPhieuDatTourId($lich_khoi_hanh_id);
+    error_log("Phiếu đặt tour ID: " . $phieu_dat_tour_id);
+    
+    if (!$phieu_dat_tour_id) {
+        error_log("Lỗi: Không tìm thấy phiếu đặt tour");
+        echo json_encode(['success' => false, 'message' => 'Không tìm thấy thông tin đặt tour']);
+        exit();
+    }
+
+    // Chuẩn bị dữ liệu JSON
+    $danhGiaDichVu = json_encode([
+        'diem_tong_quan' => $_POST['diem_tong_quan'] ?? 5,
+        'noi_dung_tong_quan' => $_POST['noi_dung_tong_quan'] ?? '',
+        'diem_khach_san' => $_POST['diem_khach_san'] ?? 5,
+        'nha_cung_cap_khach_san' => $_POST['nha_cung_cap_khach_san'] ?? '',
+        'nhan_xet_khach_san' => $_POST['nhan_xet_khach_san'] ?? '',
+        'diem_nha_hang' => $_POST['diem_nha_hang'] ?? 5,
+        'nha_cung_cap_nha_hang' => $_POST['nha_cung_cap_nha_hang'] ?? '',
+        'nhan_xet_nha_hang' => $_POST['nhan_xet_nha_hang'] ?? '',
+        'diem_xe_van_chuyen' => $_POST['diem_xe_van_chuyen'] ?? 5,
+        'nha_cung_cap_xe' => $_POST['nha_cung_cap_xe'] ?? '',
+        'nhan_xet_xe_van_chuyen' => $_POST['nhan_xet_xe_van_chuyen'] ?? '',
+        'diem_dich_vu_bo_sung' => $_POST['diem_dich_vu_bo_sung'] ?? 5,
+        'nhan_xet_dich_vu_bo_sung' => $_POST['nhan_xet_dich_vu_bo_sung'] ?? '',
+        'de_xuat_cai_thien' => $_POST['de_xuat_cai_thien'] ?? '',
+        'de_xuat_tiep_tuc_su_dung' => $_POST['de_xuat_tiep_tuc_su_dung'] ?? 'co'
+    ]);
+
+    error_log("JSON data: " . $danhGiaDichVu);
+
+    // Tính điểm trung bình
+    $diemTrungBinh = (
+        (int)($_POST['diem_tong_quan'] ?? 5) +
+        (int)($_POST['diem_khach_san'] ?? 5) +
+        (int)($_POST['diem_nha_hang'] ?? 5) +
+        (int)($_POST['diem_xe_van_chuyen'] ?? 5) +
+        (int)($_POST['diem_dich_vu_bo_sung'] ?? 5)
+    ) / 5;
+
+    error_log("Điểm trung bình: " . $diemTrungBinh);
+
+    // Chuẩn bị dữ liệu
+    $data = [
+        ':phieu_dat_tour_id' => $phieu_dat_tour_id,
+        ':diem_so' => round($diemTrungBinh, 1),
+        ':noi_dung_danh_gia' => $_POST['noi_dung_tong_quan'] ?? '',
+        ':danh_gia_dich_vu' => $danhGiaDichVu,
+        ':huong_dan_vien_id' => $huong_dan_vien_id,
+        ':lich_khoi_hanh_id' => $lich_khoi_hanh_id
+    ];
+
+    error_log("Data to insert: " . print_r($data, true));
+
+    // Lưu đánh giá
+    try {
+        $result = $this->model->saveDanhGia($data);
+        error_log("Kết quả lưu: " . ($result ? 'THÀNH CÔNG' : 'THẤT BẠI'));
+        
+        if ($result) {
+            error_log("Đánh giá đã được gửi thành công!");
+            echo json_encode(['success' => true, 'message' => 'Đánh giá đã được gửi thành công!']);
+        } else {
+            error_log("Lỗi khi gửi đánh giá");
+            echo json_encode(['success' => false, 'message' => 'Có lỗi xảy ra khi gửi đánh giá']);
+        }
+    } catch (Exception $e) {
+        error_log("EXCEPTION: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        echo json_encode(['success' => false, 'message' => 'Lỗi server: ' . $e->getMessage()]);
+    }
+    
+    error_log("=== KẾT THÚC XỬ LÝ STORE ===");
+}
+
+    // Hiển thị danh sách đánh giá đã gửi
     public function list() {
-        if (!checkGuideLogin()) {
-            $_SESSION['error'] = "Vui lòng đăng nhập!";
-            header("Location: " . BASE_URL_GUIDE . "?act=login");
+        if (!isset($_SESSION['guide_id'])) { // SỬA
+            header('Location: ?act=login');
             exit();
         }
 
-        $guide_id = $_SESSION['guide_id'];
-        $danhGiaList = $this->model->getDanhGiaByGuide($guide_id);
+        $huong_dan_vien_id = $_SESSION['guide_id']; // SỬA
+        $danhGiaList = $this->model->getDanhGiaList($huong_dan_vien_id);
         
         require_once './views/danhgia/list_reviews.php';
     }
 
-    // Xem chi tiết đánh giá
+    // Hiển thị chi tiết đánh giá
     public function detail() {
-        if (!checkGuideLogin()) {
-            $_SESSION['error'] = "Vui lòng đăng nhập!";
-            header("Location: " . BASE_URL_GUIDE . "?act=login");
+        if (!isset($_SESSION['guide_id'])) { // SỬA
+            header('Location: ?act=login');
             exit();
         }
 
-        $id = $_GET['id'] ?? null;
-        $guide_id = $_SESSION['guide_id'];
-
-        if (!$id) {
-            $_SESSION['error'] = "Không tìm thấy đánh giá!";
-            header("Location: " . BASE_URL_GUIDE . "?act=danh_gia_list");
-            exit();
-        }
-
-        $danhGia = $this->model->getDanhGiaDetail($id, $guide_id);
+        $id = $_GET['id'] ?? 0;
+        $huong_dan_vien_id = $_SESSION['guide_id']; // SỬA
+        
+        $danhGia = $this->model->getDanhGiaDetail($id, $huong_dan_vien_id);
+        
         if (!$danhGia) {
-            $_SESSION['error'] = "Không tìm thấy đánh giá!";
-            header("Location: " . BASE_URL_GUIDE . "?act=danh_gia_list");
+            $_SESSION['error'] = "Không tìm thấy đánh giá";
+            header('Location: ?act=danh_gia_list');
             exit();
         }
-
-        require_once './views/danhgia/detail.php';
+        
+        require_once './views/danhgia/list_detail.php';
     }
-
-    
-}
-?>
+}   

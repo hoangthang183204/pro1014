@@ -40,21 +40,20 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>Khách sạn:</strong> <?= $tourInfo['ten_khach_san'] ?? 'Chưa có thông tin' ?></p>
-                                    <p><strong>Địa chỉ:</strong> <?= $tourInfo['dc_khach_san'] ?? '' ?></p>
+                                <div class="col-md-4">
+                                    <p><strong>Khách sạn:</strong><br>
+                                    <?= $tourInfo['ten_khach_san'] ?? 'Chưa có thông tin' ?><br>
+                                    <small class="text-muted"><?= $tourInfo['nha_cung_cap_khach_san'] ?? '' ?></small></p>
                                 </div>
-                                <div class="col-md-6">
-                                    <p><strong>Nhà hàng:</strong> <?= $tourInfo['ten_nha_hang'] ?? 'Chưa có thông tin' ?></p>
-                                    <p><strong>Địa chỉ:</strong> <?= $tourInfo['dc_nha_hang'] ?? '' ?></p>
+                                <div class="col-md-4">
+                                    <p><strong>Nhà hàng:</strong><br>
+                                    <?= $tourInfo['ten_nha_hang'] ?? 'Chưa có thông tin' ?><br>
+                                    <small class="text-muted"><?= $tourInfo['nha_cung_cap_nha_hang'] ?? '' ?></small></p>
                                 </div>
-                                <div class="col-md-6">
-                                    <p><strong>Xe vận chuyển:</strong> <?= $tourInfo['loai_xe'] ?? 'Chưa có thông tin' ?></p>
-                                    <p><strong>Biển số:</strong> <?= $tourInfo['bien_so'] ?? '' ?></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>Tài xế:</strong> <?= $tourInfo['ten_tai_xe'] ?? '' ?></p>
-                                    <p><strong>HDV địa phương:</strong> <?= $tourInfo['ten_huong_dan_vien'] ?? 'Không có' ?></p>
+                                <div class="col-md-4">
+                                    <p><strong>Xe vận chuyển:</strong><br>
+                                    <?= $tourInfo['loai_xe'] ?? 'Chưa có thông tin' ?><br>
+                                    <small class="text-muted">Biển số: <?= $tourInfo['bien_so'] ?? '' ?></small></p>
                                 </div>
                             </div>
                         </div>
@@ -73,7 +72,7 @@
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="radio" name="diem_tong_quan" 
                                                    id="tong_quan_<?= $i ?>" value="<?= $i ?>" 
-                                                   <?= $i == 5 ? 'checked' : '' ?>>
+                                                   <?= $i == 5 ? 'checked' : '' ?> required>
                                             <label class="form-check-label" for="tong_quan_<?= $i ?>">
                                                 <?= str_repeat('★', $i) ?> (<?= $i ?>)
                                             </label>
@@ -90,31 +89,25 @@
                         </div>
                     </div>
 
-                    <!-- PHẦN 3: ĐÁNH GIÁ CHI TIẾT -->
+                    <!-- PHẦN 3: ĐÁNH GIÁ KHÁCH SẠN -->
                     <div class="card mb-4">
                         <div class="card-header bg-primary text-white">
                             <h6 class="mb-0"><i class="fas fa-hotel me-2"></i> Đánh giá khách sạn</h6>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Điểm đánh giá (1-5 sao):</label>
-                                    <div class="mb-3">
-                                        <?php for($i = 5; $i >= 1; $i--): ?>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="diem_khach_san" 
-                                                       id="ks_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?>>
-                                                <label class="form-check-label" for="ks_<?= $i ?>"><?= $i ?> sao</label>
-                                            </div>
-                                        <?php endfor; ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Nhà cung cấp:</label>
-                                    <input type="text" class="form-control" name="nha_cung_cap_khach_san" 
-                                           value="<?= $tourInfo['ten_khach_san'] ?? '' ?>">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Điểm đánh giá (1-5 sao):</label>
+                                <div class="mb-3">
+                                    <?php for($i = 5; $i >= 1; $i--): ?>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="diem_khach_san" 
+                                                   id="ks_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?> required>
+                                            <label class="form-check-label" for="ks_<?= $i ?>"><?= $i ?> sao</label>
+                                        </div>
+                                    <?php endfor; ?>
                                 </div>
                             </div>
+                            
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nhận xét chi tiết:</label>
                                 <textarea class="form-control" name="nhan_xet_khach_san" rows="3"
@@ -129,25 +122,19 @@
                             <h6 class="mb-0"><i class="fas fa-utensils me-2"></i> Đánh giá nhà hàng</h6>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Điểm đánh giá (1-5 sao):</label>
-                                    <div class="mb-3">
-                                        <?php for($i = 5; $i >= 1; $i--): ?>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="diem_nha_hang" 
-                                                       id="nh_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?>>
-                                                <label class="form-check-label" for="nh_<?= $i ?>"><?= $i ?> sao</label>
-                                            </div>
-                                        <?php endfor; ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Nhà cung cấp:</label>
-                                    <input type="text" class="form-control" name="nha_cung_cap_nha_hang" 
-                                           value="<?= $tourInfo['ten_nha_hang'] ?? '' ?>">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Điểm đánh giá (1-5 sao):</label>
+                                <div class="mb-3">
+                                    <?php for($i = 5; $i >= 1; $i--): ?>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="diem_nha_hang" 
+                                                   id="nh_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?> required>
+                                            <label class="form-check-label" for="nh_<?= $i ?>"><?= $i ?> sao</label>
+                                        </div>
+                                    <?php endfor; ?>
                                 </div>
                             </div>
+                            
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nhận xét chi tiết:</label>
                                 <textarea class="form-control" name="nhan_xet_nha_hang" rows="3"
@@ -162,25 +149,19 @@
                             <h6 class="mb-0"><i class="fas fa-bus me-2"></i> Đánh giá xe vận chuyển</h6>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Điểm đánh giá (1-5 sao):</label>
-                                    <div class="mb-3">
-                                        <?php for($i = 5; $i >= 1; $i--): ?>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="diem_xe_van_chuyen" 
-                                                       id="xe_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?>>
-                                                <label class="form-check-label" for="xe_<?= $i ?>"><?= $i ?> sao</label>
-                                            </div>
-                                        <?php endfor; ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Nhà cung cấp:</label>
-                                    <input type="text" class="form-control" name="nha_cung_cap_xe" 
-                                           value="<?= $tourInfo['ten_tai_xe'] ?? '' ?>">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Điểm đánh giá (1-5 sao):</label>
+                                <div class="mb-3">
+                                    <?php for($i = 5; $i >= 1; $i--): ?>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="diem_xe_van_chuyen" 
+                                                   id="xe_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?> required>
+                                            <label class="form-check-label" for="xe_<?= $i ?>"><?= $i ?> sao</label>
+                                        </div>
+                                    <?php endfor; ?>
                                 </div>
                             </div>
+                            
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nhận xét chi tiết:</label>
                                 <textarea class="form-control" name="nhan_xet_xe_van_chuyen" rows="3"
@@ -201,7 +182,7 @@
                                     <?php for($i = 5; $i >= 1; $i--): ?>
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input" type="radio" name="diem_dich_vu_bo_sung" 
-                                                   id="dvbs_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?>>
+                                                   id="dvbs_<?= $i ?>" value="<?= $i ?>" <?= $i == 5 ? 'checked' : '' ?> required>
                                             <label class="form-check-label" for="dvbs_<?= $i ?>"><?= $i ?> sao</label>
                                         </div>
                                     <?php endfor; ?>
@@ -225,21 +206,21 @@
                                 <div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="de_xuat_tiep_tuc_su_dung" 
-                                               id="tieptuc_co" value="co" checked>
+                                               id="tieptuc_co" value="co" checked required>
                                         <label class="form-check-label text-success fw-bold" for="tieptuc_co">
                                             <i class="fas fa-thumbs-up me-1"></i> Có, nên tiếp tục
                                         </label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="de_xuat_tiep_tuc_su_dung" 
-                                               id="tieptuc_khong" value="khong">
+                                               id="tieptuc_khong" value="khong" required>
                                         <label class="form-check-label text-danger fw-bold" for="tieptuc_khong">
                                             <i class="fas fa-thumbs-down me-1"></i> Không, không nên tiếp tục
                                         </label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="de_xuat_tiep_tuc_su_dung" 
-                                               id="tieptuc_dieukien" value="co_dieu_kien">
+                                               id="tieptuc_dieukien" value="co_dieu_kien" required>
                                         <label class="form-check-label text-warning fw-bold" for="tieptuc_dieukien">
                                             <i class="fas fa-exclamation-circle me-1"></i> Có điều kiện
                                         </label>
@@ -271,6 +252,31 @@ $(document).ready(function() {
     $('#formDanhGia').on('submit', function(e) {
         e.preventDefault();
         
+        // Validate form
+        const requiredFields = [
+            'diem_tong_quan', 
+            'diem_khach_san', 
+            'diem_nha_hang', 
+            'diem_xe_van_chuyen',
+            'diem_dich_vu_bo_sung',
+            'de_xuat_tiep_tuc_su_dung'
+        ];
+        
+        let isValid = true;
+        requiredFields.forEach(field => {
+            if (!$(`[name="${field}"]:checked`).length) {
+                isValid = false;
+                $(`[name="${field}"]`).parent().addClass('text-danger');
+            } else {
+                $(`[name="${field}"]`).parent().removeClass('text-danger');
+            }
+        });
+        
+        if (!isValid) {
+            alert('Vui lòng đánh giá đầy đủ các tiêu chí bắt buộc (có dấu *)');
+            return;
+        }
+        
         if (!confirm('Bạn có chắc chắn muốn gửi đánh giá này?')) {
             return;
         }
@@ -296,8 +302,9 @@ $(document).ready(function() {
                         .html('<i class="fas fa-paper-plane me-2"></i> Gửi đánh giá');
                 }
             },
-            error: function() {
-                alert('Lỗi kết nối server!');
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Lỗi kết nối server! Vui lòng thử lại.');
                 $('button[type="submit"]').prop('disabled', false)
                     .html('<i class="fas fa-paper-plane me-2"></i> Gửi đánh giá');
             }
@@ -313,6 +320,18 @@ $(document).ready(function() {
 }
 .card-header {
     border-bottom: none;
+}
+.form-check-inline {
+    margin-right: 15px !important;
+}
+.form-check-label {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+.form-check-label:hover {
+    background-color: #f8f9fa;
 }
 </style>
 
