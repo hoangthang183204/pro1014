@@ -1124,63 +1124,296 @@ body {
 </style>
 
 <script>
-// Lọc và tìm kiếm tour
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchTours');
+    const clearSearch = document.getElementById('clearSearch');
     const filterSelect = document.getElementById('filterStatus');
     const tourItems = document.querySelectorAll('.tour-item');
     const tourCount = document.getElementById('tourCount');
+    const resetFilter = document.getElementById('resetFilter');
+    const toggleAdvancedFilters = document.getElementById('toggleAdvancedFilters');
+    const advancedFilters = document.getElementById('advancedFilters');
     
+    // Hiển thị/ẩn bộ lọc nâng cao
+    if (toggleAdvancedFilters) {
+        toggleAdvancedFilters.addEventListener('click', function(e) {
+            e.preventDefault();
+            advancedFilters.style.display = advancedFilters.style.display === 'none' ? 'block' : 'none';
+            this.classList.toggle('active');
+            
+            const chevron = this.querySelector('.fa-chevron-down');
+            const text = this.querySelector('span');
+            
+            if (advancedFilters.style.display === 'block') {
+                chevron.style.transform = 'rotate(180deg)';
+                text.textContent = 'Ẩn bộ lọc nâng cao';
+            } else {
+                chevron.style.transform = 'rotate(0deg)';
+                text.textContent = 'Bộ lọc nâng cao';
+            }
+        });
+    }
+    
+    // Xóa nội dung tìm kiếm
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+            clearSearch.style.opacity = '0';
+            clearSearch.style.visibility = 'hidden';
+        });
+    }
+    
+    // Hiển thị nút xóa khi có nội dung
+    searchInput.addEventListener('input', function() {
+        if (clearSearch) {
+            if (this.value.trim() !== '') {
+                clearSearch.style.opacity = '1';
+                clearSearch.style.visibility = 'visible';
+            } else {
+                clearSearch.style.opacity = '0';
+                clearSearch.style.visibility = 'hidden';
+            }
+        }
+        filterTours();
+    });
+    
+    // Đặt lại bộ lọc
+    if (resetFilter) {
+        resetFilter.addEventListener('click', function() {
+            searchInput.value = '';
+            filterSelect.value = '';
+            
+            // Reset các bộ lọc nâng cao
+            const advancedSelects = advancedFilters.querySelectorAll('select');
+            advancedSelects.forEach(select => {
+                select.value = '';
+            });
+            
+            // Ẩn nút xóa tìm kiếm
+            if (clearSearch) {
+                clearSearch.style.opacity = '0';
+                clearSearch.style.visibility = 'hidden';
+            }
+            
+            filterTours();
+        });
+    }
+    
+    // Hàm lọc tour với tìm kiếm đa tiêu chí
     function filterTours() {
-        const searchTerm = searchInput.value.toLowerCase();
+        const searchTerm = searchInput.value.trim().toLowerCase();
         const filterValue = filterSelect.value;
-        let visibleCount = 0;
+        const filterDate = document.getElementById('filterDate')?.value || '';
+        const filterCategory = document.getElementById('filterCategory')?.value || '';
+        const sortBy = document.getElementById('sortBy')?.value || 'date_asc';
         
+        let visibleCount = 0;
+        const visibleItems = [];
+        
+        // Lọc theo các tiêu chí
         tourItems.forEach(item => {
-            const tourName = item.dataset.name;
-            const tourStatus = item.dataset.status;
-            const matchSearch = tourName.includes(searchTerm);
+            const tourName = item.dataset.name || '';
+            const tourKeywords = item.dataset.keywords || '';
+            const tourStatus = item.dataset.status || '';
+            
+            // Tìm kiếm theo tên hoặc từ khóa
+            const matchSearch = searchTerm === '' || 
+                tourName.includes(searchTerm) || 
+                tourKeywords.includes(searchTerm);
+            
+            // Lọc theo trạng thái
             const matchFilter = !filterValue || tourStatus === filterValue;
             
             if (matchSearch && matchFilter) {
                 item.style.display = 'block';
                 visibleCount++;
+                visibleItems.push({
+                    element: item,
+                    date: item.querySelector('.detail-value')?.textContent?.split('-')[0]?.trim() || '',
+                    name: tourName
+                });
             } else {
                 item.style.display = 'none';
             }
         });
         
+        // Cập nhật số lượng tour
         tourCount.textContent = visibleCount;
+        
+        // Sắp xếp các tour hiển thị
+        if (visibleItems.length > 0) {
+            sortTourItems(visibleItems, sortBy);
+        }
     }
     
-    searchInput.addEventListener('input', filterTours);
+    // Hàm sắp xếp tour
+    function sortTourItems(items, sortBy) {
+        const container = document.querySelector('.row#tourList');
+        
+        // Tạo mảng clone để sắp xếp
+        const sortedItems = [...items];
+        
+        sortedItems.sort((a, b) => {
+            switch(sortBy) {
+                case 'date_desc':
+                    return new Date(b.date.split('/').reverse().join('-')) - 
+                           new Date(a.date.split('/').reverse().join('-'));
+                case 'date_asc':
+                    return new Date(a.date.split('/').reverse().join('-')) - 
+                           new Date(b.date.split('/').reverse().join('-'));
+                case 'name_asc':
+                    return a.name.localeCompare(b.name);
+                case 'name_desc':
+                    return b.name.localeCompare(a.name);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Xóa và thêm lại các phần tử theo thứ tự đã sắp xếp
+        sortedItems.forEach(item => {
+            container.appendChild(item.element);
+        });
+    }
+    
+    // Thêm hiệu ứng tìm kiếm
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterTours, 300); // Debounce 300ms
+    });
+    
+    // Gọi filterTours khi thay đổi bộ lọc
     filterSelect.addEventListener('change', filterTours);
     
-    // Tính toán thời gian còn lại cho các tour sắp diễn ra
-    updateTourTimeRemaining();
+    // Lắng nghe sự kiện cho các bộ lọc nâng cao
+    document.querySelectorAll('#filterDate, #filterCategory, #sortBy').forEach(element => {
+        element.addEventListener('change', filterTours);
+    });
+    
+    // Tìm kiếm nhanh bằng phím tắt
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + F để focus vào ô tìm kiếm
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        
+        // Escape để xóa tìm kiếm
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.value = '';
+            filterTours();
+        }
+    });
+    
+    // Tự động focus vào ô tìm kiếm khi trang load (tùy chọn)
+    // searchInput.focus();
+    
+    // Khởi tạo lọc ban đầu
+    filterTours();
 });
 
-function updateTourTimeRemaining() {
-    const now = new Date();
-    const tourItems = document.querySelectorAll('.tour-item[data-status="cho lịch"], .tour-item[data-status="chờ lịch"]');
+// Hàm bổ sung: highlight từ khóa tìm kiếm trong kết quả
+function highlightSearchText() {
+    const searchTerm = document.getElementById('searchTours').value.trim().toLowerCase();
     
-    tourItems.forEach(item => {
-        // Có thể thêm logic hiển thị thời gian đếm ngược nếu cần
+    if (!searchTerm) return;
+    
+    document.querySelectorAll('.tour-title').forEach(title => {
+        const originalText = title.textContent;
+        const regex = new RegExp(`(${searchTerm})`, 'gi');
+        const highlighted = originalText.replace(regex, '<mark class="search-highlight">$1</mark>');
+        title.innerHTML = highlighted;
     });
 }
 
-function printPage() {
-    window.print();
+// Thêm CSS cho highlight
+const highlightStyle = document.createElement('style');
+highlightStyle.textContent = `
+    .search-highlight {
+        background-color: #FFEB3B;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: bold;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #64748b;
+    }
+    
+    .no-results i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        color: #cbd5e1;
+    }
+    
+    .search-loading {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: translateY(-50%) rotate(0deg); }
+        100% { transform: translateY(-50%) rotate(360deg); }
+    }
+`;
+document.head.appendChild(highlightStyle);
+
+// Thêm xử lý hiển thị thông báo khi không có kết quả
+function showNoResultsMessage() {
+    const tourList = document.getElementById('tourList');
+    const existingNoResults = document.querySelector('.no-results');
+    
+    if (existingNoResults) {
+        existingNoResults.remove();
+    }
+    
+    const visibleTours = document.querySelectorAll('.tour-item[style="display: block"]');
+    
+    if (visibleTours.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'col-12 no-results';
+        noResults.innerHTML = `
+            <i class="fas fa-search"></i>
+            <h3>Không tìm thấy tour nào</h3>
+            <p>Không có tour nào phù hợp với tiêu chí tìm kiếm của bạn.</p>
+            <button class="btn btn-outline-primary mt-2" onclick="resetFilters()">
+                <i class="fas fa-redo mr-1"></i> Đặt lại bộ lọc
+            </button>
+        `;
+        tourList.appendChild(noResults);
+    }
 }
 
-// Auto-refresh cho tour đang diễn ra
-setInterval(() => {
-    const activeTours = document.querySelectorAll('.tour-item[data-status="đang diễn ra"]');
-    if (activeTours.length > 0) {
-        // Có thể thêm logic refresh thông tin real-time
-        console.log('Auto-refresh cho tour đang diễn ra');
+// Hàm đặt lại tất cả bộ lọc
+function resetFilters() {
+    document.getElementById('searchTours').value = '';
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterDate').value = '';
+    document.getElementById('filterCategory').value = '';
+    document.getElementById('sortBy').value = 'date_asc';
+    
+    if (document.getElementById('clearSearch')) {
+        document.getElementById('clearSearch').style.opacity = '0';
+        document.getElementById('clearSearch').style.visibility = 'hidden';
     }
-}, 300000); // 5 phút
+    
+    filterTours();
+}
+
+// Gắn hàm showNoResultsMessage vào cuối filterTours
+const originalFilterTours = window.filterTours;
+window.filterTours = function() {
+    originalFilterTours();
+    showNoResultsMessage();
+    highlightSearchText();
+};
 </script>
 
 <?php
