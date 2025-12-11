@@ -3,7 +3,6 @@
 <?php include './views/layout/sidebar.php'; ?>
 
 <div class="content-wrapper">
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid p-0">
             <!-- Header -->
@@ -22,7 +21,6 @@
             </nav>
 
             <div class="container mt-4">
-                <!-- Bộ lọc tháng/năm -->
                 <div class="card mb-4 border-0 shadow-sm">
                     <div class="card-header bg-white">
                         <h5 class="card-title mb-0">
@@ -37,7 +35,7 @@
                                 <label class="form-label fw-bold">Tháng</label>
                                 <select name="thang" class="form-select">
                                     <?php for ($i = 1; $i <= 12; $i++): ?>
-                                        <option value="<?php echo $i; ?>" 
+                                        <option value="<?php echo $i; ?>"
                                             <?php echo ($thang == $i) ? 'selected' : ''; ?>>
                                             Tháng <?php echo $i; ?>
                                         </option>
@@ -48,7 +46,7 @@
                                 <label class="form-label fw-bold">Năm</label>
                                 <select name="nam" class="form-select">
                                     <?php for ($i = date('Y') - 1; $i <= date('Y') + 1; $i++): ?>
-                                        <option value="<?php echo $i; ?>" 
+                                        <option value="<?php echo $i; ?>"
                                             <?php echo ($nam == $i) ? 'selected' : ''; ?>>
                                             Năm <?php echo $i; ?>
                                         </option>
@@ -63,6 +61,13 @@
                         </form>
                     </div>
                 </div>
+
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Thông tin tổng quan -->
                 <div class="row mb-4">
@@ -119,9 +124,9 @@
                                         <i class="fas fa-money-bill-wave"></i>
                                     </div>
                                     <div class="flex-grow-1">
-                                        <h6 class="text-muted mb-1 small fw-semibold">Doanh Thu</h6>
+                                        <h6 class="text-muted mb-1 small fw-semibold">Giá trị đặt tour</h6>
                                         <h4 class="mb-0 fw-bold text-info">
-                                            <?php echo number_format($thong_ke['tong_doanh_thu'] ?? 0, 0, ',', '.'); ?>₫
+                                            <?php echo number_format(($thong_ke['doanh_thu_da_thanh_toan'] ?? 0) + ($thong_ke['doanh_thu_giu_cho'] ?? 0), 0, ',', '.'); ?>₫
                                         </h4>
                                     </div>
                                 </div>
@@ -131,21 +136,21 @@
                 </div>
 
                 <!-- Booking mới nhất -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-history me-2 text-primary"></i>
-                                    Booking Mới Nhất
-                                    <span class="badge bg-primary ms-2"><?php echo count($booking_moi_nhat); ?></span>
-                                </h5>
-                                <small class="text-muted">
-                                    Tháng <?php echo $thang; ?>/<?php echo $nam; ?>
-                                </small>
-                            </div>
-                            <div class="card-body p-0">
-                                <?php if (!empty($booking_moi_nhat)): ?>
+                <?php if (!empty($booking_moi_nhat)): ?>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-history me-2 text-primary"></i>
+                                        Booking Mới Nhất
+                                        <span class="badge bg-primary ms-2"><?php echo count($booking_moi_nhat); ?></span>
+                                    </h5>
+                                    <small class="text-muted">
+                                        Tháng <?php echo $thang; ?>/<?php echo $nam; ?>
+                                    </small>
+                                </div>
+                                <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0">
                                             <thead class="bg-light">
@@ -213,17 +218,11 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                <?php else: ?>
-                                    <div class="text-center py-5">
-                                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                                        <h6 class="text-muted">Không có booking nào</h6>
-                                        <p class="text-muted small">Chưa có booking nào trong tháng <?php echo $thang; ?>/<?php echo $nam; ?></p>
-                                    </div>
-                                <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <?php endif; ?>
 
                 <!-- Thống kê chi tiết theo trạng thái -->
                 <div class="row mb-4">
@@ -232,7 +231,7 @@
                             <div class="card-header bg-white">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-chart-pie me-2 text-warning"></i>
-                                    Thống Kê Theo Trạng Thái
+                                    Thống Kê Chi Tiết Theo Trạng Thái
                                 </h5>
                             </div>
                             <div class="card-body">
@@ -245,35 +244,53 @@
                                                         <th>TRẠNG THÁI</th>
                                                         <th width="100" class="text-center">SỐ LƯỢNG</th>
                                                         <th width="200" class="text-center">TỶ LỆ</th>
-                                                        <th width="150" class="text-center">DOANH THU</th>
+                                                        <th width="150" class="text-center">GIÁ TRỊ</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <?php
                                                     $tong_booking = $thong_ke['tong_booking'] ?? 1;
+                                                    $doanh_thu_da_thanh_toan = $thong_ke['doanh_thu_da_thanh_toan'] ?? 0;
+                                                    $doanh_thu_giu_cho = $thong_ke['doanh_thu_giu_cho'] ?? 0;
+                                                    $doanh_thu_huy = $thong_ke['doanh_thu_huy'] ?? 0;
+                                                    
+                                                    // Tổng giá trị đặt tour
+                                                    $tong_gia_tri = $doanh_thu_da_thanh_toan + $doanh_thu_giu_cho;
+
                                                     $status_stats = [
                                                         'chưa thanh toán' => [
                                                             'count' => $thong_ke['chua_thanh_toan'] ?? 0,
-                                                            'doanh_thu' => 0
+                                                            'gia_tri' => 0
                                                         ],
                                                         'giữ chỗ' => [
                                                             'count' => $thong_ke['giu_cho'] ?? 0,
-                                                            'doanh_thu' => 0
+                                                            'gia_tri' => $doanh_thu_giu_cho
                                                         ],
                                                         'đã thanh toán' => [
                                                             'count' => $thong_ke['da_thanh_toan'] ?? 0,
-                                                            'doanh_thu' => $thong_ke['tong_doanh_thu'] ?? 0
+                                                            'gia_tri' => $doanh_thu_da_thanh_toan
                                                         ],
                                                         'hủy' => [
                                                             'count' => $thong_ke['huy'] ?? 0,
-                                                            'doanh_thu' => 0
+                                                            'gia_tri' => $doanh_thu_huy
                                                         ]
                                                     ];
 
                                                     foreach ($status_stats as $status => $data):
                                                         $count = $data['count'];
-                                                        $doanh_thu = $data['doanh_thu'];
+                                                        $gia_tri = $data['gia_tri'];
                                                         $ty_le = $tong_booking > 0 ? ($count / $tong_booking) * 100 : 0;
+
+                                                        if ($status === 'hủy' && $gia_tri > 0) {
+                                                            $gia_tri_class = 'text-danger';
+                                                            $gia_tri_display = '-' . number_format($gia_tri, 0, ',', '.') . '₫';
+                                                        } elseif ($gia_tri > 0) {
+                                                            $gia_tri_class = $status === 'đã thanh toán' ? 'text-success' : 'text-warning';
+                                                            $gia_tri_display = number_format($gia_tri, 0, ',', '.') . '₫';
+                                                        } else {
+                                                            $gia_tri_class = 'text-muted';
+                                                            $gia_tri_display = '0₫';
+                                                        }
                                                     ?>
                                                         <tr>
                                                             <td>
@@ -286,7 +303,7 @@
                                                             <td>
                                                                 <div class="d-flex align-items-center">
                                                                     <div class="progress flex-grow-1 me-3" style="height: 8px;">
-                                                                        <div class="progress-bar <?php echo getStatusProgressClass($status); ?>" 
+                                                                        <div class="progress-bar <?php echo getStatusProgressClass($status); ?>"
                                                                             style="width: <?php echo $ty_le; ?>%">
                                                                         </div>
                                                                     </div>
@@ -294,13 +311,23 @@
                                                                 </div>
                                                             </td>
                                                             <td class="text-center">
-                                                                <span class="fw-bold text-success">
-                                                                    <?php echo number_format($doanh_thu, 0, ',', '.'); ?>₫
+                                                                <span class="fw-bold <?php echo $gia_tri_class; ?>">
+                                                                    <?php echo $gia_tri_display; ?>
                                                                 </span>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 </tbody>
+                                                <tfoot class="table-light">
+                                                    <tr>
+                                                        <td colspan="3" class="text-end fw-bold">Tổng giá trị đặt tour:</td>
+                                                        <td class="text-center">
+                                                            <span class="fw-bold text-primary">
+                                                                <?php echo number_format($tong_gia_tri, 0, ',', '.'); ?>₫
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>
@@ -313,18 +340,26 @@
                                             </div>
                                             <div class="mb-4">
                                                 <div class="h4 text-success fw-bold">
-                                                    <?php echo number_format($thong_ke['tong_doanh_thu'] ?? 0, 0, ',', '.'); ?>₫
+                                                    <?php echo number_format($tong_gia_tri, 0, ',', '.'); ?>₫
                                                 </div>
-                                                <small class="text-muted">Tổng doanh thu</small>
+                                                <small class="text-muted">Tổng giá trị đặt tour</small>
                                             </div>
                                             <div class="mb-4">
-                                                <div class="h5 text-info fw-bold"><?php echo $thong_ke['hoan_tat'] ?? 0; ?></div>
-                                                <small class="text-muted">Booking đã thanh toán</small>
+                                                <div class="h5 text-info fw-bold"><?php echo $thong_ke['da_thanh_toan'] ?? 0; ?></div>
+                                                <small class="text-muted">Đã thanh toán</small>
                                             </div>
                                             <div class="mb-4">
                                                 <div class="h5 text-warning fw-bold"><?php echo $thong_ke['chua_thanh_toan'] ?? 0; ?></div>
-                                                <small class="text-muted">Đang chưa thanh toán</small>
+                                                <small class="text-muted">Chưa thanh toán</small>
                                             </div>
+                                            <?php if ($doanh_thu_huy > 0): ?>
+                                                <div class="mb-4">
+                                                    <div class="h6 text-danger fw-bold">
+                                                        -<?php echo number_format($doanh_thu_huy, 0, ',', '.'); ?>₫
+                                                    </div>
+                                                    <small class="text-muted">Giá trị booking hủy</small>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -334,17 +369,17 @@
                 </div>
 
                 <!-- Thống kê theo tour -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-chart-line me-2 text-info"></i>
-                                    Thống Kê Theo Tour
-                                </h5>
-                            </div>
-                            <div class="card-body p-0">
-                                <?php if (!empty($thong_ke_tour)): ?>
+                <?php if (!empty($thong_ke_tour)): ?>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-line me-2 text-info"></i>
+                                        Thống Kê Theo Tour
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0">
                                             <thead class="bg-light">
@@ -352,15 +387,15 @@
                                                     <th>TOUR</th>
                                                     <th width="120" class="text-center">SỐ BOOKING</th>
                                                     <th width="120" class="text-center">SỐ KHÁCH</th>
-                                                    <th width="150" class="text-center">DOANH THU</th>
+                                                    <th width="150" class="text-center">GIÁ TRỊ</th>
                                                     <th width="100" class="text-center">TỶ LỆ</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php 
-                                                $tong_doanh_thu_tour = array_sum(array_column($thong_ke_tour, 'doanh_thu'));
-                                                foreach ($thong_ke_tour as $tour): 
-                                                    $ty_le = $tong_doanh_thu_tour > 0 ? ($tour['doanh_thu'] / $tong_doanh_thu_tour) * 100 : 0;
+                                                <?php
+                                                $tong_gia_tri_tour = array_sum(array_column($thong_ke_tour, 'doanh_thu'));
+                                                foreach ($thong_ke_tour as $tour):
+                                                    $ty_le = $tong_gia_tri_tour > 0 ? ($tour['doanh_thu'] / $tong_gia_tri_tour) * 100 : 0;
                                                 ?>
                                                     <tr>
                                                         <td>
@@ -386,57 +421,84 @@
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
+                                            <tfoot class="table-light">
+                                                <tr>
+                                                    <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
+                                                    <td class="text-center fw-bold text-primary">
+                                                        <?php echo number_format($tong_gia_tri_tour, 0, ',', '.'); ?>₫
+                                                    </td>
+                                                    <td class="text-center fw-bold">100%</td>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
-                                <?php else: ?>
-                                    <div class="text-center py-5">
-                                        <i class="fas fa-map-marked-alt fa-3x text-muted mb-3"></i>
-                                        <h6 class="text-muted">Không có dữ liệu tour</h6>
-                                        <p class="text-muted small">Chưa có booking nào cho các tour trong tháng <?php echo $thang; ?>/<?php echo $nam; ?></p>
-                                    </div>
-                                <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <?php else: ?>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">Không có dữ liệu thống kê</h6>
+                            <p class="text-muted small">Chưa có booking nào trong tháng <?php echo $thang; ?>/<?php echo $nam; ?></p>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
 </div>
 
 <?php
+
 // Helper functions
 function getStatusBadgeClass($status)
 {
-    $classes = [
-        'chưa thanh toán' => 'bg-warning',
-        'giữ chỗ' => 'bg-info',
-        'đã thanh toán' => 'bg-success',
-        'hủy' => 'bg-danger'
-    ];
-    return $classes[$status] ?? 'bg-secondary';
+    switch ($status) {
+        case 'đã thanh toán':
+            return 'bg-success';
+        case 'giữ chỗ':
+            return 'bg-warning text-dark';
+        case 'chưa thanh toán':
+            return 'bg-secondary';
+        case 'hủy':
+            return 'bg-danger';
+        default:
+            return 'bg-info';
+    }
 }
 
 function getStatusIcon($status)
 {
-    $icons = [
-        'chưa thanh toán' => 'clock',
-        'giữ chỗ' => 'money-bill-wave',
-        'đã thanh toán' => 'check-circle',
-        'hủy' => 'times-circle'
-    ];
-    return $icons[$status] ?? 'question';
+    switch ($status) {
+        case 'đã thanh toán':
+            return 'check-circle';
+        case 'giữ chỗ':
+            return 'clock';
+        case 'chưa thanh toán':
+            return 'exclamation-circle';
+        case 'hủy':
+            return 'times-circle';
+        default:
+            return 'question-circle';
+    }
 }
 
 function getStatusProgressClass($status)
 {
-    $classes = [
-        'chưa thanh toán' => 'bg-warning',
-        'giữ chỗ' => 'bg-info',
-        'đã thanh toán' => 'bg-success',
-        'hủy' => 'bg-danger'
-    ];
-    return $classes[$status] ?? 'bg-secondary';
+    switch ($status) {
+        case 'đã thanh toán':
+            return 'bg-success';
+        case 'giữ chỗ':
+            return 'bg-warning';
+        case 'chưa thanh toán':
+            return 'bg-secondary';
+        case 'hủy':
+            return 'bg-danger';
+        default:
+            return 'bg-info';
+    }
 }
 ?>
 

@@ -8,7 +8,6 @@ class AdminDatTour
         $this->conn = connectDB();
     }
 
-    // Lấy thông tin lịch khởi hành theo ID
     public function getLichKhoiHanhById($id)
     {
         try {
@@ -626,88 +625,34 @@ class AdminDatTour
         }
     }
 
-    // Thống kê booking
-    public function thongKeBooking($thang = null, $nam = null)
+    public function thongKeDoanhThuThucTe($thang = null, $nam = null)
     {
         try {
             $thang = $thang ?? date('m');
             $nam = $nam ?? date('Y');
+
+            // Trong trường hợp thực tế, bạn cần query từ bảng giao_dich hoặc hoa_don
+            // Dựa vào database, tôi thấy có bảng hoa_don
 
             $query = "SELECT 
-                COUNT(*) as tong_booking,
-                SUM(CASE WHEN trang_thai = 'chưa thanh toán' THEN 1 ELSE 0 END) as chua_thanh_toan,
-                SUM(CASE WHEN trang_thai = 'giữ chỗ' THEN 1 ELSE 0 END) as giu_cho,
-                SUM(CASE WHEN trang_thai = 'đã thanh toán' THEN 1 ELSE 0 END) as da_thanh_toan,
-                SUM(CASE WHEN trang_thai = 'hủy' THEN 1 ELSE 0 END) as huy,
-                SUM(tong_tien) as tong_doanh_thu
-              FROM phieu_dat_tour 
-              WHERE MONTH(created_at) = :thang 
-              AND YEAR(created_at) = :nam";
+            SUM(hd.da_thanh_toan) as doanh_thu_thuc_te
+          FROM hoa_don hd
+          JOIN phieu_dat_tour pdt ON pdt.id = hd.phieu_dat_tour_id
+          WHERE MONTH(hd.ngay_thanh_toan) = :thang 
+          AND YEAR(hd.ngay_thanh_toan) = :nam
+          AND hd.trang_thai IN ('đã thanh toán', 'thanh toán một phần')";
 
             $stmt = $this->conn->prepare($query);
             $stmt->execute([':thang' => $thang, ':nam' => $nam]);
-            return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result['doanh_thu_thuc_te'] ?? 0;
         } catch (PDOException $e) {
-            error_log("Thong Ke Booking Error: " . $e->getMessage());
-            return [];
+            error_log("Thong Ke Doanh Thu Thuc Te Error: " . $e->getMessage());
+            return 0;
         }
     }
 
-    // Lấy booking mới nhất
-    public function getBookingMoiNhat($thang = null, $nam = null)
-    {
-        try {
-            $thang = $thang ?? date('m');
-            $nam = $nam ?? date('Y');
-
-            $query = "SELECT pdt.*, lkh.ngay_bat_dau, t.ten_tour, t.ma_tour,
-                     kh.ho_ten, kh.so_dien_thoai,
-                     pdt.so_luong_khach as so_khach
-              FROM phieu_dat_tour pdt
-              LEFT JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
-              LEFT JOIN tour t ON lkh.tour_id = t.id
-              LEFT JOIN khach_hang kh ON pdt.khach_hang_id = kh.id
-              WHERE MONTH(pdt.created_at) = :thang 
-              AND YEAR(pdt.created_at) = :nam
-              ORDER BY pdt.created_at DESC 
-              LIMIT 10";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':thang' => $thang, ':nam' => $nam]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Get Booking Moi Nhat Error: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    // Lấy thống kê theo tour
-    public function getThongKeTour($thang = null, $nam = null)
-    {
-        try {
-            $thang = $thang ?? date('m');
-            $nam = $nam ?? date('Y');
-
-            $query = "SELECT t.ten_tour, t.ma_tour,
-                     COUNT(pdt.id) as so_booking,
-                     SUM(pdt.so_luong_khach) as tong_khach,
-                     SUM(pdt.tong_tien) as doanh_thu
-              FROM phieu_dat_tour pdt
-              LEFT JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
-              LEFT JOIN tour t ON lkh.tour_id = t.id
-              WHERE MONTH(pdt.created_at) = :thang 
-              AND YEAR(pdt.created_at) = :nam
-              GROUP BY t.id, t.ten_tour, t.ma_tour
-              ORDER BY doanh_thu DESC";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->execute([':thang' => $thang, ':nam' => $nam]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            error_log("Get Thong Ke Tour Error: " . $e->getMessage());
-            return [];
-        }
-    }
 
     // Thêm vào class AdminDatTour
     public function getLichTrinhTour($tour_id)
@@ -752,11 +697,10 @@ class AdminDatTour
         }
     }
 
-    // Sửa phương thức này trong class AdminDatTour
+
     public function getLichTrinhByLichKhoiHanh($lich_khoi_hanh_id)
     {
         try {
-            // Lấy tour_id từ lịch khởi hành
             $query = "SELECT t.id as tour_id 
                   FROM lich_khoi_hanh lkh
                   JOIN tour t ON lkh.tour_id = t.id
@@ -782,6 +726,97 @@ class AdminDatTour
             return $stmt2->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Get Lich Trinh By Lich Khoi Hanh Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function thongKeBooking($thang = null, $nam = null)
+    {
+        try {
+            $thang = $thang ?? date('m');
+            $nam = $nam ?? date('Y');
+
+            $query = "SELECT 
+            COUNT(*) as tong_booking,
+            SUM(CASE WHEN trang_thai = 'chưa thanh toán' THEN 1 ELSE 0 END) as chua_thanh_toan,
+            SUM(CASE WHEN trang_thai = 'giữ chỗ' THEN 1 ELSE 0 END) as giu_cho,
+            SUM(CASE WHEN trang_thai = 'đã thanh toán' THEN 1 ELSE 0 END) as da_thanh_toan,
+            SUM(CASE WHEN trang_thai = 'hủy' THEN 1 ELSE 0 END) as huy,
+            SUM(CASE WHEN trang_thai = 'đã thanh toán' THEN tong_tien ELSE 0 END) as doanh_thu_da_thanh_toan,
+            SUM(CASE WHEN trang_thai = 'giữ chỗ' THEN tong_tien ELSE 0 END) as doanh_thu_giu_cho,
+            SUM(CASE WHEN trang_thai = 'hủy' THEN tong_tien ELSE 0 END) as doanh_thu_huy,
+            SUM(tong_tien) as tong_doanh_thu_bao_cao
+          FROM phieu_dat_tour 
+          WHERE MONTH(created_at) = :thang 
+          AND YEAR(created_at) = :nam";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':thang' => $thang, ':nam' => $nam]);
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            error_log("Thong Ke Booking Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getBookingMoiNhat($thang = null, $nam = null)
+    {
+        try {
+            $thang = $thang ?? date('m');
+            $nam = $nam ?? date('Y');
+
+            $query = "SELECT 
+                pdt.*,
+                lkh.ngay_bat_dau,
+                t.ten_tour,
+                t.ma_tour,
+                kh.ho_ten,
+                kh.so_dien_thoai,
+                pdt.so_luong_khach as so_khach
+            FROM phieu_dat_tour pdt
+            JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
+            JOIN tour t ON lkh.tour_id = t.id
+            JOIN khach_hang kh ON pdt.khach_hang_id = kh.id
+            WHERE MONTH(pdt.created_at) = :thang 
+            AND YEAR(pdt.created_at) = :nam
+            ORDER BY pdt.created_at DESC
+            LIMIT 10";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':thang' => $thang, ':nam' => $nam]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Get Booking Moi Nhat Error: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function getThongKeTour($thang = null, $nam = null)
+    {
+        try {
+            $thang = $thang ?? date('m');
+            $nam = $nam ?? date('Y');
+
+            $query = "SELECT 
+                t.id,
+                t.ma_tour,
+                t.ten_tour,
+                COUNT(pdt.id) as so_booking,
+                SUM(CASE WHEN pdt.trang_thai IN ('đã thanh toán', 'giữ chỗ') THEN pdt.tong_tien ELSE 0 END) as doanh_thu,
+                SUM(pdt.so_luong_khach) as tong_khach
+            FROM phieu_dat_tour pdt
+            JOIN lich_khoi_hanh lkh ON pdt.lich_khoi_hanh_id = lkh.id
+            JOIN tour t ON lkh.tour_id = t.id
+            WHERE MONTH(pdt.created_at) = :thang 
+            AND YEAR(pdt.created_at) = :nam
+            GROUP BY t.id
+            ORDER BY doanh_thu DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute([':thang' => $thang, ':nam' => $nam]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Thong Ke Tour Error: " . $e->getMessage());
             return [];
         }
     }

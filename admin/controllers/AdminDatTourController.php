@@ -387,7 +387,6 @@ class AdminDatTourController
         exit;
     }
 
-    // Thống kê
     public function thongKe()
     {
         $thang = $_GET['thang'] ?? date('m');

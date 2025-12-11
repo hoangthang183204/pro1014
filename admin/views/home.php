@@ -1,14 +1,10 @@
-<!-- Header -->
-<?php require './views/layout/header.php'; ?>
-<!-- Navbar -->
-<?php include './views/layout/navbar.php'; ?>
-<!-- /.navbar -->
 
-<!-- Main Sidebar Container -->
+<?php require './views/layout/header.php'; ?>
+<?php include './views/layout/navbar.php'; ?>
 <?php include './views/layout/sidebar.php'; ?>
-<!-- Content Wrapper. Contains page content -->
+
 <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
+ 
     <section class="content-header">
         <div class="dashboard-header py-3 mb-4">
             <div class="container">
@@ -27,8 +23,6 @@
                 </div>
             </div>
         </div>
-
-
         <div class="container">
             <!-- Thống kê nhanh -->
             <div class="row mb-4">
