@@ -297,58 +297,9 @@ $tour = array_merge([
                         <?php endif; ?>
                     </div>
                 </div>
-
-                <!-- Chính sách tour -->
-                <div class="card policy-card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0"><i class="fas fa-file-contract mr-2"></i> Chính Sách Tour</h5>
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($tour['quy_dinh_huy_doi'])): ?>
-                            <div class="empty-state">
-                                <i class="fas fa-file"></i>
-                                <p>Không có chính sách</p>
-                            </div>
-                        <?php else: ?>
-                            <div class="policy-section">
-                                <div class="policy-title">Quy định hủy/đổi</div>
-                                <div class="policy-content">
-                                    <?= nl2br(htmlspecialchars($tour['quy_dinh_huy_doi'])) ?>
-                                </div>
-                            </div>
-                            
-                            <?php if (!empty($tour['luu_y_suc_khoe'])): ?>
-                                <div class="policy-section">
-                                    <div class="policy-title">Lưu ý sức khỏe</div>
-                                    <div class="policy-content">
-                                        <?= nl2br(htmlspecialchars($tour['luu_y_suc_khoe'])) ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (!empty($tour['luu_y_hanh_ly'])): ?>
-                                <div class="policy-section">
-                                    <div class="policy-title">Lưu ý hành lý</div>
-                                    <div class="policy-content">
-                                        <?= nl2br(htmlspecialchars($tour['luu_y_hanh_ly'])) ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if (!empty($tour['luu_y_khac'])): ?>
-                                <div class="policy-section">
-                                    <div class="policy-title">Lưu ý khác</div>
-                                    <div class="policy-content">
-                                        <?= nl2br(htmlspecialchars($tour['luu_y_khac'])) ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12">
-<div class="card mb-4">
+        </div>
+        <div class="col-12">
+                <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-users mr-2"></i> Danh Sách Khách Hàng Đã Đặt Tour
@@ -527,9 +478,7 @@ $tour = array_merge([
                         <?php endif; ?>
                     </div>
                 </div>
-                </div>
-        </div>
-
+            </div>
     </div>
 </main>
 
