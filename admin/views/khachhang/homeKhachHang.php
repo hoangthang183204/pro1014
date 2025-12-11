@@ -128,23 +128,12 @@
                     </div>
                     <div class="card-body">
                         <form method="GET" class="row g-3 align-items-end">
-                            <input type="hidden" name="act" value="khach-hang-search">
-                            <div class="col-md-6">
+                            <input type="hidden" name="act" value="khach-hang-tim-kiem">
+                            <div class="col-md-9">
                                 <label class="form-label fw-bold">Từ khóa tìm kiếm</label>
-                                <input type="text" name="tu_khoa" class="form-control" 
-                                       placeholder="Tìm theo tên, SĐT, email, CCCD hoặc tên tour..."
-                                       value="<?php echo htmlspecialchars($_GET['tu_khoa'] ?? ''); ?>">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-bold">Trạng thái tour</label>
-                                <select name="trang_thai" class="form-select">
-                                    <option value="">Tất cả trạng thái</option>
-                                    <option value="chưa thanh toán" <?php echo ($_GET['trang_thai'] ?? '') === 'chưa thanh toán' ? 'selected' : ''; ?>>chưa thanh toán</option>
-                                    <option value="giữ chỗ" <?php echo ($_GET['trang_thai'] ?? '') === 'giữ chỗ' ? 'selected' : ''; ?>>giữ chỗ</option>
-                                    <option value="đã thanh toán" <?php echo ($_GET['trang_thai'] ?? '') === 'đã thanh toán' ? 'selected' : ''; ?>>đã thanh toán</option>
-                                    <option value="hủy" <?php echo ($_GET['trang_thai'] ?? '') === 'hủy' ? 'selected' : ''; ?>>Đã hủy</option>
-                                    <option value="khong_co_tour" <?php echo ($_GET['trang_thai'] ?? '') === 'khong_co_tour' ? 'selected' : ''; ?>>Không có tour</option>
-                                </select>
+                                <input type="text" name="tu_khoa" class="form-control"
+                                    placeholder="Tìm theo tên, SĐT, email, CCCD hoặc tên tour..."
+                                    value="<?php echo htmlspecialchars($_GET['tu_khoa'] ?? ''); ?>">
                             </div>
                             <div class="col-md-3">
                                 <div class="d-grid gap-2">
@@ -159,8 +148,6 @@
                         </form>
                     </div>
                 </div>
-
-                <!-- Danh sách khách hàng -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
@@ -257,35 +244,35 @@
                                                     $class = $trang_thai_class[$khach['trang_thai_dat_tour']] ?? 'bg-secondary';
                                                     ?>
                                                     <span class="badge <?php echo $class; ?>">
-                                                        <i class="fas fa-<?php 
-                                                            switch($khach['trang_thai_dat_tour'] ?? '') {
-                                                                case 'chưa thanh toán': echo 'clock'; break;
-                                                                case 'giữ chỗ': echo 'money-bill-wave'; break;
-                                                                case 'đã thanh toán': echo 'check-circle'; break;
-                                                                case 'hủy': echo 'times-circle'; break;
-                                                                default: echo 'question';
-                                                            }
-                                                        ?> me-1"></i>
+                                                        <i class="fas fa-<?php
+                                                                            switch ($khach['trang_thai_dat_tour'] ?? '') {
+                                                                                case 'chưa thanh toán':
+                                                                                    echo 'clock';
+                                                                                    break;
+                                                                                case 'giữ chỗ':
+                                                                                    echo 'money-bill-wave';
+                                                                                    break;
+                                                                                case 'đã thanh toán':
+                                                                                    echo 'check-circle';
+                                                                                    break;
+                                                                                case 'hủy':
+                                                                                    echo 'times-circle';
+                                                                                    break;
+                                                                                default:
+                                                                                    echo 'question';
+                                                                            }
+                                                                            ?> me-1"></i>
                                                         <?php echo $trang_thai; ?>
                                                     </span>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm">
                                                         <a href="?act=khach-hang-chi-tiet&id=<?php echo $khach['id']; ?>"
-                                                           class="btn btn-primary"
-                                                           data-bs-toggle="tooltip"
-                                                           title="Xem chi tiết">
+                                                            class="btn btn-primary"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Xem chi tiết">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <?php if (!$khach['phieu_dat_tour_id']): ?>
-                                                        <a href="?act=khach-hang-delete&id=<?php echo $khach['id']; ?>"
-                                                           class="btn btn-danger"
-                                                           onclick="return confirm('Bạn có chắc muốn xóa khách hàng này?')"
-                                                           data-bs-toggle="tooltip"
-                                                           title="Xóa khách hàng">
-                                                            <i class="fas fa-trash"></i>
-                                                        </a>
-                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
                                             </tr>
