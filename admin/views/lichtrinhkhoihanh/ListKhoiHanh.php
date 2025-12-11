@@ -42,7 +42,7 @@
                                     <input type="text" name="search" class="form-control" placeholder="Tìm theo tên tour..."
                                         value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
                                     <select name="trang_thai"
                                         class="form-select shadow-sm py-2 border p-2"
                                         style="border-radius: 0.5rem !important;">
@@ -51,16 +51,6 @@
                                         <option value="đang đi" <?php echo ($_GET['trang_thai'] ?? '') === 'đang đi' ? 'selected' : ''; ?>>Đang đi</option>
                                         <option value="đã hoàn thành" <?php echo ($_GET['trang_thai'] ?? '') === 'đã hoàn thành' ? 'selected' : ''; ?>>Đã hoàn thành</option>
                                         <option value="đã hủy" <?php echo ($_GET['trang_thai'] ?? '') === 'đã hủy' ? 'selected' : ''; ?>>Đã hủy</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select name="thang" class="form-select shadow-sm py-2 border p-2" style="border-radius: 0.5rem !important;">>
-                                        <option value="">Tất cả tháng</option>
-                                        <?php for ($i = 1; $i <= 12; $i++): ?>
-                                            <option value="<?php echo $i; ?>" <?php echo ($_GET['thang'] ?? '') == $i ? 'selected' : ''; ?>>
-                                                Tháng <?php echo $i; ?>
-                                            </option>
-                                        <?php endfor; ?>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -216,18 +206,17 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-center">
-
                                                     <!-- Hàng 1 -->
                                                     <div class="btn-group btn-group-sm mb-1">
-
-                                                        <!-- Nút Sửa -->
-                                                        <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy'): ?>
+                                                        <?php if ($trang_thai_hien_tai !== 'đã hoàn thành' && $trang_thai_hien_tai !== 'đã hủy' && $trang_thai_hien_tai !== 'đang đi'): ?>
                                                             <a href="?act=lich-khoi-hanh-edit&id=<?php echo $lich['id']; ?>"
                                                                 class="btn btn-primary" title="Sửa lịch">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
                                                         <?php else: ?>
-                                                            <button class="btn btn-secondary" disabled title="Không thể sửa">
+                                                            <button class="btn btn-secondary" disabled
+                                                                title="<?php
+                                                                        echo $trang_thai_hien_tai === 'đã hoàn thành' ? 'Tour đã hoàn thành' : ($trang_thai_hien_tai === 'đã hủy' ? 'Tour đã hủy' : 'Tour đang đi không thể sửa'); ?>">
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
                                                         <?php endif; ?>
@@ -270,7 +259,7 @@
                                                             </button>
                                                         <?php endif; ?>
 
-                                                        <!-- Trạm dừng chân -->
+
                                                         <a href="?act=tram-dung-chan&lich_khoi_hanh_id=<?php echo $lich['id']; ?>"
                                                             class="btn btn-success" title="Trạm dừng chân">
                                                             <i class="fas fa-map-marker-alt"></i>

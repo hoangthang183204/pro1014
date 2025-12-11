@@ -107,16 +107,7 @@ match ($act) {
     'danh-muc-tours' => (new AdminDanhMucTourController())->toursByDanhMuc(),
     'danh-muc-filter' => (new AdminDanhMucTourController())->filterTours(),
 
-
-
-    // 'danh-muc-doi-tac' => (new AdminDanhMucTourController())->doiTac(),
-    // 'danh-muc-doi-tac-create' => (new AdminDanhMucTourController())->createDoiTac(),
-    // 'danh-muc-doi-tac-store' => (new AdminDanhMucTourController())->storeDoiTac(),
-    // 'danh-muc-doi-tac-edit' => (new AdminDanhMucTourController())->editDoiTac(),
-    // 'danh-muc-doi-tac-update' => (new AdminDanhMucTourController())->updateDoiTac(),
-    // 'danh-muc-doi-tac-delete' => (new AdminDanhMucTourController())->deleteDoiTac(),
-
-    // Quản lý Trạm dừng chân (PHP thuần)
+    // Quản lý Trạm dừng chân
     'tram-dung-chan' => (new AdminLichKhoiHanhController())->tramDungChan(),
     'tram-dung-chan-them' => (new AdminLichKhoiHanhController())->themTramDungChan(),
     'xoa-tram' => (new AdminLichKhoiHanhController())->xoaTramDungChan(),
@@ -176,7 +167,6 @@ match ($act) {
 
     'huong-dan-vien' => (new AdminHuongDanVienController())->index(),
     'huong-dan-vien-chi-tiet' => (new AdminHuongDanVienController())->detail($_GET['id'] ?? 0),
-
 
     // Quản lý phân phòng khách sạn
     'phan-phong' => (new AdminPhanPhongController())->index(),

@@ -99,9 +99,6 @@
                                 <strong>Tour đã hoàn thành!</strong> Không thể phân công hoặc hủy phân công HDV cho tour này.
                             </div>
                         <?php endif; ?>
-
-                        <!-- Hiển thị HDV hiện tại -->
-                        <!-- Hiển thị HDV hiện tại -->
                         <?php if (isset($phan_cong_hien_tai) && $phan_cong_hien_tai): ?>
                             <div class="alert alert-info mb-4">
                                 <h6><i class="fas fa-user-check me-2"></i>HDV hiện tại:</h6>
@@ -142,7 +139,7 @@
                                 </div>
                                 <?php if ($lich_khoi_hanh['trang_thai'] !== 'đã hoàn thành'): ?>
                                     <a href="?act=huy-phan-cong&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>"
-                                        class="btn btn-sm btn-outline-danger mt-2"
+                                        class="btn btn-sm btn-danger mt-2 text-decoration-none"
                                         onclick="return confirm('Bạn có chắc muốn hủy phân công HDV này?')">
                                         <i class="fas fa-times me-1"></i> Hủy phân công
                                     </a>
@@ -207,18 +204,6 @@
                                         Ghi chú sẽ được hiển thị cho HDV khi nhận phân công
                                     </small>
                                 </div>
-
-                                <!-- <div class="alert alert-info">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Thông tin phân công:</strong>
-                                    <ul class="mb-0 mt-2">
-                                        <li>Chỉ những HDV có lịch trống mới được hiển thị</li>
-                                        <li>HDV sẽ nhận được thông báo về phân công mới</li>
-                                        <li>Không thể phân công HDV cho tour đã hoàn thành</li>
-                                        <li>Có thể thay đổi HDV bất kỳ lúc nào trước khi tour hoàn thành</li>
-                                        <li>Hệ thống tự động kiểm tra trùng lịch khi phân công</li>
-                                    </ul>
-                                </div> -->
 
                                 <div class="d-flex justify-content-between">
                                     <a href="?act=lich-khoi-hanh" class="btn btn-secondary">

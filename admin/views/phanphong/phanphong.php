@@ -6,7 +6,7 @@
     <section class="content">
         <div class="container-fluid p-0">
             <!-- Header -->
-            <nav class="navbar navbar-dark bg-primary">
+            <nav class="navbar navbar-dark bg-dark">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="#">
                         <i class="fas fa-bed me-2"></i>
@@ -16,10 +16,6 @@
                         <span class="text-white me-3">
                             Tour: <strong><?php echo htmlspecialchars($lich_khoi_hanh['ten_tour'] ?? ''); ?></strong>
                         </span>
-                        <a href="?act=danh-sach-khach-tour&lich_khoi_hanh_id=<?php echo $lich_khoi_hanh['id']; ?>" 
-                           class="btn btn-light me-2">
-                            <i class="fas fa-users me-1"></i> Quản Lý Khách
-                        </a>
                         <a href="?act=lich-khoi-hanh" class="btn btn-light">
                             <i class="fas fa-arrow-left me-1"></i> Quay Lại
                         </a>
@@ -50,15 +46,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="col-md-2">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-user-friends text-info me-2"></i>
-                                    <div>
-                                        <small class="text-muted d-block">Tổng khách</small>
-                                        <span class="badge bg-primary fs-6"><?php echo $tong_so_khach; ?></span>
-                                    </div>
-                                </div>
-                            </div> -->
                             <div class="col-md-2">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-check-circle text-success me-2"></i>

@@ -189,7 +189,7 @@
                 </div>
 
                 <!-- Lịch làm việc gần đây -->
-                <div class="card mb-4">
+                <!-- <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Lịch làm việc gần đây</h5>
                         <a href="?act=lich-lam-viec-hdv&tu_khoa=<?php echo urlencode($hdv['ho_ten']); ?>" class="btn btn-sm btn-outline-primary">
@@ -282,7 +282,7 @@
                             </div>
                         </div>
                     <?php endif; ?>
-                </div>
+                </div> -->
 
                 <!-- Tour đã dẫn gần đây -->
                 <div class="card">
@@ -340,13 +340,13 @@
                                                     $trang_thai_tour = $tour['trang_thai_tour'] ?? '';
                                                     $tour_badge_class = [
                                                         'đã lên lịch' => 'info',
-                                                        'đang diễn ra' => 'warning',
+                                                        'đang đi' => 'warning',
                                                         'đã hoàn thành' => 'success',
                                                         'đã hủy' => 'danger'
                                                     ];
                                                     $tour_icon_class = [
                                                         'đã lên lịch' => 'calendar-check',
-                                                        'đang diễn ra' => 'spinner',
+                                                        'đang đi' => 'spinner',
                                                         'đã hoàn thành' => 'check-circle',
                                                         'đã hủy' => 'times-circle'
                                                     ];
