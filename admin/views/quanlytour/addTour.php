@@ -4,26 +4,23 @@
 
 <div class="content-wrapper">
     <!-- Content Header -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="h3 mb-0">Thêm Tour Mới</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="?act=/"><i class="fas fa-home"></i></a></li>
-                        <li class="breadcrumb-item"><a href="?act=tour">Quản lý Tour</a></li>
-                        <li class="breadcrumb-item active">Thêm mới</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main content -->
     <section class="content">
-        <div class="container-fluid">
+        <div class="container-fluid p-0">
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="?act=/">
+                        <i class="fas fa-edit me-2"></i>
+                        Thêm Tour Mới
+                    </a>
+                    <div>
+                        <a href="?act=tour" class="btn btn-outline-light">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="container mt-4">
             <!-- Thông báo -->
             <?php if (isset($_SESSION['error'])): ?>
                 <div class="alert alert-danger alert-dismissible">
@@ -47,11 +44,6 @@
                         <i class="fas fa-plus-circle mr-2"></i>
                         Thông tin Tour Mới
                     </h3>
-                    <div class="card-tools">
-                        <a href="?act=tour" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-arrow-left mr-1"></i> Quay lại
-                        </a>
-                    </div>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="?act=tour-store" enctype="multipart/form-data">

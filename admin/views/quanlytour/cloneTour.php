@@ -174,27 +174,6 @@
                                     <textarea class="form-control" name="mo_ta" rows="4"><?php echo htmlspecialchars($tour['mo_ta'] ?? ''); ?></textarea>
                                     <small class="form-text text-muted">Có thể chỉnh sửa mô tả tour mới</small>
                                 </div>
-
-                                <!-- <div class="callout callout-info">
-                                    <h5><i class="fas fa-info-circle me-2"></i>Thành phần sẽ được sao chép:</h5>
-                                    <ul class="mb-0">
-                                        <li>Tất cả lịch trình tour</li>
-                                        <li>Tất cả phiên bản tour (tự động tăng thời gian thêm 1 năm)</li>
-                                        <li>Tất cả hình ảnh/media (dùng chung file)</li>
-                                        <li>Cấu hình cơ bản của tour</li>
-                                    </ul>
-                                    <p class="mt-2 mb-0"><small><i class="fas fa-exclamation-triangle me-1"></i>Lưu ý: Các lịch khởi hành, booking, đánh giá sẽ không được sao chép.</small></p>
-                                </div> -->
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-flex justify-content-between">
-                                    <a href="index.php?act=tour-edit&id=<?php echo $tour['id']; ?>" class="btn btn-secondary">
-                                        <i class="fas fa-arrow-left me-2"></i>Quay lại
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-copy me-2"></i>Thực hiện Clone
-                                    </button>
-                                </div>
                             </div>
                         </form>
                     </div>

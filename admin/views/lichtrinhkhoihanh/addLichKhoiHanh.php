@@ -1,21 +1,14 @@
-<!-- Header -->
+
 <?php require './views/layout/header.php'; ?>
-<!-- Navbar -->
+
 <?php include './views/layout/navbar.php'; ?>
-<!-- /.navbar -->
 
-<!-- Main Sidebar Container -->
 <?php include './views/layout/sidebar.php'; ?>
-<!-- Content Wrapper. Contains page content -->
-<div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <!-- <section class="content-header">
-    </section> -->
 
-    <!-- Main content -->
+<div class="content-wrapper">
+
     <section class="content">
         <div class="container-fluid p-0">
-            <!-- Header -->
             <nav class="navbar navbar-dark bg-dark">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="?act=/">
@@ -99,16 +92,6 @@
                                 <label class="form-label">Ghi chú vận hành</label>
                                 <textarea name="ghi_chu_van_hanh" class="form-control" rows="4"
                                     placeholder="Ghi chú đặc biệt cho đội vận hành..."><?php echo $_POST['ghi_chu_van_hanh'] ?? ''; ?></textarea>
-                            </div>
-
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Lưu ý:</strong> 
-                                <ul class="mb-0 mt-2">
-                                    <li>Số chỗ còn lại sẽ tự động tính bằng (Số chỗ tối đa - Số chỗ đã đặt)</li>
-                                    <li>Trạng thái mặc định: <span class="badge bg-success">đã lên lịch</span></li>
-                                    <li>Ngày kết thúc phải sau ngày bắt đầu</li>
-                                </ul>
                             </div>
 
                             <div class="d-flex justify-content-between">
