@@ -178,10 +178,7 @@
                                                                 class="btn btn-outline-success" title="Clone từ bản này">
                                                                 <i class="fas fa-copy"></i>
                                                             </a>
-                                                            <a href="index.php?act=tour-lich-trinh&tour_id=<?php echo $history['new_tour_id']; ?>"
-                                                                class="btn btn-outline-info" title="Lịch trình">
-                                                                <i class="fas fa-calendar-alt"></i>
-                                                            </a>
+                                                          
                                                         </div>
                                                     </td>
                                                 </tr>
