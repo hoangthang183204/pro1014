@@ -209,25 +209,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Lời khuyên -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-lightbulb me-2 text-warning"></i>
-                        Lời khuyên tiếp theo
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Kiểm tra và chỉnh sửa thông tin tour mới nếu cần</li>
-                        <li>Tạo lịch khởi hành cho tour mới</li>
-                        <li>Thiết lập giá và khuyến mãi phù hợp</li>
-                        <li>Upload hình ảnh mới nếu cần thiết</li>
-                        <li>Thêm nhà cung cấp cho tour mới</li>
-                    </ul>
-                </div>
-            </div>
         </div>
     </section>
 </div>

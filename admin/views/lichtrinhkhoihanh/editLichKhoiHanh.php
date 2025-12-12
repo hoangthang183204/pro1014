@@ -125,23 +125,6 @@
                                     placeholder="Ghi chú đặc biệt cho đội vận hành..."><?php echo htmlspecialchars($lich_khoi_hanh['ghi_chu_van_hanh']); ?></textarea>
                             </div>
 
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Thông tin:</strong> 
-                                <ul class="mb-0 mt-2">
-                                    <li>Số chỗ còn lại: <strong><?php echo $lich_khoi_hanh['so_cho_con_lai']; ?></strong>/<strong><?php echo $lich_khoi_hanh['so_cho_toi_da']; ?></strong></li>
-                                    <li>Đã đặt: <strong><?php echo $lich_khoi_hanh['so_cho_toi_da'] - $lich_khoi_hanh['so_cho_con_lai']; ?></strong> chỗ</li>
-                                    <li>Tỷ lệ đặt: <strong><?php 
-                                        $ty_le_dat = $lich_khoi_hanh['so_cho_toi_da'] > 0 ? 
-                                            round((($lich_khoi_hanh['so_cho_toi_da'] - $lich_khoi_hanh['so_cho_con_lai']) / $lich_khoi_hanh['so_cho_toi_da']) * 100, 1) : 0;
-                                        echo $ty_le_dat; 
-                                    ?>%</strong></li>
-                                    <?php if ($lich_khoi_hanh['nguoi_tao']): ?>
-                                        <li>Người tạo: User ID <?php echo $lich_khoi_hanh['nguoi_tao']; ?></li>
-                                    <?php endif; ?>
-                                </ul>
-                            </div>
-
                             <div class="d-flex justify-content-between">
                                 <a href="?act=lich-khoi-hanh" class="btn btn-secondary">
                                     <i class="fas fa-times me-1"></i> Hủy
@@ -156,13 +139,11 @@
             </div>
         </div>
     </section>
-    <!-- /.content -->
-</div>
-<!-- /.content-wrapper -->
 
-<!-- Footer -->
+</div>
+
 <?php include './views/layout/footer.php'; ?>
-<!-- End Footer -->
+
 
 <script>
     $(function() {
